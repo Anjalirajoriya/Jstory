@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JS Origins — Chapter 1</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --ink:#0f0f0f;
+  --paper:#faf7f2;
+  --red:#e63329;
+  --yellow:#f5c842;
+  --blue:#1a6fdb;
+  --green:#2aaa5a;
+  --panel-shadow:4px 4px 0 var(--ink);
+  --font-comic:'Bangers',cursive;
+  --font-body:'Nunito',sans-serif;
+  --font-code:'JetBrains Mono',monospace;
+}
+body{background:var(--paper);font-family:var(--font-body);color:var(--ink);overflow-x:hidden}
+
+/* TOPBAR */
+.topbar{position:sticky;top:0;z-index:100;background:var(--ink);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;height:46px;border-bottom:3px solid var(--red)}
+.tb-logo{font-family:var(--font-comic);font-size:1.5rem;color:#fff;letter-spacing:3px}.tb-logo span{color:var(--red)}
+.tb-ch{font-size:11px;font-weight:800;color:#888;letter-spacing:2px;text-transform:uppercase}
+
+/* COVER */
+.cover{min-height:100vh;background:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:3rem;position:relative;overflow:hidden}
+.cover-lines{position:absolute;inset:0;background:repeating-linear-gradient(135deg,transparent,transparent 40px,rgba(255,255,255,.015) 40px,rgba(255,255,255,.015) 42px);pointer-events:none}
+.cover-ch{font-size:12px;font-weight:800;letter-spacing:6px;color:var(--red);margin-bottom:.5rem;text-transform:uppercase}
+.cover-title{font-family:var(--font-comic);font-size:clamp(3rem,10vw,7rem);color:#fff;line-height:.9;margin-bottom:1.5rem;letter-spacing:2px}
+.cover-title em{color:var(--yellow);font-style:normal}
+.cover-sub{font-size:1.1rem;color:#aaa;max-width:480px;line-height:1.7;margin-bottom:3rem}
+.cover-scroll{color:#555;font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;animation:bounce 2s infinite;display:flex;flex-direction:column;align-items:center;gap:6px}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+
+/* WEBTOON COLUMN */
+.webtoon{max-width:780px;margin:0 auto;border-left:3px solid var(--ink);border-right:3px solid var(--ink)}
+
+/* SCENE HEADER */
+.scene-hdr{display:flex;align-items:center;gap:12px;padding:14px 20px;background:var(--ink);color:#fff;border-bottom:2px solid var(--red);position:sticky;top:46px;z-index:50}
+.sh-num{font-family:var(--font-comic);font-size:1.3rem;color:var(--red);letter-spacing:2px}
+.sh-title{font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;flex:1}
+.sh-loc{font-size:10px;color:#666;font-weight:800;letter-spacing:1px;text-transform:uppercase}
+
+/* PANEL ROW */
+.row{display:grid;border-bottom:3px solid var(--ink)}
+.r1{grid-template-columns:1fr}
+.r2{grid-template-columns:1fr 1fr}
+.r3{grid-template-columns:2fr 1fr}
+.r3r{grid-template-columns:1fr 2fr}
+
+.panel{border-right:3px solid var(--ink);min-height:200px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:14px}
+.panel:last-child{border-right:none}
+
+/* BG STYLES */
+.bg-room{background:#dde8ff}
+.bg-dark{background:#0d0d1a}
+.bg-flash{background:#fffbe6}
+.bg-war{background:#1a1a1a}
+.bg-white{background:#fff}
+.bg-code{background:#0d1117}
+.bg-green{background:#e8f5e9}
+.bg-red{background:#fff0f0}
+.bg-yellow{background:#fffde7}
+
+/* SPEED LINES */
+.speed{position:absolute;inset:0;pointer-events:none;background:repeating-conic-gradient(from 0deg at 50% 130%,rgba(0,0,0,.04) 0deg 2deg,transparent 2deg 5deg)}
+.speed-h{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(90deg,transparent,transparent 34px,rgba(0,0,0,.04) 34px,rgba(0,0,0,.04) 36px)}
+
+/* BUBBLES */
+.bubbles{position:relative;z-index:3;display:flex;flex-direction:column;gap:8px}
+.b{border:2.5px solid var(--ink);border-radius:16px;padding:9px 13px;font-size:13px;font-weight:700;line-height:1.5;background:#fff;position:relative;max-width:88%;box-shadow:2px 2px 0 var(--ink)}
+.b::after{content:'';position:absolute;bottom:-13px;left:16px;border:7px solid transparent;border-top-color:var(--ink)}
+.b.thought{border-style:dashed;background:#f0f4ff;font-style:italic}
+.b.thought::after{display:none}
+.b.right{align-self:flex-end;border-radius:16px 16px 0 16px;background:var(--blue);color:#fff;border-color:var(--blue);box-shadow:2px 2px 0 rgba(0,0,0,.3)}
+.b.right::after{border-top-color:var(--blue);left:auto;right:16px}
+.b.angry{background:var(--red);color:#fff;border-color:var(--red);clip-path:polygon(0 0,100% 0,100% 78%,90% 100%,80% 78%,0 78%);border-radius:4px}
+.b.angry::after{display:none}
+.b.system{background:var(--ink);color:#7ee787;border-color:#333;font-family:var(--font-code);font-size:11px;border-radius:4px}
+.b.system::after{display:none}
+.b.yellow-bg{background:var(--yellow);border-color:var(--ink)}
+.b.small{font-size:11px;padding:7px 11px}
+
+/* BIG TEXT */
+.bigtext{font-family:var(--font-comic);font-size:clamp(2rem,6vw,4.5rem);line-height:.95;letter-spacing:2px;position:relative;z-index:2}
+.bigtext.red{color:var(--red)}
+.bigtext.white{color:#fff}
+.bigtext.yellow{color:var(--yellow)}
+.bigtext.blue{color:var(--blue)}
+
+/* SCENE LABEL */
+.slabel{position:absolute;top:10px;left:10px;font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:rgba(0,0,0,.3);z-index:2}
+.slabel.w{color:rgba(255,255,255,.4)}
+
+/* CAPTION BOX */
+.caption{background:var(--yellow);border:2px solid var(--ink);border-radius:4px;padding:8px 12px;font-size:12px;font-weight:800;position:relative;z-index:3;align-self:flex-start;box-shadow:2px 2px 0 var(--ink)}
+
+/* THOUGHT BOX floating */
+.tbox{background:#fff;border:2px dashed var(--ink);border-radius:10px;padding:10px;font-size:12px;font-weight:700;line-height:1.6;position:relative;z-index:3;box-shadow:2px 2px 0 #ccc}
+
+/* FLASHBACK BANNER */
+.fb-banner{background:var(--yellow);border-top:3px solid var(--ink);border-bottom:3px solid var(--ink);padding:10px 2rem;text-align:center;font-family:var(--font-comic);font-size:1.4rem;letter-spacing:4px;color:var(--ink)}
+
+/* DIALOGUE STRIP */
+.dlg-strip{padding:1.5rem 1.5rem;background:var(--paper);border-bottom:3px solid var(--ink);display:flex;flex-direction:column;gap:10px}
+.dlg{display:flex;align-items:flex-start;gap:10px}
+.dlg.r{flex-direction:row-reverse}
+.dlg-who{font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#888;min-width:58px;padding-top:5px}
+.dlg.r .dlg-who{text-align:right}
+.dlg-b{background:#fff;border:2px solid var(--ink);border-radius:12px;padding:9px 13px;font-size:13px;font-weight:700;line-height:1.5;box-shadow:2px 2px 0 var(--ink);max-width:480px}
+.dlg.r .dlg-b{background:var(--blue);color:#fff;border-color:var(--blue);box-shadow:2px 2px 0 rgba(0,0,0,.3)}
+
+/* CONCEPT STRIP */
+.concept-strip{padding:2rem 1.5rem;background:var(--ink);border-bottom:3px solid var(--red);color:#fff}
+.cs-tag{font-size:9px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--red);margin-bottom:.4rem}
+.cs-title{font-family:var(--font-comic);font-size:2rem;letter-spacing:2px;margin-bottom:1.2rem}
+.cs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.cs-item{background:#1e1e1e;border:1.5px solid #333;border-radius:6px;padding:12px;border-left:3px solid var(--red)}
+.cs-item-t{font-size:12px;font-weight:800;color:var(--red);margin-bottom:3px}
+.cs-item-d{font-size:12px;color:#aaa;line-height:1.6}
+
+/* CODE BLOCK */
+.code-blk{background:#0d1117;border-radius:6px;font-family:var(--font-code);font-size:12px;padding:14px;line-height:1.9;border:1.5px solid #30363d;overflow-x:auto;position:relative;z-index:2}
+.kw{color:#ff7b72}.fn{color:#d2a8ff}.str{color:#a5d6ff}.cm{color:#8b949e;font-style:italic}.num{color:#79c0ff}.cl{color:#ffa657}.ok{color:#3fb950}.op{color:#ff7b72}
+
+/* COMPANY WAR PANEL */
+.war-panel{position:relative;z-index:2;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;height:100%;padding:16px;min-height:220px}
+.co-badge{font-family:var(--font-comic);font-size:2rem;letter-spacing:2px;border:4px solid currentColor;padding:4px 14px}
+.co-sub{font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;opacity:.7}
+
+/* V8 ENGINE SECTION */
+.engine-sec{padding:2.5rem 1.5rem;background:var(--paper);border-bottom:3px solid var(--ink)}
+.engine-title{font-family:var(--font-comic);font-size:2rem;letter-spacing:2px;margin-bottom:6px;display:flex;align-items:center;gap:12px}
+.eng-badge{font-size:10px;font-weight:800;letter-spacing:2px;background:var(--red);color:#fff;padding:3px 10px;border-radius:3px;font-family:var(--font-body)}
+.engine-sub{font-size:13px;color:#555;font-weight:700;margin-bottom:1.5rem;line-height:1.6}
+.engine-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.ep{background:#fff;border:2.5px solid var(--ink);border-radius:8px;box-shadow:var(--panel-shadow);overflow:hidden}
+.ep-hdr{background:var(--ink);color:#fff;padding:8px 14px;font-size:11px;font-weight:700;letter-spacing:1px;display:flex;align-items:center;justify-content:space-between}
+.ep-dots{display:flex;gap:5px}
+.ep-dot{width:9px;height:9px;border-radius:50%}
+.ep-body{padding:14px}
+
+/* PIPELINE */
+.pipeline{display:flex;flex-direction:column;gap:0}
+.pipe-step{display:flex;align-items:center;gap:10px;padding:9px 6px;border-bottom:1px dashed #e0d9ce;cursor:pointer;border-radius:4px;transition:all .15s}
+.pipe-step:hover{background:#f8f8f8}
+.pipe-step.active .pipe-n{background:var(--red);color:#fff;border-color:var(--red)}
+.pipe-step.active .pipe-lbl{color:var(--red)}
+.pipe-n{width:26px;height:26px;border-radius:50%;border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;transition:all .2s}
+.pipe-lbl{font-size:13px;font-weight:700;flex:1;transition:all .2s}
+.pipe-desc{font-size:10px;color:#888}
+
+/* LIVE DEMO */
+.live-demo{display:flex;flex-direction:column;gap:10px}
+.ld-input-wrap{position:relative}
+.ld-input{width:100%;padding:9px 80px 9px 12px;font-family:var(--font-code);font-size:12px;border:2px solid var(--ink);border-radius:4px;background:var(--paper);color:var(--ink);outline:none;transition:border-color .2s}
+.ld-input:focus{border-color:var(--blue)}
+.ld-run{position:absolute;right:6px;top:50%;transform:translateY(-50%);padding:4px 12px;background:var(--red);color:#fff;border:none;border-radius:3px;font-family:var(--font-body);font-size:11px;font-weight:800;cursor:pointer;transition:all .1s}
+.ld-run:hover{background:#c0261e}
+.ld-pipe-vis{display:flex;border:1.5px solid var(--ink);border-radius:6px;overflow:hidden;font-size:9px;font-weight:800;letter-spacing:.5px;text-transform:uppercase}
+.ldp{flex:1;padding:7px 4px;text-align:center;border-right:1px solid var(--ink);background:#f8f8f8;transition:all .3s;font-size:9px}
+.ldp:last-child{border-right:none}
+.ldp.active{background:var(--red);color:#fff}
+.ldp.done{background:#d3f9d8;color:#166534}
+.ld-out{background:#0d1117;border-radius:4px;font-family:var(--font-code);font-size:12px;padding:12px;min-height:80px;line-height:1.7;border:1.5px solid #30363d}
+.out-line{display:block;animation:fadein .25s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+.ld-stage{background:var(--paper);border:1.5px solid #ddd;border-radius:4px;padding:9px 12px;font-size:12px;line-height:1.6;color:#444;font-weight:700;min-height:42px}
+
+/* COMPARE TABLE */
+.cmp-table{width:100%;border-collapse:collapse;font-size:12px;font-weight:700}
+.cmp-table th{background:var(--ink);color:#fff;padding:8px 12px;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;border:1.5px solid var(--ink)}
+.cmp-table td{padding:9px 12px;border:1.5px solid var(--ink);background:#fff;vertical-align:top;line-height:1.5}
+.cmp-table tr:nth-child(even) td{background:#f8f8f8}
+.cmp-table td:first-child{font-weight:800;background:var(--ink);color:#fff}
+.win{color:var(--green)}.lose{color:var(--red)}
+
+/* CPP COMPARE */
+.cpp-sec{padding:2rem 1.5rem;background:#0d1117;border-bottom:3px solid var(--ink)}
+.cpp-title{font-family:var(--font-comic);font-size:1.8rem;letter-spacing:2px;color:#fff;margin-bottom:1rem}
+.cpp-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cpp-card{background:#161b22;border:1.5px solid #30363d;border-radius:6px;overflow:hidden}
+.cpp-hdr{padding:8px 14px;font-size:11px;font-weight:800;letter-spacing:1px;display:flex;align-items:center;gap:8px;color:#fff}
+.lang-dot{width:10px;height:10px;border-radius:50%}
+.cpp-body{padding:0 14px 14px}
+
+/* SUMMARY */
+.summary{padding:2.5rem 1.5rem;background:var(--ink);border-top:3px solid var(--red);color:#fff}
+.sum-title{font-family:var(--font-comic);font-size:2.5rem;letter-spacing:2px;color:var(--red);margin-bottom:1.5rem}
+.notebook{background:#fef9c3;color:var(--ink);border:2.5px solid var(--ink);border-radius:8px;box-shadow:var(--panel-shadow);overflow:hidden}
+.nb-hdr{background:var(--ink);color:#fff;padding:10px 16px;font-size:12px;font-weight:800;letter-spacing:1px;display:flex;align-items:center;gap:8px}
+.nb-body{padding:18px;display:flex;flex-direction:column;gap:10px}
+.nb-line{display:flex;align-items:flex-start;gap:10px;padding:10px;background:#fff;border:1.5px solid #e8e3d0;border-radius:6px;border-left:4px solid var(--red)}
+.nb-icon{font-size:18px;flex-shrink:0}
+.nb-text{font-size:13px;font-weight:700;line-height:1.5}
+.nb-text strong{color:var(--red)}
+
+/* NEXT CHAPTER */
+.next-ch{padding:3rem 1.5rem;text-align:center;background:var(--paper);border-top:3px solid var(--ink)}
+.nc-label{font-size:10px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:#888;margin-bottom:.5rem}
+.nc-title{font-family:var(--font-comic);font-size:2.5rem;letter-spacing:2px;margin-bottom:1rem}
+.nc-btn{display:inline-block;background:var(--red);color:#fff;font-family:var(--font-comic);font-size:1.4rem;letter-spacing:2px;padding:12px 36px;border:3px solid var(--ink);border-radius:6px;box-shadow:var(--panel-shadow);cursor:pointer;text-decoration:none;transition:transform .1s,box-shadow .1s}
+.nc-btn:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--ink)}
+
+/* SCROLL DOT */
+.scroll-dot{position:fixed;bottom:16px;right:16px;z-index:200;width:42px;height:42px;background:var(--red);border:2.5px solid var(--ink);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-comic);font-size:.8rem;color:#fff;box-shadow:var(--panel-shadow);cursor:pointer;transition:transform .15s;letter-spacing:1px}
+.scroll-dot:hover{transform:scale(1.1)}
+
+@media(max-width:600px){
+  .r2,.r3,.r3r,.engine-grid,.cpp-grid{grid-template-columns:1fr}
+  .panel{min-height:160px}
+  .cover-title{font-size:3rem}
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+  <div class="tb-logo">JS<span>TORY</span></div>
+  <div class="tb-ch">CHAPTER 1 — WHY JAVASCRIPT EXISTS</div>
+</div>
+
+<!-- ══ COVER ══ -->
+<div class="cover">
+  <div class="cover-lines"></div>
+  <div class="cover-ch">Chapter 1</div>
+  <div class="cover-title">The<br><em>Button</em><br>That Did<br>Nothing</div>
+  <p class="cover-sub">Arjun just finished HTML & CSS. Now he wants JavaScript — but first: why does it even exist?</p>
+  <div class="cover-scroll">scroll down ▼</div>
+</div>
+
+<!-- ══ SCENE 1: ARJUN'S ROOM ══ -->
+<div class="webtoon">
+
+<div class="scene-hdr">
+  <span class="sh-num">SCENE 01</span>
+  <span class="sh-title">Summer Break — Arjun's Room</span>
+  <span class="sh-loc">📍 Hostel, 2nd Floor</span>
+</div>
+
+<div class="row r2">
+  <div class="panel bg-room" style="min-height:260px">
+    <div class="slabel">WIDE SHOT — DAY</div>
+    <div class="speed-h"></div>
+    <div class="tbox" style="align-self:flex-start;margin-bottom:auto;margin-top:60px">
+      🌞 Summer break.<br>
+      Laptop open.<br>
+      Zero plans.
+    </div>
+    <div class="bubbles">
+      <div class="b thought">Ok... HTML ✅<br>CSS ✅<br>Now... JavaScript?</div>
+    </div>
+  </div>
+  <div class="panel bg-white" style="min-height:260px;justify-content:center;align-items:center">
+    <div class="slabel">CLOSE UP</div>
+    <div style="text-align:center;position:relative;z-index:2;padding:10px">
+      <div style="font-family:var(--font-comic);font-size:3.5rem;line-height:1;color:#ddd;margin-bottom:8px">{ }</div>
+      <div class="caption">??? JavaScript ???</div>
+      <div class="b thought" style="margin-top:12px;font-size:12px">What even IS this.<br>Where do I even start.</div>
+    </div>
+  </div>
+</div>
+
+<div class="row r1">
+  <div class="panel bg-room" style="min-height:120px;justify-content:center">
+    <div class="speed"></div>
+    <div class="bigtext red" style="text-align:center;padding:10px">wait... why does<br>JavaScript EXIST?</div>
+  </div>
+</div>
+
+<div class="dlg-strip">
+  <div class="dlg">
+    <div class="dlg-who">ARJUN</div>
+    <div class="dlg-b">We already have C++, Java, Python... Why did they make ANOTHER language?</div>
+  </div>
+  <div class="dlg r">
+    <div class="dlg-who">ARJUN</div>
+    <div class="dlg-b">Let me Google this... wait, this story is actually insane 🤯</div>
+  </div>
+</div>
+
+<!-- ══ SCENE 2: FLASHBACK ══ -->
+<div class="fb-banner">— FLASHBACK : 1994 —</div>
+
+<div class="scene-hdr">
+  <span class="sh-num">SCENE 02</span>
+  <span class="sh-title">Corporate War</span>
+  <span class="sh-loc">📍 Silicon Valley, 1994</span>
+</div>
+
+<div class="row r2" style="min-height:280px">
+  <div class="panel bg-dark" style="min-height:280px">
+    <div class="war-panel">
+      <div class="co-badge" style="color:var(--green)">NETSCAPE</div>
+      <div class="co-sub" style="color:#aaa">Browser King</div>
+      <div class="bubbles" style="margin-top:16px">
+        <div class="b" style="font-size:12px">We own the browser.<br>Millions use us daily.</div>
+        <div class="b thought" style="font-size:12px;background:#79c0ff">But Microsoft... they control everything through <strong>Windows</strong>.</div>
+      </div>
+    </div>
+    <div class="slabel w">NETSCAPE HQ</div>
+  </div>
+  <div class="panel bg-war" style="min-height:280px">
+    <div class="war-panel">
+      <div class="co-badge" style="color:#f9a825">SUN MICROSYSTEMS</div>
+      <div class="co-sub" style="color:#aaa">Internet's Arms Dealer</div>
+      <div class="bubbles" style="margin-top:16px">
+        <div class="b" style="font-size:12px">We made <strong>Java</strong>.<br>Write once, run anywhere.</div>
+        <div class="b thought" style="font-size:12px;background:#79c0ff">Microsoft is just....<br>We need an alliance.</div>
+      </div>
+    </div>
+    <div class="slabel w">SUN HQ</div>
+  </div>
+</div>
+
+<div class="row r1">
+  <div class="panel bg-yellow" style="min-height:100px;justify-content:center;align-items:center">
+    <div class="bigtext" style="text-align:center;color:var(--ink)">The Big Idea 💡</div>
+  </div>
+</div>
+
+<div class="dlg-strip" style="background:#fffde7;border-bottom:3px solid var(--ink)">
+  <div class="dlg">
+    <div class="dlg-who">NETSCAPE</div>
+    <div class="dlg-b">What if ALL software ran inside the BROWSER instead of Windows?</div>
+  </div>
+  <div class="dlg r">
+    <div class="dlg-who">SUN</div>
+    <div class="dlg-b">Then nobody would need Windows at all! We put Java in your browser. Deal?</div>
+  </div>
+  <div class="dlg">
+    <div class="dlg-who">NETSCAPE</div>
+    <div class="dlg-b">DEAL. ✍️</div>
+  </div>
+</div>
+
+<div class="row r1">
+  <div class="panel bg-dark" style="min-height:80px;justify-content:center;align-items:center">
+    <div class="slabel w">MICROSOFT HQ — PANIC MODE</div>
+    <div class="speed"></div>
+    <div class="bubbles" style="align-items:center">
+      <div class="b angry">If software lives in the browser...<br>WHO NEEDS WINDOWS?!</div>
+    </div>
+  </div>
+</div>
+
+<!-- SCENE 3: WHY A SECOND LANGUAGE -->
+<div class="scene-hdr">
+  <span class="sh-num">SCENE 03</span>
+  <span class="sh-title">Why Java Wasn't Enough</span>
+  <span class="sh-loc">📍 Netscape Engineering, 1995</span>
+</div>
+
+<div class="row r3">
+  <div class="panel bg-flash" style="min-height:240px">
+    <div class="slabel">WHITEBOARD</div>
+    <div class="bubbles">
+      <div class="caption" style="margin-bottom:12px">The Problem</div>
+      <div class="b" style="font-size:12px">Java is perfect for BIG programs... but a web page also needs small stuff.</div>
+      <div class="b thought" style="font-size:12px">Check a form field.<br>React to a click.<br>Change some text.</div>
+      <div class="b" style="font-size:12px">Java is too HEAVY for that. Like using a truck to open a garage door. 🚛</div>
+    </div>
+  </div>
+  <div class="panel bg-red" style="min-height:240px;justify-content:center">
+    <div class="bigtext red" style="font-size:2rem;text-align:center">Java<br>can't<br>touch<br>the page</div>
+    <div class="b small" style="margin-top:12px;font-size:11px">Java ran inside a sealed box (applet). It couldn't reach the buttons outside it.</div>
+  </div>
+</div>
+
+<div class="dlg-strip">
+  <div class="dlg">
+    <div class="dlg-who">NETSCAPE</div>
+    <div class="dlg-b">We need TWO languages. Java for heavy lifting. A simple "glue language" for everyone else — web designers who just learned <code>&lt;table&gt;;</code> Don't know much about programming.</div>
+  </div>
+  <div class="dlg r">
+    <div class="dlg-who">MARKETING</div>
+    <div class="dlg-b">But make it LOOK like Java. Borrow the hype.</div>
+  </div>
+  <div class="dlg">
+    <div class="dlg-who">ENGINEERING</div>
+    <div class="dlg-b">...so we can't just use Python? It already exists.</div>
+  </div>
+  <div class="dlg r">
+    <div class="dlg-who">MARKETING</div>
+    <div class="dlg-b">Python doesn't sound like Java. 🤷</div>
+  </div>
+</div>
+
+<!-- SCENE 4: BRENDAN EICH -->
+<div class="scene-hdr">
+  <span class="sh-num">SCENE 04</span>
+  <span class="sh-title">Ten Days</span>
+  <span class="sh-loc">📍 May 1995</span>
+</div>
+
+<div class="row r2">
+  <div class="panel bg-dark" style="min-height:240px">
+    <div class="speed"></div>
+    <div class="slabel w">BRENDAN EICH — ENGINEER</div>
+    <div class="bubbles">
+      <div class="b" style="font-size:12px;background:#1e2840;border-color:#334;color:#eee">You want me to build a whole language...</div>
+      <div class="b angry" style="margin-top:8px">IN TEN DAYS?!</div>
+      <div class="b" style="font-size:12px;background:#1e2840;border-color:#334;color:#eee;margin-top:8px">Also it needs to look like Java.<br>But it's NOT Java.<br>And call it "JavaScript."</div>
+    </div>
+  </div>
+  <div class="panel bg-yellow" style="min-height:240px;align-items:center;justify-content:center">
+    <div style="text-align:center;position:relative;z-index:2">
+      <div class="bigtext" style="font-size:5rem;color:var(--ink)">10</div>
+      <div style="font-family:var(--font-comic);font-size:1.4rem;letter-spacing:2px;color:var(--ink)">DAYS.</div>
+      <div style="font-size:12px;font-weight:800;color:#666;margin-top:8px;line-height:1.5">May 1995<br>One prototype.<br>The web forever changed.</div>
+    </div>
+  </div>
+</div>
+
+<div class="row r1">
+  <div class="panel bg-code" style="min-height:140px;justify-content:center">
+    <div class="slabel w">FIRST EVER JS CODE</div>
+    <div class="code-blk" style="max-width:380px;margin:0 auto">
+      <span class="cm">// Brendan's first prototype — May 1995</span><br>
+      <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"Hello, World!"</span>);<br><br>
+      <span class="cm">// That's it. That was enough to start.</span>
+    </div>
+  </div>
+</div>
+
+<!-- SCENE 5: WHY NOT C++ -->
+<div class="fb-banner" style="background:var(--ink);color:#fff;border-color:var(--red)">— BUT WAIT — WHY NOT JUST USE C++ ? —</div>
+
+<div class="scene-hdr">
+  <span class="sh-num">SCENE 05</span>
+  <span class="sh-title">The C++ Problem</span>
+  <span class="sh-loc">📍 The Web, 1995 — 4MB RAM Era</span>
+</div>
+
+<div class="dlg-strip">
+  <div class="dlg">
+    <div class="dlg-who">ARJUN</div>
+    <div class="dlg-b">Wait. Why not just put C++ in the browser? It's already fast and powerful.</div>
+  </div>
+  <div class="dlg r">
+    <div class="dlg-who">FLASHBACK</div>
+    <div class="dlg-b">Oh, Arjun. Let me show you what that would look like. 😈</div>
+  </div>
+</div>
+
+<div class="cpp-sec">
+  <div class="cpp-title">C++ vs JavaScript — Side by Side</div>
+  <div class="cpp-grid">
+    <div class="cpp-card">
+      <div class="cpp-hdr">
+        <div class="lang-dot" style="background:#f9a825"></div>
+        C++ — "Hello World"
+      </div>
+      <div class="cpp-body">
+        <div class="code-blk" style="border:none;padding:10px 0;background:transparent;color:#e6edf3">
+<span style="color:#ff7b72">#include</span><span style="color:#a5d6ff">&lt;iostream&gt;</span><br>
+<span style="color:#ff7b72">using namespace</span> <span style="color:#ffa657">std</span>;<br>
+<span style="color:#ff7b72">int</span> <span style="color:#d2a8ff">main</span>() {<br>
+&nbsp;&nbsp;<span style="color:#ffa657">cout</span> &lt;&lt; <span style="color:#a5d6ff">"Hello World"</span>;<br>
+&nbsp;&nbsp;<span style="color:#ff7b72">return</span> <span style="color:#79c0ff">0</span>;<br>
+}
+        </div>
+        <div style="margin-top:10px;font-size:11px;color:#888;line-height:1.6;font-weight:700">
+          Needs compilation.<br>
+          Direct memory access.<br>
+          Can call system("rm -rf /")
+        </div>
+      </div>
+    </div>
+    <div class="cpp-card">
+      <div class="cpp-hdr">
+        <div class="lang-dot" style="background:var(--yellow)"></div>
+        JavaScript — "Hello World"
+      </div>
+      <div class="cpp-body">
+        <div class="code-blk" style="border:none;padding:10px 0;background:transparent">
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"Hello World"</span>);
+        </div>
+        <div style="margin-top:10px;font-size:11px;color:#888;line-height:1.6;font-weight:700">
+          Runs in the browser instantly.<br>
+          Sandboxed — can't touch your files.<br>
+          Handles memory automatically.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="concept-strip">
+  <div class="cs-tag">The 3 Reasons C++ Couldn't Be in Browsers</div>
+  <div class="cs-title">Why C++ Was Impossible</div>
+  <div class="cs-grid">
+    <div class="cs-item">
+      <div class="cs-item-t">☠️ Security</div>
+      <div class="cs-item-d">C++ can read your files, open sockets, crash the OS. A website running raw C++ could install malware or wipe your drive.</div>
+    </div>
+    <div class="cs-item">
+      <div class="cs-item-t">💾 Memory (1995)</div>
+      <div class="cs-item-d">Average PC had 4–8 MB RAM. Running a sandboxed C++ runtime would have left zero room for Windows 95 AND a browser.</div>
+    </div>
+    <div class="cs-item">
+      <div class="cs-item-t">🚫 Too Hard</div>
+      <div class="cs-item-d">Web designers, not kernel engineers, needed to write "glue" code. C++ with manual memory management was completely wrong for that audience.</div>
+    </div>
+    <div class="cs-item">
+      <div class="cs-item-t">✅ JS Fixed All Three</div>
+      <div class="cs-item-d">Sandboxed. Tiny footprint. Simple syntax. Automatic garbage collection. Designed specifically for the browser environment.</div>
+    </div>
+  </div>
+</div>
+
+<!-- V8 ENGINE SECTION -->
+<div class="engine-sec">
+  <div class="engine-title">
+    How JS Actually Runs
+    <span class="eng-badge">INTERACTIVE</span>
+  </div>
+  <div class="engine-sub">
+    JavaScript is written in C++. The V8 engine (made by Google, also in C++) takes your code and executes it. Here's what happens between you typing <code style="background:#f0f0f0;padding:2px 6px;border-radius:3px;font-family:var(--font-code);font-size:11px">console.log("hi")</code> and seeing output.
+  </div>
+  <div class="engine-grid">
+    <div class="ep">
+      <div class="ep-hdr">
+        <span>V8 Pipeline — click a step</span>
+        <div class="ep-dots">
+          <div class="ep-dot" style="background:#ff5f57"></div>
+          <div class="ep-dot" style="background:#febc2e"></div>
+          <div class="ep-dot" style="background:#28c840"></div>
+        </div>
+      </div>
+      <div class="ep-body">
+        <div class="pipeline" id="pipeline">
+          <div class="pipe-step active" onclick="selectStep(0)">
+            <div class="pipe-n">1</div>
+            <div><div class="pipe-lbl">Your JS Code</div><div class="pipe-desc">What you write</div></div>
+          </div>
+          <div class="pipe-step" onclick="selectStep(1)">
+            <div class="pipe-n">2</div>
+            <div><div class="pipe-lbl">Parser</div><div class="pipe-desc">Reads your code</div></div>
+          </div>
+          <div class="pipe-step" onclick="selectStep(2)">
+            <div class="pipe-n">3</div>
+            <div><div class="pipe-lbl">AST</div><div class="pipe-desc">Tree of meaning</div></div>
+          </div>
+          <div class="pipe-step" onclick="selectStep(3)">
+            <div class="pipe-n">4</div>
+            <div><div class="pipe-lbl">Ignition (Bytecode)</div><div class="pipe-desc">Low-level instructions</div></div>
+          </div>
+          <div class="pipe-step" onclick="selectStep(4)">
+            <div class="pipe-n">5</div>
+            <div><div class="pipe-lbl">TurboFan (JIT)</div><div class="pipe-desc">Hot paths → machine code</div></div>
+          </div>
+          <div class="pipe-step" onclick="selectStep(5)">
+            <div class="pipe-n">6</div>
+            <div><div class="pipe-lbl">Output</div><div class="pipe-desc">You see the result</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ep">
+      <div class="ep-hdr">
+        <span>Try It — Live</span>
+        <div class="ep-dots">
+          <div class="ep-dot" style="background:#ff5f57"></div>
+          <div class="ep-dot" style="background:#febc2e"></div>
+          <div class="ep-dot" style="background:#28c840"></div>
+        </div>
+      </div>
+      <div class="ep-body">
+        <div class="live-demo">
+          <div style="font-size:12px;font-weight:800;color:#888;margin-bottom:4px">Write JS — hit Run:</div>
+          <div class="ld-input-wrap">
+            <input class="ld-input" id="ldInput" value='console.log("Hello from V8!")' spellcheck="false">
+            <button class="ld-run" onclick="runCode()">Run ▶</button>
+          </div>
+          <div class="ld-pipe-vis" id="ldPipeVis">
+            <div class="ldp" id="ldp0">Parse</div>
+            <div class="ldp" id="ldp1">AST</div>
+            <div class="ldp" id="ldp2">Bytecode</div>
+            <div class="ldp" id="ldp3">JIT</div>
+            <div class="ldp" id="ldp4">Output</div>
+          </div>
+          <div class="ld-out" id="ldOut"><span style="color:#484f58">// output appears here</span></div>
+          <div class="ld-stage" id="ldStage">Hit Run to watch V8 process your code step by step.</div>
+          <div style="font-size:11px;color:#888;font-weight:700;margin-top:4px">Try: Math.random() &nbsp;·&nbsp; "js".toUpperCase() &nbsp;·&nbsp; 2**10 &nbsp;·&nbsp; typeof null</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ COMPILER DEEP DIVE ══ -->
+<div class="scene-hdr">
+  <span class="sh-num">BONUS</span>
+  <span class="sh-title">How a Compiler Actually Works</span>
+  <span class="sh-loc">📍 Under the Hood</span>
+</div>
+
+<div class="concept-strip" style="padding:2rem 1.5rem">
+  <div class="cs-tag">Compiler Theory — Simplified</div>
+  <div class="cs-title">Source Code → Output: The 5 Stages</div>
+  <div class="cs-grid" style="grid-template-columns:repeat(5,1fr);gap:8px">
+    <div class="cs-item" style="text-align:center">
+      <div class="cs-item-t">1. Lexer</div>
+      <div class="cs-item-d">Breaks raw text into tokens.<br><code style="color:#a5d6ff">console</code> <code style="color:#ff7b72">.</code> <code style="color:#d2a8ff">log</code> <code style="color:#ff7b72">(</code> <code style="color:#a5d6ff">"hi"</code> <code style="color:#ff7b72">)</code></div>
+    </div>
+    <div class="cs-item" style="text-align:center">
+      <div class="cs-item-t">2. Parser</div>
+      <div class="cs-item-d">Tokens → AST tree of meaning. Checks grammar rules.</div>
+    </div>
+    <div class="cs-item" style="text-align:center">
+      <div class="cs-item-t">3. Semantic</div>
+      <div class="cs-item-d">Are the types right? Does this variable exist? Type checking.</div>
+    </div>
+    <div class="cs-item" style="text-align:center">
+      <div class="cs-item-t">4. Code Gen</div>
+      <div class="cs-item-d">AST → bytecode or machine code instructions.</div>
+    </div>
+    <div class="cs-item" style="text-align:center">
+      <div class="cs-item-t">5. Execute</div>
+      <div class="cs-item-d">CPU runs instructions. Output appears.</div>
+    </div>
+  </div>
+</div>
+
+<!-- MINI COMPILER DEMO -->
+<div class="engine-sec" style="background:#0d1117;border-bottom:3px solid var(--ink)">
+  <div class="engine-title" style="color:#fff">
+    Build Your Own JS Compiler
+    <span class="eng-badge">INTERACTIVE</span>
+  </div>
+  <div class="engine-sub" style="color:#aaa">
+    Here's a tiny compiler written in C++ that handles <code style="background:#1e1e1e;padding:2px 6px;border-radius:3px;font-family:var(--font-code);font-size:11px;color:#a5d6ff">console.log("string")</code> and <code style="background:#1e1e1e;padding:2px 6px;border-radius:3px;font-family:var(--font-code);font-size:11px;color:#a5d6ff">console.log(a+b)</code> — exactly what V8 does, just stripped to the bone. Toggle between the real C++ source and a simulated run.
+  </div>
+
+  <div class="engine-grid" style="gap:16px">
+    <!-- C++ SOURCE WITH ANNOTATIONS -->
+    <div class="ep" style="background:#161b22;border-color:#30363d">
+      <div class="ep-hdr" style="background:#21262d">
+        <span>mini_v8.cpp — annotated</span>
+        <div style="display:flex;gap:6px">
+          <button onclick="showTab('src')" id="tab-src" style="background:var(--red);color:#fff;border:none;border-radius:3px;padding:3px 10px;font-size:10px;font-weight:800;cursor:pointer;font-family:var(--font-body)">SOURCE</button>
+          <button onclick="showTab('ast')" id="tab-ast" style="background:#333;color:#aaa;border:none;border-radius:3px;padding:3px 10px;font-size:10px;font-weight:800;cursor:pointer;font-family:var(--font-body)">AST VIEW</button>
+        </div>
+      </div>
+      <div class="ep-body" style="padding:0;overflow-y:auto;max-height:420px">
+
+        <!-- SOURCE TAB -->
+        <div id="tab-src-content">
+          <div class="code-blk" style="border:none;border-radius:0;font-size:11px;line-height:1.8;padding:14px ; color:white">
+<span class="cm">// STAGE 1 — LEXER (tokenizer)</span><br>
+<span class="cm">// Find the ( and ) — extract what's inside</span><br>
+<span class="kw">int</span> open  = code.<span class="fn">find</span>(<span class="str">'('</span>);<br>
+<span class="kw">int</span> close = code.<span class="fn">rfind</span>(<span class="str">')'</span>);<br>
+<span class="kw">string</span> inside = code.<span class="fn">substr</span>(open+<span class="num">1</span>, close-open-<span class="num">1</span>);<br>
+<br>
+<span class="cm">// STAGE 2 — PARSER + SEMANTIC</span><br>
+<span class="cm">// First char is " → it's a string literal</span><br>
+<span class="kw">if</span>(inside[<span class="num">0</span>] == <span class="str">'"'</span>){<br>
+&nbsp;&nbsp;<span class="cm">// Strip the quotes and print</span><br>
+&nbsp;&nbsp;cout &lt;&lt; inside.<span class="fn">substr</span>(<span class="num">1</span>, inside.<span class="fn">size</span>()-<span class="num">2</span>);<br>
+}<br>
+<span class="kw">else</span>{<br>
+&nbsp;&nbsp;<span class="cm">// STAGE 3 — EVALUATE expression</span><br>
+&nbsp;&nbsp;<span class="cm">// Walk chars to parse left operand</span><br>
+&nbsp;&nbsp;<span class="kw">int</span> index=<span class="num">0</span>, a=<span class="num">0</span>, b=<span class="num">0</span>;<br>
+&nbsp;&nbsp;<span class="kw">while</span>(inside[index]!=<span class="str">'+'</span> &amp;&amp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inside[index]!=<span class="str">'-'</span> &amp;&amp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inside[index]!=<span class="str">'*'</span> &amp;&amp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inside[index]!=<span class="str">'/'</span>){<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a = a*<span class="num">10</span> + (inside[index]-<span class="str">'0'</span>);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;index++;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="kw">char</span> op = inside[index++]; <span class="cm">// operator</span><br>
+&nbsp;&nbsp;<span class="cm">// Walk remaining chars for right operand</span><br>
+&nbsp;&nbsp;<span class="kw">while</span>(index &lt; inside.<span class="fn">size</span>()){<br>
+&nbsp;&nbsp;&nbsp;&nbsp;b = b*<span class="num">10</span> + (inside[index]-<span class="str">'0'</span>);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;index++;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="cm">// STAGE 4 — CODE EXECUTION</span><br>
+&nbsp;&nbsp;<span class="kw">if</span>(op==<span class="str">'+'</span>) cout &lt;&lt; a+b;<br>
+&nbsp;&nbsp;<span class="kw">else if</span>(op==<span class="str">'-'</span>) cout &lt;&lt; a-b;<br>
+&nbsp;&nbsp;<span class="kw">else if</span>(op==<span class="str">'*'</span>) cout &lt;&lt; a*b;<br>
+&nbsp;&nbsp;<span class="kw">else</span> cout &lt;&lt; a/b;<br>
+}
+          </div>
+        </div>
+
+        <!-- AST TAB -->
+        <div id="tab-ast-content" style="display:none;padding:14px">
+          <div style="font-size:11px;font-weight:800;color:#888;margin-bottom:10px;letter-spacing:1px;text-transform:uppercase">AST for: console.log("hello Ji")</div>
+          <div style="font-family:var(--font-code);font-size:11px;color:#e6edf3;line-height:2">
+            <span style="color:#d2a8ff">Program</span><br>
+            &nbsp;└─ <span style="color:#ffa657">ExpressionStatement</span><br>
+            &nbsp;&nbsp;&nbsp;└─ <span style="color:#d2a8ff">CallExpression</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├─ callee: <span style="color:#ffa657">MemberExpression</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;├─ object: <span style="color:#79c0ff">Identifier</span> <span style="color:#a5d6ff">"console"</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;└─ prop: &nbsp;<span style="color:#79c0ff">Identifier</span> <span style="color:#a5d6ff">"log"</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─ args[0]: <span style="color:#ffa657">StringLiteral</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#a5d6ff">"hello Ji"</span>
+          </div>
+          <div style="font-size:11px;font-weight:800;color:#888;margin:14px 0 10px;letter-spacing:1px;text-transform:uppercase">AST for: console.log(3+5)</div>
+          <div style="font-family:var(--font-code);font-size:11px;color:#e6edf3;line-height:2">
+            <span style="color:#d2a8ff">Program</span><br>
+            &nbsp;└─ <span style="color:#ffa657">ExpressionStatement</span><br>
+            &nbsp;&nbsp;&nbsp;└─ <span style="color:#d2a8ff">CallExpression</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├─ callee: <span style="color:#ffa657">MemberExpression</span> <span style="color:#a5d6ff">console.log</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─ args[0]: <span style="color:#ffa657">BinaryExpression</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├─ op: <span style="color:#ff7b72">"+"</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├─ left: <span style="color:#79c0ff">NumericLiteral</span> <span style="color:#79c0ff">3</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─ right: <span style="color:#79c0ff">NumericLiteral</span> <span style="color:#79c0ff">5</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SIMULATE THE COMPILER -->
+    <div class="ep" style="background:#161b22;border-color:#30363d">
+      <div class="ep-hdr" style="background:#21262d">
+        <span>Simulate This Compiler</span>
+        <div class="ep-dots">
+          <div class="ep-dot" style="background:#ff5f57"></div>
+          <div class="ep-dot" style="background:#febc2e"></div>
+          <div class="ep-dot" style="background:#28c840"></div>
+        </div>
+      </div>
+      <div class="ep-body">
+        <div class="live-demo">
+          <div style="font-size:11px;font-weight:800;color:#888;margin-bottom:6px">Try a console.log() call:</div>
+          <div class="ld-input-wrap">
+            <input class="ld-input" id="cppInput" value='console.log("hello Ji")' spellcheck="false" style="background:#0d1117;color:#e6edf3;border-color:#30363d">
+            <button class="ld-run" onclick="runMiniCompiler()">Run ▶</button>
+          </div>
+          <div style="font-size:10px;color:#555;font-weight:700;margin-top:2px">
+            Try: console.log("hello Ji") &nbsp;·&nbsp; console.log(3+5) &nbsp;·&nbsp; console.log(10*4) &nbsp;·&nbsp; console.log(100-37)
+          </div>
+
+          <!-- STAGE VISUALIZER -->
+          <div id="cpp-stages" style="display:flex;flex-direction:column;gap:6px;margin-top:8px"></div>
+
+          <!-- OUTPUT -->
+          <div style="font-size:11px;font-weight:800;color:#888;margin-top:8px;margin-bottom:4px;letter-spacing:1px;text-transform:uppercase">Output</div>
+          <div class="ld-out" id="cppOut" style="min-height:60px"><span style="color:#484f58">// output appears here</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHAT V8 DOES ON TOP -->
+  <div style="margin-top:16px;background:#161b22;border:1.5px solid #30363d;border-radius:8px;padding:16px">
+    <div style="font-size:11px;font-weight:800;color:var(--red);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">What Real V8 Adds On Top</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">
+      <div style="background:#0d1117;border:1.5px solid #21262d;border-radius:6px;padding:10px;border-left:3px solid var(--red)">
+        <div style="font-size:11px;font-weight:800;color:var(--red);margin-bottom:4px">This snippet handles</div>
+        <div style="font-size:11px;color:#aaa;line-height:1.6">String literals. Integer arithmetic. One function call. ~60 lines of C++.</div>
+      </div>
+      <div style="background:#0d1117;border:1.5px solid #21262d;border-radius:6px;padding:10px;border-left:3px solid #f9a825">
+        <div style="font-size:11px;font-weight:800;color:#f9a825;margin-bottom:4px">Real V8 adds</div>
+        <div style="font-size:11px;color:#aaa;line-height:1.6">Garbage collection. JIT optimization. Closures. Prototype chains. Async/await. ~2M lines of C++.</div>
+      </div>
+      <div style="background:#0d1117;border:1.5px solid #21262d;border-radius:6px;padding:10px;border-left:3px solid var(--green)">
+        <div style="font-size:11px;font-weight:800;color:var(--green);margin-bottom:4px">The key insight</div>
+        <div style="font-size:11px;color:#aaa;line-height:1.6">Both are the same idea: read text → parse meaning → execute. Scale is the only difference.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showTab(tab) {
+  document.getElementById('tab-src-content').style.display = tab==='src' ? 'block' : 'none';
+  document.getElementById('tab-ast-content').style.display = tab==='ast' ? 'block' : 'none';
+  document.getElementById('tab-src').style.background = tab==='src' ? 'var(--red)' : '#333';
+  document.getElementById('tab-src').style.color = tab==='src' ? '#fff' : '#aaa';
+  document.getElementById('tab-ast').style.background = tab==='ast' ? 'var(--red)' : '#333';
+  document.getElementById('tab-ast').style.color = tab==='ast' ? '#fff' : '#aaa';
+}
+
+function runMiniCompiler() {
+  const code = document.getElementById('cppInput').value.trim();
+  const out = document.getElementById('cppOut');
+  const stagesEl = document.getElementById('cpp-stages');
+  out.innerHTML = '';
+  stagesEl.innerHTML = '';
+
+  const stages = [
+    { name: 'LEXER', color: '#d2a8ff', desc: '' },
+    { name: 'PARSER', color: '#ffa657', desc: '' },
+    { name: 'SEMANTIC', color: '#79c0ff', desc: '' },
+    { name: 'EXECUTE', color: '#3fb950', desc: '' },
+  ];
+
+  // Run the mini compiler logic (JS mirror of the C++ code)
+  let result = null;
+  let error = null;
+
+  try {
+    const open = code.indexOf('(');
+    const close = code.lastIndexOf(')');
+    if (open === -1 || close === -1) throw new Error('No parentheses found');
+    const inside = code.substring(open + 1, close);
+
+    stages[0].desc = `Tokens: identifier("console") · op(".") · identifier("log") · op("(") · literal(${inside}) · op(")")`;
+
+    if (inside[0] === '"') {
+      const str = inside.substring(1, inside.length - 1);
+      stages[1].desc = `AST: CallExpression → StringLiteral("${str}")`;
+      stages[2].desc = `Type check: string ✓. No type errors.`;
+      stages[3].desc = `Output: "${str}"`;
+      result = str;
+    } else {
+      let index = 0, a = 0, b = 0;
+      while (index < inside.length && !'+-*/'.includes(inside[index])) {
+        a = a * 10 + parseInt(inside[index]);
+        index++;
+      }
+      const op = inside[index++];
+      while (index < inside.length) {
+        b = b * 10 + parseInt(inside[index]);
+        index++;
+      }
+      stages[1].desc = `AST: CallExpression → BinaryExpression(${a} ${op} ${b})`;
+      stages[2].desc = `Type check: number ${op} number → number ✓`;
+      let res;
+      if (op==='+') res=a+b;
+      else if (op==='-') res=a-b;
+      else if (op==='*') res=a*b;
+      else res=Math.floor(a/b);
+      stages[3].desc = `${a} ${op} ${b} = ${res}`;
+      result = String(res);
+    }
+  } catch(e) {
+    error = e.message;
+  }
+
+  stages.forEach((s, i) => {
+    setTimeout(() => {
+      const div = document.createElement('div');
+      div.style.cssText = `display:flex;align-items:flex-start;gap:8px;padding:8px 10px;background:#0d1117;border:1.5px solid #21262d;border-radius:4px;border-left:3px solid ${s.color};animation:fadein .25s ease`;
+      div.innerHTML = `<span style="font-size:10px;font-weight:800;color:${s.color};min-width:70px;letter-spacing:1px">${s.name}</span><span style="font-size:11px;color:#aaa;font-family:var(--font-code);line-height:1.5">${s.desc || (error && i===0 ? '❌ '+error : '')}</span>`;
+      stagesEl.appendChild(div);
+
+      if (i === stages.length - 1) {
+        setTimeout(() => {
+          if (error) {
+            out.innerHTML = `<span style="color:#ff7b72">❌ ${error}</span>`;
+          } else {
+            const span = document.createElement('span');
+            span.className = 'out-line';
+            span.style.color = '#3fb950';
+            span.textContent = '> ' + result;
+            out.appendChild(span);
+          }
+        }, 200);
+      }
+    }, i * 400);
+  });
+}
+
+document.getElementById('cppInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') runMiniCompiler();
+});
+</script>
+
+
+<!-- SCENE 6: BACK TO ARJUN -->
+<div class="fb-banner">— BACK TO PRESENT —</div>
+
+<div class="scene-hdr">
+  <span class="sh-num">SCENE 06</span>
+  <span class="sh-title">The Click</span>
+  <span class="sh-loc">📍 Arjun's Hostel Room</span>
+</div>
+
+<div class="row r2">
+  <div class="panel bg-room" style="min-height:240px">
+    <div class="bubbles">
+      <div class="b thought">So... JavaScript wasn't even supposed to be this big.</div>
+      <div class="b thought" style="margin-top:6px">It was built in 10 days.<br>Named for marketing.<br>Called a "silly little brother."</div>
+    </div>
+  </div>
+  <div class="panel bg-white" style="min-height:240px;justify-content:center;align-items:center">
+    <div class="speed"></div>
+    <div style="text-align:center;position:relative;z-index:2;padding:10px">
+      <div class="bigtext red" style="font-size:3rem">AND IT<br>WON.</div>
+      <div style="font-size:12px;font-weight:700;color:#666;margin-top:10px;line-height:1.6">Java removed from browsers: 2015.<br>JavaScript: everywhere. Always.</div>
+    </div>
+  </div>
+</div>
+
+<div class="row r1">
+  <div class="panel bg-dark" style="min-height:100px;justify-content:center;align-items:center">
+    <div class="speed"></div>
+    <div class="bubbles" style="align-items:center">
+      <div class="b" style="background:#1e2840;border-color:#334;color:#eee;text-align:center;font-size:14px">
+        Those other languages own the <strong style="color:var(--yellow)">computer</strong>.<br>
+        JavaScript owns the <strong style="color:var(--red)">browser tab</strong>.<br>
+        And the browser turned out to be a very big room.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="dlg-strip">
+  <div class="dlg">
+    <div class="dlg-who">ARJUN</div>
+    <div class="dlg-b">Ok. I get it now. It was never about being the best language. It was about being in the right place.</div>
+  </div>
+  <div class="dlg r">
+    <div class="dlg-who">ARJUN</div>
+    <div class="dlg-b">Now... time to actually LEARN it. 💻</div>
+  </div>
+</div>
+
+<!-- SUMMARY -->
+<div class="summary">
+  <div class="sum-title">📓 Chapter 1 — Summary</div>
+  <div class="notebook">
+    <div class="nb-hdr">📖 Arjun's Notes</div>
+    <div class="nb-body">
+      <div class="nb-line">
+        <div class="nb-icon">⚔️</div>
+        <div class="nb-text">1994: <strong>Netscape + Sun</strong> teamed up against Microsoft. Plan: move all software into the browser so Windows becomes irrelevant.</div>
+      </div>
+      <div class="nb-line">
+        <div class="nb-icon">🧩</div>
+        <div class="nb-text">Java handles <strong>big programs</strong> (sealed box). But someone needed a simple "glue language" for the page itself — reacting to clicks, checking forms.</div>
+      </div>
+      <div class="nb-line">
+        <div class="nb-icon">⏱️</div>
+        <div class="nb-text"><strong>Brendan Eich</strong> built the prototype in <strong>10 days</strong>, May 1995. Named "JavaScript" purely for marketing — borrowing Java's hype.</div>
+      </div>
+      <div class="nb-line">
+        <div class="nb-icon">🚫</div>
+        <div class="nb-text"><strong>C++ couldn't work</strong> in browsers — security nightmare, too heavy for 4MB RAM machines, too hard for web designers.</div>
+      </div>
+      <div class="nb-line">
+        <div class="nb-icon">⚙️</div>
+        <div class="nb-text">V8 engine (written in C++) compiles your JS → <strong>Parse → AST → Bytecode → JIT → Output</strong>. The little language runs on a giant engine.</div>
+      </div>
+      <div class="nb-line">
+        <div class="nb-icon">👑</div>
+        <div class="nb-text">Java was removed from browsers in 2015. JavaScript <strong>won by being woven into every page</strong> — not by being the most powerful language.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NEXT CHAPTER -->
+<div class="next-ch">
+  <div class="nc-label">Up Next</div>
+  <div class="nc-title">Chapter 2: Variables &amp; Data Types</div>
+  <p style="font-size:13px;color:#666;font-weight:700;margin-bottom:1.5rem;line-height:1.6">
+    Arjun starts building his first project. Repeating the same name everywhere. There has to be a better way...Datatypes...variables..loading...
+  </p>
+  <a class="nc-btn" href="secondpage.html">Chapter 2 →</a>
+</div>
+
+</div><!-- /webtoon -->
+
+<div class="scroll-dot" onclick="window.scrollTo({top:0,behavior:'smooth'})">TOP</div>
+
+<script>
+const stageInfo = [
+  "Your source code — exactly what you typed. The engine hasn't touched it yet.",
+  "The Parser reads each character and checks syntax. Throws a SyntaxError if something's wrong.",
+  "AST = Abstract Syntax Tree. Your code becomes a tree of nodes. console.log(\"hi\") → CallExpression → MemberExpression → Identifier.",
+  "Ignition converts the AST into Bytecode — simpler instructions the engine can execute directly.",
+  "TurboFan watches which code runs often (hot paths) and compiles them to native machine code for speed.",
+  "Your output appears! The whole pipeline runs in milliseconds."
+];
+
+function selectStep(i) {
+  document.querySelectorAll('.pipe-step').forEach((s,j) => s.classList.toggle('active', j===i));
+  document.getElementById('ldStage').textContent = stageInfo[i];
+}
+
+function runCode() {
+  const code = document.getElementById('ldInput').value;
+  const out = document.getElementById('ldOut');
+  const stageEl = document.getElementById('ldStage');
+  const steps = ['ldp0','ldp1','ldp2','ldp3','ldp4'];
+  
+  steps.forEach(id => {
+    const el = document.getElementById(id);
+    el.classList.remove('active','done');
+  });
+  out.innerHTML = '';
+
+  const msgs = [
+    {stage: "Parsing your code...", delay: 0},
+    {stage: "Building Abstract Syntax Tree...", delay: 300},
+    {stage: "Generating Bytecode (Ignition)...", delay: 600},
+    {stage: "JIT compiling hot paths (TurboFan)...", delay: 900},
+    {stage: "Executing — output ready!", delay: 1200},
+  ];
+
+  msgs.forEach((m, i) => {
+    setTimeout(() => {
+      steps.forEach((id,j) => {
+        const el = document.getElementById(id);
+        if (j < i) el.classList.add('done'), el.classList.remove('active');
+        else if (j === i) el.classList.add('active'), el.classList.remove('done');
+        else el.classList.remove('active','done');
+      });
+      stageEl.textContent = m.stage;
+    }, m.delay);
+  });
+
+  setTimeout(() => {
+    steps.forEach(id => {
+      document.getElementById(id).classList.remove('active');
+      document.getElementById(id).classList.add('done');
+    });
+
+    const logs = [];
+    const fakeConsole = {
+      log: (...args) => logs.push(args.map(a => {
+        if (typeof a === 'object') try { return JSON.stringify(a) } catch { return String(a) }
+        return String(a);
+      }).join(' '))
+    };
+
+    try {
+      const fn = new Function('console', code);
+      fn(fakeConsole);
+      if (logs.length === 0) {
+        const result = eval(code);
+        if (result !== undefined) logs.push(String(result));
+      }
+      if (logs.length === 0) {
+        out.innerHTML = '<span style="color:#484f58">// (no output)</span>';
+      } else {
+        logs.forEach((line, i) => {
+          setTimeout(() => {
+            const span = document.createElement('span');
+            span.className = 'out-line';
+            span.style.color = '#3fb950';
+            span.textContent = '> ' + line;
+            out.appendChild(span);
+            out.appendChild(document.createTextNode('\n'));
+          }, i * 80);
+        });
+      }
+      stageEl.textContent = "Done! All " + steps.length + " pipeline stages completed.";
+    } catch(e) {
+      out.innerHTML = '<span style="color:#ff7b72">❌ ' + e.message + '</span>';
+      stageEl.textContent = "Error caught during execution.";
+    }
+  }, 1500);
+}
+
+document.getElementById('ldInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') runCode();
+});
+
+
+</script>
+<script>
+(function(){
+
+var ALL_CHAPTERS = [
+  { num:1, title:"Why JavaScript Exists",  file:"firstpage.html",      done:true  },
+  { num:2, title:"Variables & Data Types", file:"secondpage.html", done:true  },
+  { num:3, title:"Operator and Data type",              file:"thirdpage.html",        done:true },
+  { num:4, title:"Loop, Number, math and String",       file:"fouthpage.html",        done:true },
+  { num:5, title:"Soon...",               file:"ch5.html",        done:false },
+  { num:6, title:"Soon...",    file:"ch6.html",        done:false },
+  { num:7, title:"Soon...",      file:"ch7.html",        done:false },
+  { num:8, title:"Soon...",          file:"ch8.html",        done:false },
+];
+
+/* ── styles ── */
+var s = document.createElement('style');
+s.textContent =
+  ':root{--tw:264px;--ta:#e63329;--ty:#f5c842}'
+
+  /* toggle tab */
+  +'#jtoc-btn{position:fixed;top:50%;left:0;transform:translateY(-50%);z-index:9999;'
+  +'background:var(--ta);color:#fff;border:none;border-radius:0 5px 5px 0;'
+  +'padding:13px 7px;cursor:pointer;writing-mode:vertical-lr;white-space:nowrap;'
+  +'font-family:"Bangers",cursive;font-size:10px;letter-spacing:2px;'
+  +'box-shadow:2px 0 10px rgba(0,0,0,.5);transition:left .28s ease;user-select:none}'
+  +'body.jtoc-open #jtoc-btn{left:var(--tw)}'
+  +'#jtoc-arr{writing-mode:horizontal-tb;display:block;font-size:12px;'
+  +'transition:transform .28s ease;margin-bottom:4px}'
+  +'body.jtoc-open #jtoc-arr{transform:rotate(180deg)}'
+
+  /* panel */
+  +'#jtoc-panel{position:fixed;top:0;left:calc(-1*var(--tw) - 4px);width:var(--tw);'
+  +'height:100vh;background:#0e0e0e;border-right:2px solid #1f1f1f;z-index:9998;'
+  +'display:flex;flex-direction:column;overflow:hidden;'
+  +'box-shadow:4px 0 24px rgba(0,0,0,.8);transition:left .28s ease}'
+  +'body.jtoc-open #jtoc-panel{left:0}'
+
+  /* overlay */
+  +'#jtoc-ov{display:none;position:fixed;inset:0;z-index:9997;background:rgba(0,0,0,.4)}'
+  +'body.jtoc-open #jtoc-ov{display:block}'
+
+  /* header */
+  +'.jt-hd{background:#080808;border-bottom:2px solid var(--ta);padding:13px 15px;flex-shrink:0}'
+  +'.jt-logo{font-family:"Bangers",cursive;font-size:1.3rem;color:#fff;letter-spacing:3px}'
+  +'.jt-logo b{color:var(--ta);font-weight:400}'
+  +'.jt-sub{font-size:9px;font-weight:800;color:#383838;letter-spacing:2px;text-transform:uppercase;margin-top:2px}'
+
+  /* scroll area */
+  +'.jt-body{flex:1;overflow-y:auto;padding:8px 0}'
+  +'.jt-body::-webkit-scrollbar{width:2px}'
+  +'.jt-body::-webkit-scrollbar-thumb{background:#252525}'
+
+  /* section label */
+  +'.jt-lbl{font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;'
+  +'color:#2c2c2c;padding:10px 15px 3px}'
+
+  /* chapter row — DONE */
+  +'.jt-ch{display:flex;align-items:center;gap:9px;padding:8px 15px;'
+  +'text-decoration:none;color:#a0a0a0;border-left:3px solid transparent;'
+  +'transition:background .12s}'
+  +'.jt-ch:hover{background:#161616}'
+  +'.jt-ch.jt-cur{background:#180a0a;border-left-color:var(--ta);color:#fff}'
+  +'.jt-ch-n{font-family:"Bangers",cursive;font-size:.95rem;color:var(--ta);'
+  +'min-width:24px;letter-spacing:1px}'
+  +'.jt-ch.jt-cur .jt-ch-n{color:var(--ty)}'
+  +'.jt-ch-name{font-size:12px;font-weight:700;flex:1;line-height:1.3}'
+
+  /* chapter row — LOCKED (not done) */
+  +'.jt-lock{display:flex;align-items:center;gap:9px;padding:8px 15px;'
+  +'border-left:3px solid transparent;cursor:default;opacity:1}'
+  +'.jt-lock-n{font-family:"Bangers",cursive;font-size:.95rem;color:#2a2a2a;min-width:24px;letter-spacing:1px}'
+  +'.jt-lock-name{font-size:12px;font-weight:700;flex:1;line-height:1.3;color:#2e2e2e}'
+
+  /* divider */
+  +'.jt-div{height:1px;background:#181818;margin:7px 15px}'
+
+  /* scene rows */
+  +'.jt-sc{display:flex;align-items:center;gap:8px;padding:5px 15px 5px 20px;'
+  +'cursor:pointer;border-left:3px solid transparent;color:#373737;transition:background .12s}'
+  +'.jt-sc:hover{background:#141414;color:#777}'
+  +'.jt-sc.jt-act{border-left-color:var(--ty);color:#ddd;background:#111008}'
+  +'.jt-sc-dot{width:4px;height:4px;border-radius:50%;background:currentColor;flex-shrink:0}'
+  +'.jt-sc.jt-act .jt-sc-dot{background:var(--ty)}'
+  +'.jt-sc-n{font-family:"Bangers",cursive;font-size:.8rem;min-width:32px;'
+  +'letter-spacing:1px;color:inherit}'
+  +'.jt-sc.jt-act .jt-sc-n{color:var(--ty)}'
+  +'.jt-sc-lbl{font-size:11px;font-weight:700;line-height:1.3}'
+
+  /* progress footer */
+  +'.jt-ft{padding:11px 15px;border-top:1px solid #161616;flex-shrink:0;background:#080808}'
+  +'.jt-ft-row{display:flex;justify-content:space-between;font-size:9px;font-weight:800;'
+  +'letter-spacing:1px;text-transform:uppercase;color:#2a2a2a;margin-bottom:5px}'
+  +'.jt-bar{height:2px;background:#1a1a1a;border-radius:1px;overflow:hidden}'
+  +'.jt-fill{height:100%;background:var(--ta);border-radius:1px;transition:width .2s;width:0%}'
+
+  /* push webtoon right on big screens */
+  +'@media(min-width:1100px){.webtoon{transition:margin-left .28s ease}'
+  +'body.jtoc-open .webtoon{margin-left:calc(var(--tw)+16px)}}'
+  +'@media(max-width:600px){:root{--tw:224px}}';
+document.head.appendChild(s);
+
+/* ── detect current page ── */
+var curFile = location.pathname.split('/').pop() || 'index.html';
+if(curFile === '') curFile = 'index.html';
+var curIdx = ALL_CHAPTERS.findIndex(function(c){ return c.file === curFile; });
+var curCh  = ALL_CHAPTERS[curIdx] || {num:'?'};
+
+/* ── build chapter list html ── */
+var chHTML = ALL_CHAPTERS.map(function(ch, i){
+  var isCur = (i === curIdx);
+  if(ch.done){
+    /* clickable */
+    var href = isCur ? '#' : ch.file;
+    return '<a class="jt-ch'+(isCur?' jt-cur':'')+'" href="'+href+'"'
+      +(isCur?' onclick="return false"':'')+' tabindex="0">'
+      +'<span class="jt-ch-n">'+ch.num+'</span>'
+      +'<span class="jt-ch-name">'+ch.title+'</span>'
+      +'</a>';
+  } else {
+    /* locked — looks dim, no click, no badge */
+    return '<div class="jt-lock">'
+      +'<span class="jt-lock-n">'+ch.num+'</span>'
+      +'<span class="jt-lock-name">'+ch.title+'</span>'
+      +'</div>';
+  }
+}).join('');
+
+/* ── build DOM ── */
+var panel = document.createElement('div');
+panel.id = 'jtoc-panel';
+panel.innerHTML =
+  '<div class="jt-hd">'
+  +'<div class="jt-logo">JS<b>TORY</b></div>'
+  +'<div class="jt-sub">Table of Contents</div>'
+  +'</div>'
+  +'<div class="jt-body">'
+  +'<div class="jt-lbl">Chapters</div>'
+  +chHTML
+  +'<div class="jt-div"></div>'
+  +'<div class="jt-lbl">This Chapter</div>'
+  +'<div id="jt-sc-list"></div>'
+  +'</div>'
+  +'<div class="jt-ft">'
+  +'<div class="jt-ft-row"><span>Chapter '+curCh.num+' Progress</span><span id="jt-pct">0%</span></div>'
+  +'<div class="jt-bar"><div class="jt-fill" id="jt-fill"></div></div>'
+  +'</div>';
+
+var btn = document.createElement('button');
+btn.id = 'jtoc-btn';
+btn.setAttribute('aria-label','Toggle Table of Contents');
+btn.innerHTML = '<span id="jtoc-arr">◀</span>CONTENTS';
+
+var ov = document.createElement('div');
+ov.id = 'jtoc-ov';
+
+document.body.appendChild(panel);
+document.body.appendChild(btn);
+document.body.appendChild(ov);
+
+/* ── open / close ── */
+function open(){ document.body.classList.add('jtoc-open'); }
+function close(){ document.body.classList.remove('jtoc-open'); }
+btn.onclick = function(){ document.body.classList.toggle('jtoc-open'); };
+ov.onclick  = close;
+
+/* ── scroll to scene ── */
+window.jtocGo = function(id){
+  var el = document.getElementById(id);
+  if(!el) return;
+  /* topbar height: look for .topbar or sticky element, fallback 50 */
+  var tb = document.querySelector('.topbar');
+  var offset = tb ? tb.offsetHeight + 6 : 56;
+  var y = el.getBoundingClientRect().top + window.scrollY - offset;
+  window.scrollTo({top: y, behavior:'smooth'});
+  if(window.innerWidth < 900) close();
+};
+
+/* ── build scene list from .scene-hdr ── */
+var secs = [];
+function buildSections(){
+  var hdrs = document.querySelectorAll('.scene-hdr');
+  var list = document.getElementById('jt-sc-list');
+  if(!list) return;
+  list.innerHTML = '';
+  secs = [];
+  hdrs.forEach(function(hdr, i){
+    var numEl  = hdr.querySelector('.sh-num');
+    var lblEl  = hdr.querySelector('.sh-title');
+    var num = numEl  ? numEl.textContent.trim()  : ('S'+(i+1));
+    var lbl = lblEl ? lblEl.textContent.trim() : ('Scene '+(i+1));
+    var id  = 'jtoc-s'+i;
+    hdr.id  = id;
+    secs.push({id:id, num:num, lbl:lbl});
+    var div = document.createElement('div');
+    div.className  = 'jt-sc';
+    div.dataset.id = id;
+    div.innerHTML  =
+      '<span class="jt-sc-n">'+num+'</span>'
+      +'<div class="jt-sc-dot"></div>'
+      +'<span class="jt-sc-lbl">'+lbl+'</span>';
+    div.onclick = function(){ jtocGo(id); };
+    list.appendChild(div);
+  });
+}
+
+
+function tick(){
+  if(!secs.length) return;
+
+  var THRESH = 70; /* px from top — adjust if topbar is taller */
+  var active = null;
+
+  for(var i = 0; i < secs.length; i++){
+    var el = document.getElementById(secs[i].id);
+    if(!el) continue;
+    if(el.getBoundingClientRect().top <= THRESH){
+      active = secs[i]; /* keep overwriting — last one wins */
+    }
+  }
+  /* if scrolled above first section, highlight first */
+  if(!active) active = secs[0];
+
+  document.querySelectorAll('.jt-sc').forEach(function(el){
+    el.classList.toggle('jt-act', el.dataset.id === active.id);
+  });
+
+  /* scroll active item into view inside the panel */
+  var actEl = panel.querySelector('.jt-sc.jt-act');
+  if(actEl){
+    var body = panel.querySelector('.jt-body');
+    var elTop  = actEl.offsetTop;
+    var elBot  = elTop + actEl.offsetHeight;
+    var visTop = body.scrollTop;
+    var visBot = visTop + body.clientHeight;
+    if(elTop < visTop + 20)        body.scrollTop = elTop - 20;
+    else if(elBot > visBot - 20)   body.scrollTop = elBot - body.clientHeight + 20;
+  }
+
+  /* progress */
+  var total = document.documentElement.scrollHeight - window.innerHeight;
+  var pct = total > 0 ? Math.round(window.scrollY / total * 100) : 0;
+  document.getElementById('jt-fill').style.width = pct+'%';
+  document.getElementById('jt-pct').textContent  = pct+'%';
+}
+
+/* ── init ── */
+function init(){
+  buildSections();
+  tick();
+  window.addEventListener('scroll', tick, {passive:true});
+}
+
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+
+})();
+</script>
+
+
+</body>
+</html>

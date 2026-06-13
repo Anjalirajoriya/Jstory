@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JStory — Chapter 2</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --ink:#0f0f0f;
+  --paper:#faf7f2;
+  --red:#e63329;
+  --yellow:#f5c842;
+  --blue:#1a6fdb;
+  --green:#2aaa5a;
+  --purple:#7c3aed;
+  --orange:#f97316;
+  --panel-shadow:4px 4px 0 var(--ink);
+  --font-comic:'Bangers',cursive;
+  --font-body:'Nunito',sans-serif;
+  --font-code:'JetBrains Mono',monospace;
+}
+body{background:var(--paper);font-family:var(--font-body);color:var(--ink);overflow-x:hidden}
+
+.topbar{position:sticky;top:0;z-index:100;background:var(--ink);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;height:46px;border-bottom:3px solid var(--yellow)}
+.tb-logo{font-family:var(--font-comic);font-size:1.5rem;color:#fff;letter-spacing:3px}.tb-logo span{color:var(--yellow)}
+.tb-ch{font-size:11px;font-weight:800;color:#888;letter-spacing:2px;text-transform:uppercase}
+.tb-back{font-size:11px;font-weight:800;color:#555;letter-spacing:1px;text-decoration:none;border:1.5px solid #333;padding:3px 10px;border-radius:3px;transition:all .15s}
+.tb-back:hover{color:#fff;border-color:#fff}
+
+
+/* COVER */
+.cover{min-height:100vh;background:#0d0d1a;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:3rem;position:relative;overflow:hidden}
+.cover-stars{position:absolute;inset:0;pointer-events:none}
+.star{position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;opacity:.6;animation:twinkle var(--d,3s) infinite var(--delay,0s)}
+@keyframes twinkle{0%,100%{opacity:.2}50%{opacity:.8}}
+.cover-ch{font-size:12px;font-weight:800;letter-spacing:6px;color:var(--yellow);margin-bottom:.5rem;text-transform:uppercase}
+.cover-title{font-family:var(--font-comic);font-size:clamp(3rem,10vw,7rem);color:#fff;line-height:.9;margin-bottom:1.5rem;letter-spacing:2px}
+.cover-title em{color:var(--yellow);font-style:normal}
+.cover-title .red{color:var(--red)}
+.cover-sub{font-size:1rem;color:#aaa;max-width:480px;line-height:1.7;margin-bottom:1.5rem}
+.cover-tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:3rem}
+.cover-tag{font-size:11px;font-weight:800;letter-spacing:1px;padding:4px 12px;border-radius:3px;text-transform:uppercase}
+.cover-scroll{color:#444;font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;animation:bounce 2s infinite;display:flex;flex-direction:column;align-items:center;gap:6px}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+
+.webtoon{max-width:780px;margin:0 auto;border-left:3px solid var(--ink);border-right:3px solid var(--ink)}
+
+.scene-hdr{display:flex;align-items:center;gap:12px;padding:14px 20px;background:var(--ink);color:#fff;border-bottom:2px solid var(--yellow);position:sticky;top:46px;z-index:50}
+.sh-num{font-family:var(--font-comic);font-size:1.3rem;color:var(--yellow);letter-spacing:2px}
+.sh-title{font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;flex:1}
+.sh-loc{font-size:10px;color:#666;font-weight:800;letter-spacing:1px;text-transform:uppercase}
+
+.row{display:grid;border-bottom:3px solid var(--ink)}
+.r1{grid-template-columns:1fr}
+.r2{grid-template-columns:1fr 1fr}
+.r3{grid-template-columns:2fr 1fr}
+.r3r{grid-template-columns:1fr 2fr}
+.r13{grid-template-columns:1fr 3fr}
+
+.panel{border-right:3px solid var(--ink);min-height:200px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:14px}
+.panel:last-child{border-right:none}
+
+.bg-room{background:#dde8ff}
+.bg-night{background:#080820}
+.bg-dawn{background:#1a0a2e}
+.bg-morning{background:#fff9e6}
+.bg-dark{background:#0d0d1a}
+.bg-flash{background:#fffbe6}
+.bg-white{background:#fff}
+.bg-code{background:#0d1117}
+.bg-green{background:#e8f5e9}
+.bg-red{background:#fff0f0}
+.bg-yellow{background:#fffde7}
+.bg-purple{background:#f5f0ff}
+.bg-orange{background:#fff7ed}
+.bg-gray{background:#f4f4f4}
+.bg-phone{background:#1a1a2e}
+
+.speed{position:absolute;inset:0;pointer-events:none;background:repeating-conic-gradient(from 0deg at 50% 130%,rgba(0,0,0,.04) 0deg 2deg,transparent 2deg 5deg)}
+.speed-h{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(90deg,transparent,transparent 34px,rgba(0,0,0,.04) 34px,rgba(0,0,0,.04) 36px)}
+.halftone{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(0,0,0,.08) 1px,transparent 1px);background-size:8px 8px}
+
+.bubbles{position:relative;z-index:3;display:flex;flex-direction:column;gap:8px}
+.b{border:2.5px solid var(--ink);border-radius:16px;padding:9px 13px;font-size:13px;font-weight:700;line-height:1.5;background:#fff;position:relative;max-width:90%;box-shadow:2px 2px 0 var(--ink)}
+.b::after{content:'';position:absolute;bottom:-13px;left:16px;border:7px solid transparent;border-top-color:var(--ink)}
+.b.thought{border-style:dashed;background:#f0f4ff;font-style:italic}
+.b.thought::after{display:none}
+.b.right{align-self:flex-end;border-radius:16px 16px 0 16px;background:var(--blue);color:#fff;border-color:var(--blue);box-shadow:2px 2px 0 rgba(0,0,0,.3)}
+.b.right::after{border-top-color:var(--blue);left:auto;right:16px}
+.b.angry{background:var(--red);color:#fff;border-color:var(--red);clip-path:polygon(0 0,100% 0,100% 78%,90% 100%,80% 78%,0 78%);border-radius:4px}
+.b.angry::after{display:none}
+.b.system{background:var(--ink);color:#7ee787;border-color:#333;font-family:var(--font-code);font-size:11px;border-radius:4px}
+.b.system::after{display:none}
+.b.yellow{background:var(--yellow);border-color:var(--ink)}
+.b.yellow::after{border-top-color:var(--ink)}
+.b.purple{background:var(--purple);color:#fff;border-color:var(--purple);box-shadow:2px 2px 0 rgba(0,0,0,.3)}
+.b.purple::after{border-top-color:var(--purple);left:auto;right:16px}
+.b.dim{background:#1e1e3a;color:#aaa;border-color:#333;font-size:12px}
+.b.dim::after{border-top-color:#333}
+
+.slabel{position:absolute;top:10px;left:10px;font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:rgba(0,0,0,.3);z-index:2}
+.slabel.w{color:rgba(255,255,255,.35)}
+
+.caption{background:var(--yellow);border:2px solid var(--ink);border-radius:4px;padding:8px 12px;font-size:12px;font-weight:800;position:relative;z-index:3;align-self:flex-start;box-shadow:2px 2px 0 var(--ink)}
+.caption.dark{background:var(--ink);color:var(--yellow)}
+.caption.red{background:var(--red);color:#fff;border-color:var(--red)}
+
+.tbox{background:#fff;border:2px dashed var(--ink);border-radius:10px;padding:10px;font-size:12px;font-weight:700;line-height:1.6;position:relative;z-index:3;box-shadow:2px 2px 0 #ccc}
+
+.bigtext{font-family:var(--font-comic);font-size:clamp(2rem,6vw,4.5rem);line-height:.95;letter-spacing:2px;position:relative;z-index:2}
+.bigtext.red{color:var(--red)}.bigtext.white{color:#fff}.bigtext.yellow{color:var(--yellow)}.bigtext.blue{color:var(--blue)}.bigtext.purple{color:var(--purple)}.bigtext.ink{color:var(--ink)}
+
+/* DIVIDERS */
+.banner{border-top:3px solid var(--ink);border-bottom:3px solid var(--ink);padding:10px 2rem;text-align:center;font-family:var(--font-comic);font-size:1.4rem;letter-spacing:4px}
+.banner.yellow{background:var(--yellow);color:var(--ink)}
+.banner.night{background:#080820;color:#fff;border-color:#333}
+.banner.dawn{background:#1a0a2e;color:var(--yellow)}
+.banner.morning{background:#fff9e6;color:var(--ink)}
+.banner.red{background:var(--red);color:#fff;border-color:var(--red)}
+
+/* DIALOGUE STRIP */
+.dlg-strip{padding:1.5rem 1.5rem;background:var(--paper);border-bottom:3px solid var(--ink);display:flex;flex-direction:column;gap:10px}
+.dlg-strip.night{background:#080820;border-bottom-color:#333}
+.dlg-strip.morning{background:#fff9e6}
+.dlg{display:flex;align-items:flex-start;gap:10px}
+.dlg.r{flex-direction:row-reverse}
+.dlg-who{font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#888;min-width:58px;padding-top:5px}
+.dlg.r .dlg-who{text-align:right}
+.dlg-night .dlg-who{color:#555}
+.dlg-b{background:#fff;border:2px solid var(--ink);border-radius:12px;padding:9px 13px;font-size:13px;font-weight:700;line-height:1.5;box-shadow:2px 2px 0 var(--ink);max-width:480px}
+.dlg.r .dlg-b{background:var(--blue);color:#fff;border-color:var(--blue);box-shadow:2px 2px 0 rgba(0,0,0,.3)}
+.night-b{background:#1e1e3a;border-color:#333;color:#aaa;box-shadow:none}
+
+/* CONCEPT STRIP */
+.concept-strip{padding:2rem 1.5rem;background:var(--ink);border-bottom:3px solid var(--yellow);color:#fff}
+.cs-tag{font-size:9px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--yellow);margin-bottom:.4rem}
+.cs-title{font-family:var(--font-comic);font-size:2rem;letter-spacing:2px;margin-bottom:1.2rem}
+.cs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.cs-item{background:#1e1e1e;border:1.5px solid #333;border-radius:6px;padding:12px;border-left:3px solid var(--yellow)}
+.cs-item.red{border-left-color:var(--red)}
+.cs-item.blue{border-left-color:var(--blue)}
+.cs-item.green{border-left-color:var(--green)}
+.cs-item.purple{border-left-color:var(--purple)}
+.cs-item-t{font-size:12px;font-weight:800;margin-bottom:3px}
+.cs-item-t.yellow{color:var(--yellow)}.cs-item-t.red{color:var(--red)}.cs-item-t.blue{color:var(--blue)}.cs-item-t.green{color:var(--green)}.cs-item-t.purple{color:var(--purple)}
+.cs-item-d{font-size:12px;color:#aaa;line-height:1.6}
+
+.code-blk{background:#000000;border-radius:6px;font-family:var(--font-code);font-size:12px;padding:14px;line-height:1.9;border:1.5px solid #30363d;overflow-x:auto;position:relative;z-index:2; color:#fff}
+.kw{color:#ff7b72}.fn{color:#d2a8ff}.str{color:#a5d6ff}.cm{color:#8b949e;font-style:italic}.num{color:#79c0ff}.cl{color:#ffa657}.ok{color:#3fb950}.op{color:#ff7b72}
+
+/* VAR/LET/CONST TABLE */
+.vtable{width:100%;border-collapse:collapse;font-size:12px;font-weight:700}
+.vtable th{background:var(--ink);color:#fff;padding:8px 12px;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;border:1.5px solid var(--ink)}
+.vtable td{padding:9px 12px;border:1.5px solid var(--ink);background:#fff;vertical-align:top;line-height:1.5}
+.vtable tr:nth-child(even) td{background:#f8f8f8}
+.vtable td:first-child{font-family:var(--font-code);font-weight:800;background:#1e1e1e;color:var(--yellow);font-size:13px}
+.yes{color:var(--green)}.no{color:var(--red)}.warn{color:var(--orange)}
+.tdz{color:var(--purple);font-size:10px}
+
+/* TYPE CARDS */
+.type-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;padding:1.5rem;background:var(--paper);border-bottom:3px solid var(--ink)}
+.type-card{border:2.5px solid var(--ink);border-radius:8px;overflow:hidden;box-shadow:3px 3px 0 var(--ink);cursor:pointer;transition:transform .15s,box-shadow .15s}
+.type-card:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--ink)}
+.tc-hdr{padding:8px 12px;font-family:var(--font-comic);font-size:1.1rem;letter-spacing:1px;display:flex;align-items:center;gap:8px}
+.tc-body{padding:10px 12px;background:#fff;font-size:11px;font-weight:700;line-height:1.6;color:#444}
+.tc-code{background:#0d1117;padding:8px 12px;font-family:var(--font-code);font-size:10px;color:#e6edf3;line-height:1.8}
+
+/* INTERACTIVE TYPEOF */
+.typeof-section{padding:2rem 1.5rem;background:var(--paper);border-bottom:3px solid var(--ink)}
+.typeof-title{font-family:var(--font-comic);font-size:2rem;letter-spacing:2px;margin-bottom:6px}
+.typeof-sub{font-size:13px;color:#666;font-weight:700;margin-bottom:1.5rem}
+.typeof-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.tf-panel{background:#fff;border:2.5px solid var(--ink);border-radius:8px;box-shadow:var(--panel-shadow);overflow:hidden}
+.tf-hdr{background:var(--ink);color:#fff;padding:8px 14px;font-size:11px;font-weight:700;letter-spacing:1px;display:flex;align-items:center;justify-content:space-between}
+.tf-dots{display:flex;gap:5px}
+.tf-dot{width:9px;height:9px;border-radius:50%}
+.tf-body{padding:14px;display:flex;flex-direction:column;gap:10px}
+.tf-input{width:100%;padding:9px 12px;font-family:var(--font-code);font-size:13px;border:2px solid var(--ink);border-radius:4px;background:var(--paper);color:var(--ink);outline:none;transition:border-color .2s}
+.tf-input:focus{border-color:var(--yellow)}
+.tf-result{background:#0d1117;border-radius:4px;padding:12px;font-family:var(--font-code);font-size:12px;border:1.5px solid #30363d;min-height:80px;line-height:1.8}
+.tf-chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:#f0f0f0;border:1.5px solid var(--ink);border-radius:4px;padding:4px 10px;font-family:var(--font-code);font-size:11px;font-weight:700;cursor:pointer;transition:all .15s}
+.chip:hover{background:var(--yellow);box-shadow:2px 2px 0 var(--ink)}
+.chip.active{background:var(--yellow);box-shadow:2px 2px 0 var(--ink)}
+
+/* BY VALUE / BY REFERENCE */
+.byval-section{padding:2rem 1.5rem;background:#f4f0ff;border-bottom:3px solid var(--ink)}
+.byval-title{font-family:var(--font-comic);font-size:2rem;letter-spacing:2px;margin-bottom:6px;color:var(--purple)}
+.byval-sub{font-size:13px;color:#666;font-weight:700;margin-bottom:1.5rem}
+.byval-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.bv-box{background:#fff;border:2.5px solid var(--ink);border-radius:8px;overflow:hidden;box-shadow:var(--panel-shadow)}
+.bv-hdr{padding:8px 14px;font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;border-bottom:2px solid var(--ink)}
+.bv-body{padding:14px;display:flex;flex-direction:column;gap:10px}
+.mem-row{display:flex;align-items:center;gap:8px;font-family:var(--font-code);font-size:12px}
+.mem-addr{background:#e8e8e8;border:1.5px solid #ccc;border-radius:4px;padding:3px 8px;font-size:10px;color:#888;min-width:70px;text-align:center}
+.mem-val{background:#fff9e6;border:2px solid var(--yellow);border-radius:4px;padding:4px 10px;font-weight:800;font-size:13px;transition:all .3s}
+.mem-val.changed{background:#ffe0e0;border-color:var(--red);animation:flash .3s ease}
+@keyframes flash{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.mem-arrow{color:#888;font-size:16px}
+.mem-ptr{background:#e8f0ff;border:2px solid var(--blue);border-radius:4px;padding:4px 10px;font-size:11px;color:var(--blue);font-weight:800}
+.bv-run{width:100%;padding:8px;background:var(--purple);color:#fff;border:2px solid var(--ink);border-radius:4px;font-family:var(--font-body);font-size:12px;font-weight:800;cursor:pointer;transition:all .15s;letter-spacing:1px}
+.bv-run:hover{background:#6d28d9}
+.bv-note{font-size:11px;font-weight:700;line-height:1.6;padding:8px 10px;border-radius:4px;border-left:3px solid var(--purple);background:#f5f0ff;color:#444}
+
+/* PHONE PANEL */
+.phone-panel{background:#1a1a2e;padding:20px;border-radius:16px;width:200px;margin:16px auto;border:3px solid #333;position:relative;z-index:3}
+.phone-status{font-size:9px;color:#555;text-align:center;margin-bottom:8px;font-weight:800;letter-spacing:1px}
+.phone-screen{background:#0d1117;border-radius:8px;padding:12px;font-size:11px;font-family:var(--font-code);color:#e6edf3;line-height:1.8}
+.phone-search{background:#1e2940;border-radius:6px;padding:6px 10px;font-size:11px;color:#aaa;margin-bottom:8px;border:1px solid #333}
+
+/* SUMMARY */
+.summary{padding:2.5rem 1.5rem;background:var(--ink);border-top:3px solid var(--yellow);color:#fff}
+.sum-title{font-family:var(--font-comic);font-size:2.5rem;letter-spacing:2px;color:var(--yellow);margin-bottom:1.5rem}
+.notebook{background:#fef9c3;color:var(--ink);border:2.5px solid var(--ink);border-radius:8px;box-shadow:var(--panel-shadow);overflow:hidden}
+.nb-hdr{background:var(--ink);color:#fff;padding:10px 16px;font-size:12px;font-weight:800;letter-spacing:1px;display:flex;align-items:center;gap:8px}
+.nb-body{padding:18px;display:flex;flex-direction:column;gap:10px}
+.nb-line{display:flex;align-items:flex-start;gap:10px;padding:10px;background:#fff;border:1.5px solid #e8e3d0;border-radius:6px;border-left:4px solid var(--yellow)}
+.nb-line.red{border-left-color:var(--red)}.nb-line.blue{border-left-color:var(--blue)}.nb-line.green{border-left-color:var(--green)}.nb-line.purple{border-left-color:var(--purple)}
+.nb-icon{font-size:18px;flex-shrink:0}
+.nb-text{font-size:13px;font-weight:700;line-height:1.5}
+.nb-text strong{color:var(--red)}
+.nb-text .yl{color:#b45309}.nb-text .bl{color:var(--blue)}.nb-text .gr{color:var(--green)}.nb-text .pu{color:var(--purple)}
+
+.next-ch{padding:3rem 1.5rem;text-align:center;background:var(--paper);border-top:3px solid var(--ink)}
+.nc-label{font-size:10px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:#888;margin-bottom:.5rem}
+.nc-title{font-family:var(--font-comic);font-size:2.5rem;letter-spacing:2px;margin-bottom:1rem}
+.nc-btn{display:inline-block;background:var(--yellow);color:var(--ink);font-family:var(--font-comic);font-size:1.4rem;letter-spacing:2px;padding:12px 36px;border:3px solid var(--ink);border-radius:6px;box-shadow:var(--panel-shadow);cursor:pointer;text-decoration:none;transition:transform .1s,box-shadow .1s}
+.nc-btn:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--ink)}
+
+@media(max-width:600px){
+  .r2,.r3,.r3r,.r13,.typeof-grid,.byval-grid{grid-template-columns:1fr}
+  .panel{min-height:160px}
+  .cover-title{font-size:3rem}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="tb-logo">JS<span>TORY</span></div>
+  <div class="tb-ch">CHAPTER 2 — VARIABLES & DATA TYPES</div>
+  <a class="tb-back" href="firstpage.html">← Ch.1</a>
+</div>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="cover-stars" id="stars"></div>
+  <div class="cover-ch">Chapter 2</div>
+  <div class="cover-title">Box of <em>Datatypes</em></div>
+  <p class="cover-sub">Arjun still isn't convinced he needs JS. One rabbit hole later and a good night's sleep — he finally gets it.</p>
+  <div class="cover-tags">
+    <span class="cover-tag" style="background:var(--yellow);color:var(--ink)">var / let / const</span>
+    <span class="cover-tag" style="background:var(--purple);color:#fff">Data Types</span>
+    <span class="cover-tag" style="background:var(--blue);color:#fff">typeof</span>
+    <span class="cover-tag" style="background:var(--green);color:#fff">Value vs Reference</span>
+  </div>
+  <div class="cover-scroll">scroll down ▼</div>
+</div>
+
+<div class="webtoon">
+
+<!-- ════════════════════════════
+     SCENE 1 — WAIT, WHY JS?
+════════════════════════════ -->
+<div class="scene-hdr">
+  <span class="sh-num">SCENE 01</span>
+  <span class="sh-title">Wait... Why JS Again?</span>
+  <span class="sh-loc">📍 Arjun's Room — Late Afternoon</span>
+</div>
+
+<div class="row r2">
+  <div class="panel bg-room" style="min-height:260px">
+    <div class="slabel">ARJUN — LAPTOP OPEN</div>
+    <div class="speed-h"></div>
+    <div class="bubbles">
+      <div class="b thought">Ok so... Chapter 1 done.<br>JavaScript exists. Cool.</div>
+      <div class="b thought" style="margin-top:6px">But like... I already know HTML and CSS.<br>Why do I even NEED this?</div>
+    </div>
+  </div>
+  <div class="panel bg-white" style="min-height:260px;justify-content:center;align-items:center">
+    <div class="halftone"></div>
+    <div style="text-align:center;position:relative;z-index:2;padding:14px">
+      <div style="font-family:var(--font-code);font-size:11px;color:#aaa;margin-bottom:10px;font-weight:700">his portfolio page</div>
+      <div style="background:#f8f8f8;border:2px solid #ddd;border-radius:6px;padding:12px;text-align:left;font-size:11px;font-weight:700;line-height:2">
+        <span style="color:#e63329">&lt;h1&gt;</span>Arjun<span style="color:#e63329">&lt;/h1&gt;</span><br>
+        <span style="color:#e63329">&lt;p&gt;</span>I code stuff<span style="color:#e63329">&lt;/p&gt;</span><br>
+        <span style="color:#1a6fdb">.box {</span> color: red; <span style="color:#1a6fdb">}</span>
+      </div>
+      <div class="b thought" style="margin-top:10px;font-size:11px">Looks fine to me 🤷</div>
+    </div>
+  </div>
+</div>
+
+<!-- THE ANALOGY STRIP -->
+<div class="banner yellow">— THE HOUSE ANALOGY —</div>
+
+<div class="row r1">
+  <div class="panel bg-yellow" style="min-height:280px;justify-content:center;align-items:center">
+    <div style="position:relative;z-index:2;width:100%;padding:16px">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center">
+        <div style="background:#fff;border:3px solid var(--ink);border-radius:8px;padding:16px;box-shadow:4px 4px 0 var(--ink)">
+          <div style="font-size:2.5rem;margin-bottom:6px">🧱</div>
+          <div style="font-family:var(--font-comic);font-size:1.4rem;letter-spacing:1px;color:var(--red)">HTML</div>
+          <div style="font-size:11px;font-weight:800;color:#666;margin-top:4px;line-height:1.5">The structure.<br>Walls. Rooms.<br>The skeleton.</div>
+        </div>
+        <div style="background:#fff;border:3px solid var(--ink);border-radius:8px;padding:16px;box-shadow:4px 4px 0 var(--ink)">
+          <div style="font-size:2.5rem;margin-bottom:6px">🎨</div>
+          <div style="font-family:var(--font-comic);font-size:1.4rem;letter-spacing:1px;color:var(--blue)">CSS</div>
+          <div style="font-size:11px;font-weight:800;color:#666;margin-top:4px;line-height:1.5">The design.<br>Paint. Furniture.<br>Makes it pretty.</div>
+        </div>
+        <div style="background:#fff;border:3px solid var(--ink);border-radius:8px;padding:16px;box-shadow:4px 4px 0 var(--ink)">
+          <div style="font-size:2.5rem;margin-bottom:6px">⚡</div>
+          <div style="font-family:var(--font-comic);font-size:1.4rem;letter-spacing:1px;color:var(--green)">JS</div>
+          <div style="font-size:11px;font-weight:800;color:#666;margin-top:4px;line-height:1.5">The electricity.<br>Lights. Locks. AC.<br>Makes it <em>alive</em>.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="dlg-strip">
+  <div class="dlg">
+    <div class="dlg-who">ARJUN</div>
+    <div class="dlg-b">Ok yeah but my portfolio doesn't need electricity. It's just... a portfolio.</div>
+  </div>
+  <div class="dlg r">
+    <div class="dlg-who">ARJUN</div>
+    <div class="dlg-b">I mean, what's even on a portfolio? Name. Projects. Contact. HTML does that fine.</div>
+  </div>
+</div>
+
+<!-- WITHOUT JS -->
+<div class="row r2">
+  <div class="panel bg-white" style="min-height:240px">
+    <div class="slabel">WITHOUT JS</div>
+    <div class="halftone"></div>
+    <div class="caption" style="margin-bottom:10px;align-self:flex-start">Without JavaScript</div>
+    <div style="background:#f8f8f8;border:2px solid #ddd;border-radius:8px;padding:14px;position:relative;z-index:2;font-size:12px;font-weight:700;line-height:2.2">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="background:#ddd;border-radius:4px;padding:4px 14px;font-size:11px;color:#999">Click Me</div>
+        <span style="color:#aaa;font-size:11px">← clicks. nothing.</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="background:#ddd;border-radius:4px;padding:4px 14px;font-size:11px;color:#999">Dark Mode</div>
+        <span style="color:#aaa;font-size:11px">← doesn't toggle.</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="background:#ddd;border-radius:4px;padding:4px 14px;font-size:11px;color:#999">Send Message</div>
+        <span style="color:#aaa;font-size:11px">← nothing happens.</span>
+      </div>
+    </div>
+    <div class="b thought" style="margin-top:10px;font-size:11px">A dead house. Looks good. Does nothing.</div>
+  </div>
+  <div class="panel bg-green" style="min-height:240px">
+    <div class="slabel">WITH JS</div>
+    <div class="caption red" style="margin-bottom:10px;align-self:flex-start">With JavaScript</div>
+    <div style="background:#fff;border:2px solid #2aaa5a;border-radius:8px;padding:14px;position:relative;z-index:2;font-size:12px;font-weight:700;line-height:2.2">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="background:#e8f5e9;border:2px solid var(--green);border-radius:4px;padding:4px 14px;font-size:11px;color:var(--green)">Click Me</div>
+        <span style="color:var(--green);font-size:11px">← modal opens ✓</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="background:#e8f5e9;border:2px solid var(--green);border-radius:4px;padding:4px 14px;font-size:11px;color:var(--green)">Dark Mode</div>
+        <span style="color:var(--green);font-size:11px">← theme switches ✓</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="background:#e8f5e9;border:2px solid var(--green);border-radius:4px;padding:4px 14px;font-size:11px;color:var(--green)">Send Message</div>
+        <span style="color:var(--green);font-size:11px">← form submits ✓</span>
+      </div>
+    </div>
+    <div class="b" style="margin-top:10px;font-size:11px;background:#e8f5e9;border-color:var(--green)">Logic. Reactions. Memory. Life. ⚡</div>
+  </div>
+</div>
+
+<div class="row r1">
+  <div class="panel bg-dark" style="min-height:80px;justify-content:center;align-items:center">
+    <div class="speed"></div>
+    <div class="bigtext white" style="text-align:center;font-size:clamp(1.8rem,5vw,3.5rem)">HTML = <span style="color:#aaa">what exists</span> &nbsp;·&nbsp; CSS = <span style="color:#aaa">how it looks</span> &nbsp;·&nbsp; JS = <span style="color:var(--yellow)">what it does</span></div>
+  </div>
+</div>
+
+<div class="dlg-strip">
+  <div class="dlg">
+    <div class="dlg-who">ARJUN</div>
+    <div class="dlg-b">...ok. ok. I get it. The house needs electricity.</div>
+  </div>
+  <div class="dlg r">
+    <div class="dlg-who">ARJUN</div>
+    <div class="dlg-b">Let me just open the JavaScript docs and— wait. What's "web scraping"? And "hoisting"??</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     SCENE 2 — THE RABBIT HOLE
+════════════════════════════ -->
+<div class="scene-hdr">
+  <span class="sh-num">SCENE 02</span>
+  <span class="sh-title">The Rabbit Hole</span>
+  <span class="sh-loc">📍 11:47 PM — Still Arjun's Room</span>
+</div>
+
+<div class="banner night">— 11:47 PM —</div>
+
+<div class="row r2">
+  <div class="panel bg-night" style="min-height:260px">
+    <div class="slabel w">ARJUN — PHONE GLOW</div>
+    <div class="phone-panel">
+      <div class="phone-status">● WIFI &nbsp; 11:47 PM &nbsp; 🔋23%</div>
+      <div class="phone-screen">
+        <div class="phone-search">🔍 "what is web scraping"</div>
+        <div style="color:#aaa;font-size:10px">Web scraping is the process of<br>extracting data from websites...</div>
+      </div>
+    </div>
+    <div class="bubbles" style="position:absolute;bottom:14px;left:14px;right:14px">
+      <div class="b dim">oh wow that's actually sick</div>
+    </div>
+  </div>
+  <div class="panel bg-night" style="min-height:260px">
+    <div class="slabel w">30 MINS LATER</div>
+    <div class="phone-panel" style="margin-top:auto">
+      <div class="phone-status">● WIFI &nbsp; 12:19 AM &nbsp; 🔋11%</div>
+      <div class="phone-screen">
+        <div class="phone-search">🔍 "javascript hoisting explained"</div>
+        <div style="color:#aaa;font-size:10px">Hoisting is JavaScript's default<br>behavior of moving declarations...</div>
+      </div>
+    </div>
+    <div class="bubbles" style="position:absolute;bottom:14px;left:14px;right:14px">
+      <div class="b dim">wait... var gets hoisted but let doesn't??</div>
+    </div>
+  </div>
+</div>
+
+<div class="row r1">
+  <div class="panel bg-night" style="min-height:200px">
+    <div class="slabel w">2:13 AM</div>
+    <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px">
+      <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+        <div style="background:#1e1e3a;border:1.5px solid #333;border-radius:6px;padding:8px 14px;font-size:11px;color:#888;font-weight:700">web scraping ✓</div>
+        <div style="background:#1e1e3a;border:1.5px solid #333;border-radius:6px;padding:8px 14px;font-size:11px;color:#888;font-weight:700">hoisting ✓</div>
+        <div style="background:#1e1e3a;border:1.5px solid #333;border-radius:6px;padding:8px 14px;font-size:11px;color:#888;font-weight:700">closures ✓?</div>
+        <div style="background:#1e1e3a;border:1.5px solid #333;border-radius:6px;padding:8px 14px;font-size:11px;color:#888;font-weight:700">prototype chain 😵</div>
+        <div style="background:#1e1e3a;border:1.5px solid #333;border-radius:6px;padding:8px 14px;font-size:11px;color:#888;font-weight:700">event loop ??</div>
+      </div>
+      <div class="b dim" style="text-align:center">
+        i have no idea what i'm doing<br>
+        <span style="color:#555">but i can't stop reading</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- THE SLEEP PANEL -->
+<div class="banner night" style="font-size:3rem;padding:2rem;letter-spacing:2px">💤 z z z</div>
+
+<div class="row r1">
+  <div class="panel bg-dawn" style="min-height:120px;justify-content:center;align-items:center">
+    <div class="speed"></div>
+    <div style="text-align:center;position:relative;z-index:2">
+      <div class="bigtext yellow" style="font-size:clamp(1.5rem,5vw,3rem)">TIME SKIP — 8 hours of sleep</div>
+      <div style="font-size:12px;color:#888;font-weight:800;margin-top:8px;letter-spacing:1px">The browser tab is still open. 27 tabs actually.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     SCENE 3 — FRESH MORNING
+════════════════════════════ -->
+<div class="banner morning">— NEXT MORNING — 9:14 AM —</div>
+
+<div class="scene-hdr">
+  <span class="sh-num">SCENE 03</span>
+  <span class="sh-title">New Day, Fresh Brain</span>
+  <span class="sh-loc">📍 Arjun's Desk — Morning</span>
+</div>
+
+<div class="row r2">
+  <div class="panel bg-morning" style="min-height:240px">
+    <div class="halftone"></div>
+    <div class="slabel">WIDE — MORNING LIGHT</div>
+    <div class="caption" style="margin-bottom:auto;margin-top:16px;align-self:center">☀️ fresh start.</div>
+    <div class="bubbles">
+      <div class="b yellow" style="font-size:13px">Ok. Yesterday I learned WHY js exists.<br>Today I actually <strong>start</strong>.</div>
+    </div>
+  </div>
+  <div class="panel bg-morning" style="min-height:240px;justify-content:center">
+    <div class="tbox">
+      📋 Today's plan:<br><br>
+      1. Variables — what are they?<br>
+      2. var / let / const — differences<br>
+      3. Data types — 8 of them??<br>
+      4. typeof — inspect anything<br>
+      5. Value vs Reference — 🤯
+    </div>
+  </div>
+</div>
+
+<div class="dlg-strip" style="background:#fff9e6">
+  <div class="dlg">
+    <div class="dlg-who">ARJUN</div>
+    <div class="dlg-b">Alright. The computer is just RAM — bytes. It has no idea if those bytes are a name or a number. That's the whole reason data types exist in the first place.</div>
+  </div>
+  <div class="dlg r">
+    <div class="dlg-who">ARJUN</div>
+    <div class="dlg-b">And JavaScript lets variables hold ANY type. You don't declare int x or string y. Just... <code style="background:#fff9;padding:2px 6px;border-radius:3px;font-family:var(--font-code)">let x = whatever</code>. Brendan Eich's call, 1995.</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     SCENE 4 — VARIABLES
+════════════════════════════ -->
+<div class="scene-hdr">
+  <span class="sh-num">SCENE 04</span>
+  <span class="sh-title">Variables — Named Boxes</span>
+  <span class="sh-loc">📍 The Concept Zone</span>
+</div>
+
+<div class="row r1">
+  <div class="panel bg-yellow" style="min-height:220px;justify-content:center;align-items:center">
+    <div style="position:relative;z-index:2;text-align:center;padding:16px">
+      <div class="bigtext ink" style="margin-bottom:16px">A variable = a named box in RAM</div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <div style="background:#fff;border:3px solid var(--ink);border-radius:8px;padding:14px 20px;box-shadow:var(--panel-shadow);text-align:center;min-width:100px">
+          <div style="font-size:9px;font-weight:800;letter-spacing:2px;color:#888;margin-bottom:6px">NAME</div>
+          <div style="font-family:var(--font-code);font-size:1.4rem;font-weight:800;color:var(--blue)">"Arjun"</div>
+          <div style="font-size:9px;font-weight:800;color:#aaa;margin-top:6px">addr: 0x1A2F</div>
+        </div>
+        <div style="background:#fff;border:3px solid var(--ink);border-radius:8px;padding:14px 20px;box-shadow:var(--panel-shadow);text-align:center;min-width:100px">
+          <div style="font-size:9px;font-weight:800;letter-spacing:2px;color:#888;margin-bottom:6px">AGE</div>
+          <div style="font-family:var(--font-code);font-size:1.4rem;font-weight:800;color:var(--red)">20</div>
+          <div style="font-size:9px;font-weight:800;color:#aaa;margin-top:6px">addr: 0x1A30</div>
+        </div>
+        <div style="background:#fff;border:3px solid var(--ink);border-radius:8px;padding:14px 20px;box-shadow:var(--panel-shadow);text-align:center;min-width:100px">
+          <div style="font-size:9px;font-weight:800;letter-spacing:2px;color:#888;margin-bottom:6px">IS_STUDENT</div>
+          <div style="font-family:var(--font-code);font-size:1.4rem;font-weight:800;color:var(--green)">true</div>
+          <div style="font-size:9px;font-weight:800;color:#aaa;margin-top:6px">addr: 0x1A31</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VAR LET CONST VISUAL STORY -->
+<div class="row r1">
+  <div class="panel bg-white" style="min-height:260px">
+    <div class="slabel">THE THREE KEYWORDS</div>
+    <div class="halftone"></div>
+    <div style="position:relative;z-index:2;padding:16px;width:100%">
+      <div class="code-blk" style="margin-bottom:14px">
+<span class="cm">// var — old school, leaks everywhere</span><br>
+<span class="kw">if</span> (<span class="num">true</span>) {<br>
+&nbsp;&nbsp;<span class="kw">var</span> leak = <span class="str">"I escaped the block!"</span>;<br>
+}<br>
+<span class="fn">console</span>.<span class="fn">log</span>(leak); <span class="cm">// "I escaped the block!" 😬</span><br>
+<br>
+<span class="cm">// let — block scoped, reassignable</span><br>
+<span class="kw">let</span> score = <span class="num">0</span>;<br>
+score = <span class="num">100</span>; <span class="cm">// ✓ allowed</span><br>
+<br>
+<span class="cm">// const — block scoped, reference locked</span><br>
+<span class="kw">const</span> NAME = <span class="str">"Arjun"</span>;<br>
+<span class="cm">// NAME = "Rahul"; ❌ TypeError</span>
+      </div>
+      <div class="b" style="font-size:12px;font-style:italic;background:#f8f8f8">Think of it: <strong>var</strong> doesn't respect walls. <strong>let</strong> respects walls but lets you change what's inside. <strong>const</strong> locks the label tag itself.</div>
+    </div>
+  </div>
+</div>
+
+<!-- INTERACTIVE VAR/LET/CONST TABLE -->
+<div class="concept-strip">
+  <div class="cs-tag">Quick Reference</div>
+  <div class="cs-title">var vs let vs const</div>
+  <div style="overflow-x:auto">
+    <table class="vtable">
+      <thead>
+        <tr>
+          <th>Keyword</th>
+          <th>Scope</th>
+          <th>Reassign</th>
+          <th>Redeclare</th>
+          <th>Hoisted as</th>
+          <th>Use when</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>var</td>
+          <td><span class="warn">Function 🚨</span></td>
+          <td><span class="yes">✓ Yes</span></td>
+          <td><span class="yes">✓ Yes</span></td>
+          <td><span class="warn">undefined</span></td>
+          <td><span class="no">Avoid it.</span></td>
+        </tr>
+        <tr>
+          <td>let</td>
+          <td><span class="yes">Block ✓</span></td>
+          <td><span class="yes">✓ Yes</span></td>
+          <td><span class="no">✗ No</span></td>
+          <td><span class="tdz">TDZ ⚡</span></td>
+          <td style="color:#000000;">Counters, loops, anything that changes.</td>
+        </tr>
+        <tr>
+          <td>const</td>
+          <td><span class="yes">Block ✓</span></td>
+          <td><span class="no">✗ No</span></td>
+          <td><span class="no">✗ No</span></td>
+          <td><span class="tdz">TDZ ⚡</span></td>
+          <td style="color:#000000;">Default choice. Everything that shouldn't change.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div style="margin-top:12px;font-size:12px;color:#888;font-weight:700">TDZ = Temporal Dead Zone — the variable exists but accessing it before the declaration line throws a ReferenceError.</div>
+</div>
+
+<!-- ════════════════════════════
+     SCENE 5 — DATA TYPES
+════════════════════════════ -->
+<div class="scene-hdr">
+  <span class="sh-num">SCENE 05</span>
+  <span class="sh-title">Data Types — 8 Kinds of Box</span>
+  <span class="sh-loc">📍 The Memory Room</span>
+</div>
+
+<div class="row r1">
+  <div class="panel bg-dark" style="min-height:100px;justify-content:center;align-items:center">
+    <div class="speed"></div>
+    <div class="bigtext yellow" style="text-align:center">The computer stores everything as bytes.<br><span style="color:#fff;font-size:.6em">Types tell it what those bytes MEAN.</span></div>
+  </div>
+</div>
+
+<!-- TYPE CARDS GRID -->
+<div class="type-grid">
+  <div class="type-card">
+    <div class="tc-hdr" style="background:#dbeafe">🔤 <span style="color:#1e40af;font-family:var(--font-comic);letter-spacing:1px">string</span></div>
+    <div class="tc-body">Text. Any characters between quotes.</div>
+    <div class="tc-code"><span style="color:#a5d6ff">let name = "Arjun"</span> ; <span style="color:#a5d6ff">'hello'</span> · <span style="color:#a5d6ff">`hi ${name}`</span></div>
+  </div>
+  <div class="type-card">
+    <div class="tc-hdr" style="background:#dcfce7">🔢 <span style="color:#166534;font-family:var(--font-comic);letter-spacing:1px">number</span></div>
+    <div class="tc-body">Integers AND decimals. No float/int split.</div>
+    <div class="tc-code"><span style="color:#79c0ff">42</span> · <span style="color:#79c0ff">3.14</span> · <span style="color:#79c0ff">NaN</span> · <span style="color:#79c0ff">Infinity</span></div>
+  </div>
+  <div class="type-card">
+    <div class="tc-hdr" style="background:#fef9c3">✅ <span style="color:#854d0e;font-family:var(--font-comic);letter-spacing:1px">boolean</span></div>
+    <div class="tc-body">Only two values. True or false. That's it.</div>
+    <div class="tc-code"><span style="color:#ff7b72">true</span> · <span style="color:#ff7b72">false</span></div>
+  </div>
+  <div class="type-card">
+    <div class="tc-hdr" style="background:#f3f4f6">👻 <span style="color:#374151;font-family:var(--font-comic);letter-spacing:1px">undefined</span></div>
+    <div class="tc-body">Declared, but nothing assigned. JS's "empty by default."</div>
+    <div class="tc-code"><span style="color:#ff7b72">let</span> x; <span style="color:#8b949e">// undefined</span></div>
+  </div>
+  <div class="type-card">
+    <div class="tc-hdr" style="background:#fee2e2">🚫 <span style="color:#991b1b;font-family:var(--font-comic);letter-spacing:1px">null</span></div>
+    <div class="tc-body">Intentionally empty. <em>You</em> set this. "Nothing here on purpose."</div>
+    <div class="tc-code"><span style="color:#ff7b72">let</span> data = <span style="color:#ff7b72">null</span>;</div>
+  </div>
+  <div class="type-card">
+    <div class="tc-hdr" style="background:#ede9fe">🔮 <span style="color:#5b21b6;font-family:var(--font-comic);letter-spacing:1px">symbol</span></div>
+    <div class="tc-body">Unique identifier. Never equal to anything else. Even itself.</div>
+    <div class="tc-code"><span style="color:#d2a8ff">Symbol</span>(<span style="color:#a5d6ff">'id'</span>)</div>
+  </div>
+  <div class="type-card">
+    <div class="tc-hdr" style="background:#cffafe">🦕 <span style="color:#155e75;font-family:var(--font-comic);letter-spacing:1px">bigint</span></div>
+    <div class="tc-body">Numbers too large for number type. Add n suffix.</div>
+    <div class="tc-code"><span style="color:#79c0ff">9007199254740991n</span></div>
+  </div>
+  <div class="type-card">
+    <div class="tc-hdr" style="background:#fff7ed">📦 <span style="color:#9a3412;font-family:var(--font-comic);letter-spacing:1px">object</span></div>
+    <div class="tc-body">Key-value pairs. Arrays, functions — all objects under the hood.</div>
+    <div class="tc-code">{ name: <span style="color:#a5d6ff">"Arjun"</span> }</div>
+  </div>
+</div>
+
+<!-- THE NULL BUG PANEL -->
+<div class="row r2">
+  <div class="panel bg-red" style="min-height:200px">
+    <div class="slabel">THE FAMOUS BUG</div>
+    <div class="bubbles">
+      <div class="caption red" style="margin-bottom:10px">⚠️ The typeof null bug</div>
+      <div class="code-blk" style="font-size:11px">
+<span class="fn">typeof</span> <span class="kw">null</span> <span class="cm">// → "object"</span><br>
+<span class="cm">// ← WAIT WHAT?!</span>
+      </div>
+      <div class="b" style="margin-top:10px;font-size:12px">null is NOT an object. This is a 30-year-old bug in JS that can never be fixed — too many sites would break.</div>
+    </div>
+  </div>
+  <div class="panel bg-yellow" style="min-height:200px;justify-content:center;align-items:center">
+    <div class="halftone"></div>
+    <div style="text-align:center;position:relative;z-index:2;padding:14px">
+      <div class="bigtext ink" style="font-size:2.5rem">null ≠ object</div>
+      <div style="font-size:12px;font-weight:700;color:#666;margin-top:10px;line-height:1.6">It's a primitive. Always was.<br>typeof lies here.<br>Always check <code style="background:#fff9;padding:2px 6px;border-radius:3px;font-family:var(--font-code);font-size:11px">=== null</code> directly.</div>
+    </div>
+  </div>
+</div>
+
+<!-- INTERACTIVE TYPEOF EXPLORER -->
+<div class="typeof-section">
+  <div class="typeof-title">typeof Explorer</div>
+  <div class="typeof-sub">Type any value — see its type, truthiness, and what it converts to.</div>
+  <div class="typeof-grid">
+    <div class="tf-panel">
+      <div class="tf-hdr">
+        <span>Type any JS value</span>
+        <div class="tf-dots">
+          <div class="tf-dot" style="background:#ff5f57"></div>
+          <div class="tf-dot" style="background:#febc2e"></div>
+          <div class="tf-dot" style="background:#28c840"></div>
+        </div>
+      </div>
+      <div class="tf-body">
+        <input class="tf-input" id="typeofInput" value="null" spellcheck="false" oninput="runTypeof()">
+        <div style="font-size:11px;font-weight:800;color:#888;margin-bottom:4px;letter-spacing:1px;text-transform:uppercase">Quick picks</div>
+        <div class="tf-chips" id="typeofChips">
+          <span class="chip" onclick="setChip(this,'null')">null</span>
+<span class="chip" onclick="setChip(this,'undefined')">undefined</span>
+<span class="chip" onclick="setChip(this,'42')">42</span>
+<span class="chip" onclick="setChip(this,'&quot;hello&quot;')">"hello"</span>
+<span class="chip" onclick="setChip(this,'true')">true</span>
+<span class="chip" onclick="setChip(this,'[]')">[]</span>
+<span class="chip" onclick="setChip(this,'({})')">{ }</span>
+<span class="chip" onclick="setChip(this,'NaN')">NaN</span>
+<span class="chip" onclick="setChip(this,'0')">0</span>
+<span class="chip" onclick="setChip(this,'&quot;&quot;')">""</span>
+<span class="chip" onclick="setChip(this,'Symbol()')">Symbol()</span>
+<span class="chip" onclick="setChip(this,'9n')">9n</span>
+        </div>
+      </div>
+    </div>
+    <div class="tf-panel">
+      <div class="tf-hdr"><span>Results</span></div>
+      <div class="tf-body">
+        <div class="tf-result" id="typeofResult">
+          <span style="color:#484f58">// type something on the left</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     SCENE 6 — VALUE vs REFERENCE
+════════════════════════════ -->
+<div class="scene-hdr">
+  <span class="sh-num">SCENE 06</span>
+  <span class="sh-title">Value vs Reference — The Big Brain Moment</span>
+  <span class="sh-loc">📍 Memory Land</span>
+</div>
+
+<div class="row r1">
+  <div class="panel bg-purple" style="min-height:100px;justify-content:center;align-items:center">
+    <div class="bigtext purple" style="text-align:center">Primitives copy the VALUE.<br><span style="font-size:.6em;color:var(--ink)">Objects copy the ADDRESS.</span></div>
+  </div>
+</div>
+
+<div class="dlg-strip" style="background:#f5f0ff">
+  <div class="dlg">
+    <div class="dlg-who">ARJUN</div>
+    <div class="dlg-b">So when I do <code style="font-family:var(--font-code);background:#ede9fe;padding:2px 6px;border-radius:3px">let b = a</code> — it depends on what <code style="font-family:var(--font-code);background:#ede9fe;padding:2px 6px;border-radius:3px">a</code> is?</div>
+  </div>
+  <div class="dlg r">
+    <div class="dlg-who">CONCEPT</div>
+    <div class="dlg-b" style="background:var(--purple);border-color:var(--purple)">If a is a number or string: b gets a fresh copy. They're independent.<br>If a is an object: b gets the same address. Touch b, you touch a.</div>
+  </div>
+</div>
+
+<!-- INTERACTIVE BY VALUE / BY REFERENCE -->
+<div class="byval-section">
+  <div class="byval-title">Value vs Reference</div>
+  <div class="byval-sub">Step through both examples — watch what changes in memory.</div>
+  <div class="byval-grid">
+    <!-- BY VALUE -->
+    <div class="bv-box">
+      <div class="bv-hdr" style="background:#dcfce7;color:#166534">By Value (Primitives)</div>
+      <div class="bv-body">
+        <div class="code-blk" style="font-size:11px">
+<span class="kw">let</span> a = <span class="num">10</span>;<br>
+<span class="kw">let</span> b = a; <span class="cm">// copy</span><br>
+b = <span class="num" id="bval-new">20</span>;
+        </div>
+        <div style="font-size:11px;font-weight:800;color:#888;margin-bottom:4px;letter-spacing:1px;text-transform:uppercase">Memory</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div class="mem-row">
+            <div class="mem-addr">0x1A00</div>
+            <div style="font-family:var(--font-code);font-size:12px;font-weight:800;min-width:24px">a</div>
+            <div class="mem-val" id="bv-a">10</div>
+          </div>
+          <div class="mem-row">
+            <div class="mem-addr">0x1A04</div>
+            <div style="font-family:var(--font-code);font-size:12px;font-weight:800;min-width:24px">b</div>
+            <div class="mem-val" id="bv-b">10</div>
+          </div>
+        </div>
+        <div class="bv-note" id="bv-note">Both a and b start with the same value 10. They're stored at different addresses.</div>
+        <button class="bv-run" onclick="stepValue()">Step Through ▶</button>
+        <div style="font-size:11px;font-weight:800;color:#888;text-align:center" id="bv-step">Step 1 of 2</div>
+      </div>
+    </div>
+    <!-- BY REFERENCE -->
+    <div class="bv-box">
+      <div class="bv-hdr" style="background:#ede9fe;color:#5b21b6">By Reference (Objects)</div>
+      <div class="bv-body">
+        <div class="code-blk" style="font-size:11px">
+<span class="kw">let</span> obj1 = { val: <span class="num">10</span> };<br>
+<span class="kw">let</span> obj2 = obj1; <span class="cm">// ref copy</span><br>
+obj2.val = <span class="num">99</span>;
+        </div>
+        <div style="font-size:11px;font-weight:800;color:#888;margin-bottom:4px;letter-spacing:1px;text-transform:uppercase">Memory</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div class="mem-row">
+            <div class="mem-addr">0x2A00</div>
+            <div style="font-family:var(--font-code);font-size:12px;font-weight:800;min-width:44px">obj1</div>
+            <div class="mem-ptr" id="rv-ptr1">→ 0xFF01</div>
+          </div>
+          <div class="mem-row">
+            <div class="mem-addr">0x2A08</div>
+            <div style="font-family:var(--font-code);font-size:12px;font-weight:800;min-width:44px">obj2</div>
+            <div class="mem-ptr" id="rv-ptr2">→ ???</div>
+          </div>
+          <div style="height:1px;background:#ddd;margin:4px 0"></div>
+          <div class="mem-row">
+            <div class="mem-addr" style="background:#ede9fe;border-color:#a78bfa">0xFF01</div>
+            <div style="font-family:var(--font-code);font-size:12px;font-weight:800;min-width:44px;color:var(--purple)">{ val }</div>
+            <div class="mem-val" id="rv-obj" style="border-color:var(--purple)">10</div>
+          </div>
+        </div>
+        <div class="bv-note" id="rv-note" style="border-color:var(--purple);background:#ede9fe">obj1 holds an address (0xFF01). The actual object lives there.</div>
+        <button class="bv-run" onclick="stepRef()" style="background:var(--purple)">Step Through ▶</button>
+        <div style="font-size:11px;font-weight:800;color:#888;text-align:center" id="rv-step">Step 1 of 2</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     SUMMARY
+════════════════════════════ -->
+<div class="summary">
+  <div class="sum-title">📓 Chapter 2 — Summary</div>
+  <div class="notebook">
+    <div class="nb-hdr">📖 Arjun's Notes — Morning After</div>
+    <div class="nb-body">
+      <div class="nb-line">
+        <div class="nb-icon">🧱</div>
+        <div class="nb-text"><span class="yl">HTML</span> = structure. <span class="bl">CSS</span> = style. <strong>JS</strong> = behaviour. A house without electricity is just a pretty shell.</div>
+      </div>
+      <div class="nb-line red">
+        <div class="nb-icon">📦</div>
+        <div class="nb-text">Variables are named boxes in RAM. Use <strong>const</strong> by default. <strong>let</strong> when you need to reassign. Never use <strong>var</strong> — it leaks out of blocks.</div>
+      </div>
+      <div class="nb-line blue">
+        <div class="nb-icon">🏷️</div>
+        <div class="nb-text">7 primitives: <strong>string, number, boolean, undefined, null, symbol, bigint</strong>. 1 non-primitive: <strong>object</strong> (includes arrays and functions).</div>
+      </div>
+      <div class="nb-line purple">
+        <div class="nb-icon">🐛</div>
+        <div class="nb-text"><strong>typeof null → "object"</strong> is a 30-year-old bug. null is a primitive. Always check <code style="background:#f5f0ff;padding:2px 5px;border-radius:3px;font-family:var(--font-code);font-size:11px">value === null</code> directly.</div>
+      </div>
+      <div class="nb-line green">
+        <div class="nb-icon">🧠</div>
+        <div class="nb-text">Primitives copy by <strong>value</strong> — independent. Objects copy by <strong>reference</strong> — same address, shared data. Change one, both feel it.</div>
+      </div>
+      <div class="nb-line">
+  <div class="nb-icon">⚖️</div>
+  <div class="nb-text">
+    <strong>Primitive vs Non-Primitive</strong>
+    <div style="overflow-x:auto;margin-top:8px">
+      <table class="vtable">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>Primitive 🧩</th>
+            <th>Non-Primitive 📦</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Types</td>
+            <td>string, number, boolean, undefined, null, symbol, bigint</td>
+            <td>object (arrays, functions, dates, etc.)</td>
+          </tr>
+          <tr>
+            <td>Stored</td>
+            <td>Actual value</td>
+            <td>Memory address (reference)</td>
+          </tr>
+          <tr>
+            <td>Copy</td>
+            <td>By value</td>
+            <td>By reference</td>
+          </tr>
+          <tr>
+            <td>Mutable</td>
+            <td>No</td>
+            <td>Yes</td>
+          </tr>
+          <tr>
+            <td>Example</td>
+            <td><code>let a = 10</code></td>
+            <td><code>let obj = {x:10}</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NEXT CHAPTER -->
+<div class="next-ch">
+  <div class="nc-label">Up Next</div>
+  <div class="nc-title">Chapter 3: Functions & Scope</div>
+  <p style="font-size:13px;color:#666;font-weight:700;margin-bottom:1.5rem;line-height:1.6">
+    Arjun keeps writing the same code. Copy. Paste. Again. There has to be a better way.  Operator and Data type 👀
+  </p>
+  <a class="nc-btn" href="thirdpage.html">Chapter 3 →</a>
+</div>
+
+</div><!-- /webtoon -->
+
+<script>
+// Stars on cover
+(function(){
+  const c = document.getElementById('stars');
+  for(let i=0;i<80;i++){
+    const s=document.createElement('div');
+    s.className='star';
+    s.style.left=Math.random()*100+'%';
+    s.style.top=Math.random()*100+'%';
+    s.style.setProperty('--d',Math.random()*3+2+'s');
+    s.style.setProperty('--delay',Math.random()*3+'s');
+    c.appendChild(s);
+  }
+})();
+
+// TYPEOF EXPLORER
+function setChip(el, val){
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('typeofInput').value = val;
+  runTypeof();
+}
+function runTypeof(){
+  const raw = document.getElementById('typeofInput').value.trim();
+  const out = document.getElementById('typeofResult');
+  let val, typeStr, boolStr, numStr, strStr, isNull=false, note='';
+  try {
+    val = eval(raw);
+    typeStr = typeof val;
+    boolStr = Boolean(val);
+    isNull = val === null;
+    if(isNull){
+      note = '<span style="color:#ff7b72">⚠️ typeof null → "object" is a known bug. null is actually a primitive.</span>';
+      numStr = '0';
+      strStr = '"null"';
+    } else {
+      try{ numStr = String(Number(val)); } catch{ numStr='NaN'; }
+      try{ strStr = '"'+String(val)+'"'; } catch{ strStr='[error]'; }
+    }
+    out.innerHTML =
+      line('typeof', '"'+typeStr+'"', '#d2a8ff') +
+      line('Boolean()', boolStr?'<span style="color:#3fb950">true</span>':'<span style="color:#ff7b72">false</span>','') +
+      line('Number()', numStr, '#79c0ff') +
+      line('String()', strStr, '#a5d6ff') +
+      (isNull ? '<br>'+note : '') +
+      (typeStr==='object'&&!isNull ? '<br><span style="color:#ffa657">📌 Stored by reference in memory</span>' : '') +
+      (typeStr==='number'&&isNaN(val) ? '<br><span style="color:#ff7b72">⚠️ NaN is typeof "number" — also a famous quirk</span>' : '');
+  } catch(e){
+    out.innerHTML = '<span style="color:#ff7b72">❌ Invalid JS expression</span>';
+  }
+}
+function line(label, val, color){
+  return `<div style="display:flex;gap:8px;margin-bottom:2px"><span style="color:#888;min-width:80px">${label}</span><span style="color:${color||'#e6edf3'}">${val}</span></div>`;
+}
+runTypeof();
+
+// BY VALUE STEPPER
+let bvStep = 0;
+function stepValue(){
+  bvStep = (bvStep+1) % 3;
+  const a = document.getElementById('bv-a');
+  const b = document.getElementById('bv-b');
+  const note = document.getElementById('bv-note');
+  const stepEl = document.getElementById('bv-step');
+  if(bvStep===1){
+    b.textContent='10'; b.classList.remove('changed');
+    note.textContent = 'let b = a → value 10 is COPIED into b. Two separate boxes.';
+    stepEl.textContent='Step 1 of 2';
+  } else if(bvStep===2){
+    b.textContent='20'; b.classList.add('changed');
+    note.textContent = 'b = 20 → only b changes. a still holds 10. They\'re independent.';
+    stepEl.textContent='Step 2 of 2 ✓';
+    setTimeout(()=>b.classList.remove('changed'),400);
+  } else {
+    b.textContent='10'; a.textContent='10'; b.classList.remove('changed');
+    note.textContent = 'Reset. Both a and b start with the same value 10.';
+    stepEl.textContent='Step 1 of 2';
+  }
+}
+
+// BY REFERENCE STEPPER
+let rvStep = 0;
+function stepRef(){
+  rvStep = (rvStep+1) % 3;
+  const ptr2 = document.getElementById('rv-ptr2');
+  const obj = document.getElementById('rv-obj');
+  const note = document.getElementById('rv-note');
+  const stepEl = document.getElementById('rv-step');
+  if(rvStep===1){
+    ptr2.textContent='→ 0xFF01'; obj.textContent='10'; obj.classList.remove('changed');
+    note.textContent = 'let obj2 = obj1 → the ADDRESS 0xFF01 is copied. Both point to the same object.';
+    stepEl.textContent='Step 1 of 2';
+  } else if(rvStep===2){
+    obj.textContent='99'; obj.classList.add('changed');
+    note.textContent = 'obj2.val = 99 → modifies the object at 0xFF01. obj1.val is also 99 now — same address!';
+    stepEl.textContent='Step 2 of 2 ⚠️';
+    setTimeout(()=>obj.classList.remove('changed'),400);
+  } else {
+    ptr2.textContent='→ ???'; obj.textContent='10'; obj.classList.remove('changed');
+    note.textContent = 'Reset. obj1 holds address 0xFF01. obj2 not yet assigned.';
+    stepEl.textContent='Step 1 of 2';
+  }
+}
+</script>
+<script>
+(function(){
+
+var ALL_CHAPTERS = [
+  { num:1, title:"Why JavaScript Exists",  file:"firstpage.html",      done:true  },
+  { num:2, title:"Variables & Data Types", file:"secondpage.html", done:true  },
+  { num:3, title:"Loop, Number, math and String",              file:"thirdpage.html",        done:true },
+  { num:4, title:"Arrays & Objects",       file:"fouthpage.html",        done:true },
+  { num:5, title:"Soon...",               file:"ch5.html",        done:false },
+  { num:6, title:"Soon...",    file:"ch6.html",        done:false },
+  { num:7, title:"Soon...",      file:"ch7.html",        done:false },
+  { num:8, title:"Soon...",          file:"ch8.html",        done:false },
+];
+
+/* ── styles ── */
+var s = document.createElement('style');
+s.textContent =
+  ':root{--tw:264px;--ta:#e63329;--ty:#f5c842}'
+
+  /* toggle tab */
+  +'#jtoc-btn{position:fixed;top:50%;left:0;transform:translateY(-50%);z-index:9999;'
+  +'background:var(--ta);color:#fff;border:none;border-radius:0 5px 5px 0;'
+  +'padding:13px 7px;cursor:pointer;writing-mode:vertical-lr;white-space:nowrap;'
+  +'font-family:"Bangers",cursive;font-size:10px;letter-spacing:2px;'
+  +'box-shadow:2px 0 10px rgba(0,0,0,.5);transition:left .28s ease;user-select:none}'
+  +'body.jtoc-open #jtoc-btn{left:var(--tw)}'
+  +'#jtoc-arr{writing-mode:horizontal-tb;display:block;font-size:12px;'
+  +'transition:transform .28s ease;margin-bottom:4px}'
+  +'body.jtoc-open #jtoc-arr{transform:rotate(180deg)}'
+
+  /* panel */
+  +'#jtoc-panel{position:fixed;top:0;left:calc(-1*var(--tw) - 4px);width:var(--tw);'
+  +'height:100vh;background:#0e0e0e;border-right:2px solid #1f1f1f;z-index:9998;'
+  +'display:flex;flex-direction:column;overflow:hidden;'
+  +'box-shadow:4px 0 24px rgba(0,0,0,.8);transition:left .28s ease}'
+  +'body.jtoc-open #jtoc-panel{left:0}'
+
+  /* overlay */
+  +'#jtoc-ov{display:none;position:fixed;inset:0;z-index:9997;background:rgba(0,0,0,.4)}'
+  +'body.jtoc-open #jtoc-ov{display:block}'
+
+  /* header */
+  +'.jt-hd{background:#080808;border-bottom:2px solid var(--ta);padding:13px 15px;flex-shrink:0}'
+  +'.jt-logo{font-family:"Bangers",cursive;font-size:1.3rem;color:#fff;letter-spacing:3px}'
+  +'.jt-logo b{color:var(--ta);font-weight:400}'
+  +'.jt-sub{font-size:9px;font-weight:800;color:#383838;letter-spacing:2px;text-transform:uppercase;margin-top:2px}'
+
+  /* scroll area */
+  +'.jt-body{flex:1;overflow-y:auto;padding:8px 0}'
+  +'.jt-body::-webkit-scrollbar{width:2px}'
+  +'.jt-body::-webkit-scrollbar-thumb{background:#252525}'
+
+  /* section label */
+  +'.jt-lbl{font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;'
+  +'color:#2c2c2c;padding:10px 15px 3px}'
+
+  /* chapter row — DONE */
+  +'.jt-ch{display:flex;align-items:center;gap:9px;padding:8px 15px;'
+  +'text-decoration:none;color:#a0a0a0;border-left:3px solid transparent;'
+  +'transition:background .12s}'
+  +'.jt-ch:hover{background:#161616}'
+  +'.jt-ch.jt-cur{background:#180a0a;border-left-color:var(--ta);color:#fff}'
+  +'.jt-ch-n{font-family:"Bangers",cursive;font-size:.95rem;color:var(--ta);'
+  +'min-width:24px;letter-spacing:1px}'
+  +'.jt-ch.jt-cur .jt-ch-n{color:var(--ty)}'
+  +'.jt-ch-name{font-size:12px;font-weight:700;flex:1;line-height:1.3}'
+
+  /* chapter row — LOCKED (not done) */
+  +'.jt-lock{display:flex;align-items:center;gap:9px;padding:8px 15px;'
+  +'border-left:3px solid transparent;cursor:default;opacity:1}'
+  +'.jt-lock-n{font-family:"Bangers",cursive;font-size:.95rem;color:#2a2a2a;min-width:24px;letter-spacing:1px}'
+  +'.jt-lock-name{font-size:12px;font-weight:700;flex:1;line-height:1.3;color:#2e2e2e}'
+
+  /* divider */
+  +'.jt-div{height:1px;background:#181818;margin:7px 15px}'
+
+  /* scene rows */
+  +'.jt-sc{display:flex;align-items:center;gap:8px;padding:5px 15px 5px 20px;'
+  +'cursor:pointer;border-left:3px solid transparent;color:#373737;transition:background .12s}'
+  +'.jt-sc:hover{background:#141414;color:#777}'
+  +'.jt-sc.jt-act{border-left-color:var(--ty);color:#ddd;background:#111008}'
+  +'.jt-sc-dot{width:4px;height:4px;border-radius:50%;background:currentColor;flex-shrink:0}'
+  +'.jt-sc.jt-act .jt-sc-dot{background:var(--ty)}'
+  +'.jt-sc-n{font-family:"Bangers",cursive;font-size:.8rem;min-width:32px;'
+  +'letter-spacing:1px;color:inherit}'
+  +'.jt-sc.jt-act .jt-sc-n{color:var(--ty)}'
+  +'.jt-sc-lbl{font-size:11px;font-weight:700;line-height:1.3}'
+
+  /* progress footer */
+  +'.jt-ft{padding:11px 15px;border-top:1px solid #161616;flex-shrink:0;background:#080808}'
+  +'.jt-ft-row{display:flex;justify-content:space-between;font-size:9px;font-weight:800;'
+  +'letter-spacing:1px;text-transform:uppercase;color:#2a2a2a;margin-bottom:5px}'
+  +'.jt-bar{height:2px;background:#1a1a1a;border-radius:1px;overflow:hidden}'
+  +'.jt-fill{height:100%;background:var(--ta);border-radius:1px;transition:width .2s;width:0%}'
+
+  /* push webtoon right on big screens */
+  +'@media(min-width:1100px){.webtoon{transition:margin-left .28s ease}'
+  +'body.jtoc-open .webtoon{margin-left:calc(var(--tw)+16px)}}'
+  +'@media(max-width:600px){:root{--tw:224px}}';
+document.head.appendChild(s);
+
+/* ── detect current page ── */
+var curFile = location.pathname.split('/').pop() || 'index.html';
+if(curFile === '') curFile = 'index.html';
+var curIdx = ALL_CHAPTERS.findIndex(function(c){ return c.file === curFile; });
+var curCh  = ALL_CHAPTERS[curIdx] || {num:'?'};
+
+/* ── build chapter list html ── */
+var chHTML = ALL_CHAPTERS.map(function(ch, i){
+  var isCur = (i === curIdx);
+  if(ch.done){
+    /* clickable */
+    var href = isCur ? '#' : ch.file;
+    return '<a class="jt-ch'+(isCur?' jt-cur':'')+'" href="'+href+'"'
+      +(isCur?' onclick="return false"':'')+' tabindex="0">'
+      +'<span class="jt-ch-n">'+ch.num+'</span>'
+      +'<span class="jt-ch-name">'+ch.title+'</span>'
+      +'</a>';
+  } else {
+    /* locked — looks dim, no click, no badge */
+    return '<div class="jt-lock">'
+      +'<span class="jt-lock-n">'+ch.num+'</span>'
+      +'<span class="jt-lock-name">'+ch.title+'</span>'
+      +'</div>';
+  }
+}).join('');
+
+/* ── build DOM ── */
+var panel = document.createElement('div');
+panel.id = 'jtoc-panel';
+panel.innerHTML =
+  '<div class="jt-hd">'
+  +'<div class="jt-logo">JS<b>TORY</b></div>'
+  +'<div class="jt-sub">Table of Contents</div>'
+  +'</div>'
+  +'<div class="jt-body">'
+  +'<div class="jt-lbl">Chapters</div>'
+  +chHTML
+  +'<div class="jt-div"></div>'
+  +'<div class="jt-lbl">This Chapter</div>'
+  +'<div id="jt-sc-list"></div>'
+  +'</div>'
+  +'<div class="jt-ft">'
+  +'<div class="jt-ft-row"><span>Chapter '+curCh.num+' Progress</span><span id="jt-pct">0%</span></div>'
+  +'<div class="jt-bar"><div class="jt-fill" id="jt-fill"></div></div>'
+  +'</div>';
+
+var btn = document.createElement('button');
+btn.id = 'jtoc-btn';
+btn.setAttribute('aria-label','Toggle Table of Contents');
+btn.innerHTML = '<span id="jtoc-arr">◀</span>CONTENTS';
+
+var ov = document.createElement('div');
+ov.id = 'jtoc-ov';
+
+document.body.appendChild(panel);
+document.body.appendChild(btn);
+document.body.appendChild(ov);
+
+/* ── open / close ── */
+function open(){ document.body.classList.add('jtoc-open'); }
+function close(){ document.body.classList.remove('jtoc-open'); }
+btn.onclick = function(){ document.body.classList.toggle('jtoc-open'); };
+ov.onclick  = close;
+
+/* ── scroll to scene ── */
+window.jtocGo = function(id){
+  var el = document.getElementById(id);
+  if(!el) return;
+  /* topbar height: look for .topbar or sticky element, fallback 50 */
+  var tb = document.querySelector('.topbar');
+  var offset = tb ? tb.offsetHeight + 6 : 56;
+  var y = el.getBoundingClientRect().top + window.scrollY - offset;
+  window.scrollTo({top: y, behavior:'smooth'});
+  if(window.innerWidth < 900) close();
+};
+
+/* ── build scene list from .scene-hdr ── */
+var secs = [];
+function buildSections(){
+  var hdrs = document.querySelectorAll('.scene-hdr');
+  var list = document.getElementById('jt-sc-list');
+  if(!list) return;
+  list.innerHTML = '';
+  secs = [];
+  hdrs.forEach(function(hdr, i){
+    var numEl  = hdr.querySelector('.sh-num');
+    var lblEl  = hdr.querySelector('.sh-title');
+    var num = numEl  ? numEl.textContent.trim()  : ('S'+(i+1));
+    var lbl = lblEl ? lblEl.textContent.trim() : ('Scene '+(i+1));
+    var id  = 'jtoc-s'+i;
+    hdr.id  = id;
+    secs.push({id:id, num:num, lbl:lbl});
+    var div = document.createElement('div');
+    div.className  = 'jt-sc';
+    div.dataset.id = id;
+    div.innerHTML  =
+      '<span class="jt-sc-n">'+num+'</span>'
+      +'<div class="jt-sc-dot"></div>'
+      +'<span class="jt-sc-lbl">'+lbl+'</span>';
+    div.onclick = function(){ jtocGo(id); };
+    list.appendChild(div);
+  });
+}
+
+/* ── active highlight + progress ──
+   Key fix: track which section is "above the fold".
+   Walk forward; last one whose top <= threshold wins.
+   If none qualifies (user scrolled above first section) → highlight first. */
+function tick(){
+  if(!secs.length) return;
+
+  var THRESH = 70; /* px from top — adjust if topbar is taller */
+  var active = null;
+
+  for(var i = 0; i < secs.length; i++){
+    var el = document.getElementById(secs[i].id);
+    if(!el) continue;
+    if(el.getBoundingClientRect().top <= THRESH){
+      active = secs[i]; /* keep overwriting — last one wins */
+    }
+  }
+  /* if scrolled above first section, highlight first */
+  if(!active) active = secs[0];
+
+  document.querySelectorAll('.jt-sc').forEach(function(el){
+    el.classList.toggle('jt-act', el.dataset.id === active.id);
+  });
+
+  /* scroll active item into view inside the panel */
+  var actEl = panel.querySelector('.jt-sc.jt-act');
+  if(actEl){
+    var body = panel.querySelector('.jt-body');
+    var elTop  = actEl.offsetTop;
+    var elBot  = elTop + actEl.offsetHeight;
+    var visTop = body.scrollTop;
+    var visBot = visTop + body.clientHeight;
+    if(elTop < visTop + 20)        body.scrollTop = elTop - 20;
+    else if(elBot > visBot - 20)   body.scrollTop = elBot - body.clientHeight + 20;
+  }
+
+  /* progress */
+  var total = document.documentElement.scrollHeight - window.innerHeight;
+  var pct = total > 0 ? Math.round(window.scrollY / total * 100) : 0;
+  document.getElementById('jt-fill').style.width = pct+'%';
+  document.getElementById('jt-pct').textContent  = pct+'%';
+}
+
+/* ── init ── */
+function init(){
+  buildSections();
+  tick();
+  window.addEventListener('scroll', tick, {passive:true});
+}
+
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+
+})();
+</script>
+</body>
+</html>

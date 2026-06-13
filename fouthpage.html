@@ -1,0 +1,1798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JStory — Chapter 4</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --ink:#0f0f0f;
+  --paper:#faf7f2;
+  --red:#e63329;
+  --yellow:#f5c842;
+  --blue:#1a6fdb;
+  --green:#2aaa5a;
+  --purple:#7c3aed;
+  --orange:#f97316;
+  --pink:#db2777;
+  --teal:#0d9488;
+  --panel-shadow:4px 4px 0 var(--ink);
+  --font-comic:'Bangers',cursive;
+  --font-body:'Nunito',sans-serif;
+  --font-code:'JetBrains Mono',monospace;
+}
+body{background:var(--paper);font-family:var(--font-body);color:var(--ink);overflow-x:hidden}
+
+/* ── TOPBAR ── */
+.topbar{position:sticky;top:0;z-index:100;background:var(--ink);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;height:46px;border-bottom:3px solid var(--pink)}
+.tb-logo{font-family:var(--font-comic);font-size:1.5rem;color:#fff;letter-spacing:3px}.tb-logo span{color:var(--pink)}
+.tb-ch{font-size:11px;font-weight:800;color:#888;letter-spacing:2px;text-transform:uppercase}
+.tb-back{font-size:11px;font-weight:800;color:#555;letter-spacing:1px;text-decoration:none;border:1.5px solid #333;padding:3px 10px;border-radius:3px;transition:all .15s}
+.tb-back:hover{color:#fff;border-color:#fff}
+
+/* ── COVER ── */
+.cover{min-height:100vh;background:linear-gradient(160deg,#1a0a2e 0%,#0d1a2e 60%,#0a1a0a 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:3rem;position:relative;overflow:hidden}
+.cover-bg{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle at 20% 80%,rgba(219,39,119,.15) 0%,transparent 50%),radial-gradient(circle at 80% 20%,rgba(245,200,66,.1) 0%,transparent 50%)}
+.cover-ch{font-size:12px;font-weight:800;letter-spacing:6px;color:var(--pink);margin-bottom:.5rem;text-transform:uppercase}
+.cover-title{font-family:var(--font-comic);font-size:clamp(2.8rem,9vw,6.5rem);color:#fff;line-height:.9;margin-bottom:1.5rem;letter-spacing:2px}
+.cover-title em{color:var(--yellow);font-style:normal}
+.cover-title .pk{color:var(--pink)}
+.cover-sub{font-size:1rem;color:#aaa;max-width:500px;line-height:1.7;margin-bottom:1.5rem}
+.cover-tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:3rem}
+.cover-tag{font-size:11px;font-weight:800;letter-spacing:1px;padding:4px 12px;border-radius:3px;text-transform:uppercase}
+.cover-scroll{color:#444;font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;animation:bounce 2s infinite;display:flex;flex-direction:column;align-items:center;gap:6px}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+
+/* ── WEBTOON ── */
+.webtoon{max-width:780px;margin:0 auto;border-left:3px solid var(--ink);border-right:3px solid var(--ink)}
+
+/* ── SCENE HEADER ── */
+.scene-hdr{display:flex;align-items:center;gap:12px;padding:14px 20px;background:var(--ink);color:#fff;border-bottom:2px solid var(--pink);position:sticky;top:46px;z-index:50}
+.sh-num{font-family:var(--font-comic);font-size:1.3rem;color:var(--pink);letter-spacing:2px}
+.sh-title{font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;flex:1}
+.sh-loc{font-size:10px;color:#666;font-weight:800;letter-spacing:1px;text-transform:uppercase}
+
+/* ── GRID ROWS ── */
+.row{display:grid;border-bottom:3px solid var(--ink)}
+.r1{grid-template-columns:1fr}
+.r2{grid-template-columns:1fr 1fr}
+.r3{grid-template-columns:2fr 1fr}
+.r3r{grid-template-columns:1fr 2fr}
+.r13{grid-template-columns:1fr 3fr}
+
+/* ── PANELS ── */
+.panel{border-right:3px solid var(--ink);min-height:200px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:14px}
+.panel:last-child{border-right:none}
+
+/* panel backgrounds */
+.bg-room{background:#dde8ff}.bg-room2{background:#ffd6e8}
+.bg-night{background:#080820}.bg-dawn{background:#1a0a2e}
+.bg-morning{background:#fff9e6}.bg-afternoon{background:#fff3e0}
+.bg-dark{background:#0d0d1a}.bg-flash{background:#fffbe6}
+.bg-white{background:#fff}.bg-code{background:#0d1117}
+.bg-green{background:#e8f5e9}.bg-red{background:#fff0f0}
+.bg-yellow{background:#fffde7}.bg-purple{background:#f5f0ff}
+.bg-orange{background:#fff7ed}.bg-gray{background:#f4f4f4}
+.bg-pink{background:#fdf2f8}.bg-teal{background:#f0fdfa}
+.bg-bitcoin{background:#1a1200}
+
+/* textures */
+.speed{position:absolute;inset:0;pointer-events:none;background:repeating-conic-gradient(from 0deg at 50% 130%,rgba(0,0,0,.04) 0deg 2deg,transparent 2deg 5deg)}
+.speed-h{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(90deg,transparent,transparent 34px,rgba(0,0,0,.04) 34px,rgba(0,0,0,.04) 36px)}
+.halftone{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(0,0,0,.07) 1px,transparent 1px);background-size:8px 8px}
+.dots-pink{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(219,39,119,.1) 1px,transparent 1px);background-size:10px 10px}
+
+/* ── SPEECH BUBBLES ── */
+.bubbles{position:relative;z-index:3;display:flex;flex-direction:column;gap:8px}
+.b{border:2.5px solid var(--ink);border-radius:16px;padding:9px 13px;font-size:13px;font-weight:700;line-height:1.5;background:#fff;position:relative;max-width:90%;box-shadow:2px 2px 0 var(--ink)}
+.b::after{content:'';position:absolute;bottom:-13px;left:16px;border:7px solid transparent;border-top-color:var(--ink)}
+.b.thought{border-style:dashed;background:#f0f4ff;font-style:italic}.b.thought::after{display:none}
+.b.right{align-self:flex-end;border-radius:16px 16px 0 16px;background:var(--blue);color:#fff;border-color:var(--blue);box-shadow:2px 2px 0 rgba(0,0,0,.3)}.b.right::after{border-top-color:var(--blue);left:auto;right:16px}
+.b.anjali{align-self:flex-start;background:var(--pink);color:#fff;border-color:var(--pink);box-shadow:2px 2px 0 rgba(219,39,119,.4)}.b.anjali::after{border-top-color:var(--pink)}
+.b.angry{background:var(--red);color:#fff;border-color:var(--red);clip-path:polygon(0 0,100% 0,100% 78%,90% 100%,80% 78%,0 78%);border-radius:4px}.b.angry::after{display:none}
+.b.system{background:var(--ink);color:#7ee787;border-color:#333;font-family:var(--font-code);font-size:11px;border-radius:4px}.b.system::after{display:none}
+.b.yellow{background:var(--yellow);border-color:var(--ink)}.b.yellow::after{border-top-color:var(--ink)}
+.b.think{border-style:dotted;background:#fff;font-style:italic}.b.think::after{display:none}
+.b.small{font-size:11px;padding:7px 11px}
+.who{font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;margin-bottom:3px}
+.who.arjun{color:var(--blue)}.who.anjali{color:var(--pink)}
+
+/* ── LABELS & CAPTIONS ── */
+.slabel{position:absolute;top:10px;left:10px;font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:rgba(0,0,0,.28);z-index:2}
+.slabel.w{color:rgba(255,255,255,.35)}
+.caption{background:var(--yellow);border:2px solid var(--ink);border-radius:4px;padding:8px 12px;font-size:12px;font-weight:800;position:relative;z-index:3;align-self:flex-start;box-shadow:2px 2px 0 var(--ink)}
+.caption.dark{background:var(--ink);color:var(--yellow)}
+.caption.red{background:var(--red);color:#fff;border-color:var(--red)}
+.caption.pink{background:var(--pink);color:#fff;border-color:var(--pink)}
+.tbox{background:#fff;border:2px dashed var(--ink);border-radius:10px;padding:10px;font-size:12px;font-weight:700;line-height:1.6;position:relative;z-index:3;box-shadow:2px 2px 0 #ccc}
+.bigtext{font-family:var(--font-comic);font-size:clamp(2rem,6vw,4.5rem);line-height:.95;letter-spacing:2px;position:relative;z-index:2}
+
+/* ── BANNERS ── */
+.banner{border-top:3px solid var(--ink);border-bottom:3px solid var(--ink);padding:10px 2rem;text-align:center;font-family:var(--font-comic);font-size:1.4rem;letter-spacing:4px}
+.banner.yellow{background:var(--yellow);color:var(--ink)}
+.banner.pink{background:var(--pink);color:#fff;border-color:var(--pink)}
+.banner.dark{background:#080820;color:#fff;border-color:#333}
+.banner.orange{background:var(--orange);color:#fff;border-color:var(--orange)}
+.banner.teal{background:var(--teal);color:#fff;border-color:var(--teal)}
+.banner.bitcoin{background:#f7931a;color:#fff;border-color:#c97610}
+
+/* ── DIALOGUE STRIP ── */
+.dlg-strip{padding:1.5rem 1.5rem;background:var(--paper);border-bottom:3px solid var(--ink);display:flex;flex-direction:column;gap:10px}
+.dlg-strip.pink-bg{background:#fdf2f8}
+.dlg-strip.morning{background:#fff9e6}
+.dlg-strip.dark{background:#080820;border-color:#333}
+.dlg{display:flex;align-items:flex-start;gap:10px}
+.dlg.r{flex-direction:row-reverse}
+.dlg-who{font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#888;min-width:58px;padding-top:5px}
+.dlg.r .dlg-who{text-align:right}
+.dlg-b{background:#fff;border:2px solid var(--ink);border-radius:12px;padding:9px 13px;font-size:13px;font-weight:700;line-height:1.5;box-shadow:2px 2px 0 var(--ink);max-width:480px}
+.dlg.r .dlg-b{background:var(--blue);color:#fff;border-color:var(--blue);box-shadow:2px 2px 0 rgba(0,0,0,.3)}
+.dlg-b.anjali-b{background:var(--pink);color:#fff;border-color:var(--pink);box-shadow:2px 2px 0 rgba(219,39,119,.4)}
+.dlg-b.system-b{background:#0d1117;color:#7ee787;font-family:var(--font-code);font-size:12px;border-color:#333}
+
+/* ── CONCEPT STRIP ── */
+.concept-strip{padding:2rem 1.5rem;background:var(--ink);border-bottom:3px solid var(--pink);color:#fff}
+.cs-tag{font-size:9px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--pink);margin-bottom:.4rem}
+.cs-title{font-family:var(--font-comic);font-size:2rem;letter-spacing:2px;margin-bottom:1.2rem}
+.cs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.cs-item{background:#1e1e1e;border:1.5px solid #333;border-radius:6px;padding:12px}
+.cs-item.pk{border-left:3px solid var(--pink)}.cs-item.ye{border-left:3px solid var(--yellow)}.cs-item.gr{border-left:3px solid var(--green)}.cs-item.bl{border-left:3px solid var(--blue)}.cs-item.or{border-left:3px solid var(--orange)}.cs-item.te{border-left:3px solid var(--teal)}
+.cs-item-t{font-size:12px;font-weight:800;margin-bottom:3px}
+.cs-item-t.pk{color:var(--pink)}.cs-item-t.ye{color:var(--yellow)}.cs-item-t.gr{color:var(--green)}.cs-item-t.bl{color:var(--blue)}.cs-item-t.or{color:var(--orange)}.cs-item-t.te{color:var(--teal)}
+.cs-item-d{font-size:12px;color:#aaa;line-height:1.6}
+
+/* ── CODE ── */
+.code-blk{background:#0d1117;border-radius:6px;font-family:var(--font-code);font-size:12px;padding:14px;line-height:1.9;border:1.5px solid #30363d;overflow-x:auto;position:relative;z-index:2}
+.kw{color:#ff7b72}.fn{color:#d2a8ff}.str{color:#a5d6ff}.cm{color:#8b949e;font-style:italic}.num{color:#79c0ff}.cl{color:#ffa657}.ok{color:#3fb950}.op{color:#ff7b72}
+
+/* ── IF-ELSE FLOW DIAGRAM ── */
+.flow-section{padding:2rem 1.5rem;background:var(--paper);border-bottom:3px solid var(--ink)}
+.flow-title{font-family:var(--font-comic);font-size:2rem;letter-spacing:2px;margin-bottom:6px}
+.flow-sub{font-size:13px;color:#666;font-weight:700;margin-bottom:1.5rem}
+.flow-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.flow-box{background:#fff;border:2.5px solid var(--ink);border-radius:8px;overflow:hidden;box-shadow:var(--panel-shadow)}
+.flow-hdr{background:var(--ink);color:#fff;padding:8px 14px;font-size:11px;font-weight:700;letter-spacing:1px}
+.flow-body{padding:14px;display:flex;flex-direction:column;gap:10px}
+
+/* flowchart nodes */
+.fc{display:flex;flex-direction:column;align-items:center;gap:0;font-family:var(--font-body)}
+.fc-diamond{background:var(--yellow);border:2.5px solid var(--ink);transform:rotate(45deg);width:60px;height:60px;display:flex;align-items:center;justify-content:center;box-shadow:2px 2px 0 var(--ink);margin:8px 0;flex-shrink:0}
+.fc-diamond span{transform:rotate(-45deg);font-size:10px;font-weight:800;text-align:center;line-height:1.2}
+.fc-rect{background:#fff;border:2.5px solid var(--ink);border-radius:4px;padding:6px 14px;font-size:11px;font-weight:800;box-shadow:2px 2px 0 var(--ink);text-align:center}
+.fc-rect.green{background:#e8f5e9;border-color:var(--green)}
+.fc-rect.red{background:#fff0f0;border-color:var(--red)}
+.fc-rect.blue{background:#dbeafe;border-color:var(--blue)}
+.fc-arrow{font-size:18px;color:#888;line-height:1;margin:0}
+.fc-label{font-size:9px;font-weight:800;letter-spacing:1px;color:#888;text-transform:uppercase}
+.fc-row{display:flex;align-items:center;gap:8px;width:100%;justify-content:center}
+
+/* if-else playground */
+.ifelse-input{width:100%;padding:8px 12px;font-family:var(--font-code);font-size:12px;border:2px solid var(--ink);border-radius:4px;background:var(--paper);outline:none;transition:border-color .2s}
+.ifelse-input:focus{border-color:var(--pink)}
+.run-btn{padding:8px 20px;background:var(--pink);color:#fff;border:2px solid var(--ink);border-radius:4px;font-family:var(--font-body);font-size:12px;font-weight:800;cursor:pointer;transition:all .15s;letter-spacing:1px}
+.run-btn:hover{background:#be185d}
+.result-box{background:#0d1117;border-radius:4px;padding:12px;font-family:var(--font-code);font-size:12px;border:1.5px solid #30363d;min-height:60px;line-height:1.8}
+.out-line{display:block;animation:fadein .25s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+
+/* ── WARDROBE ANALOGY PANEL ── */
+.wardrobe{display:flex;gap:10px;flex-wrap:wrap;padding:16px;background:#fff;border-bottom:3px solid var(--ink);position:relative;z-index:2}
+.outfit{background:var(--paper);border:2.5px solid var(--ink);border-radius:8px;padding:12px;text-align:center;flex:1;min-width:120px;box-shadow:var(--panel-shadow);transition:transform .15s}
+.outfit:hover{transform:translateY(-3px)}
+.outfit-emoji{font-size:2.5rem;margin-bottom:6px}
+.outfit-cond{font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#888;margin-bottom:4px}
+.outfit-name{font-size:12px;font-weight:800}
+
+/* ── LOOPS ANIMATOR ── */
+.loop-section{padding:2rem 1.5rem;background:var(--paper);border-bottom:3px solid var(--ink)}
+.loop-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:1.5rem}
+.loop-panel{background:#fff;border:2.5px solid var(--ink);border-radius:8px;overflow:hidden;box-shadow:var(--panel-shadow)}
+.lp-hdr{background:var(--ink);color:#fff;padding:8px 14px;font-size:11px;font-weight:700;letter-spacing:1px;display:flex;align-items:center;justify-content:space-between}
+.lp-body{padding:14px;display:flex;flex-direction:column;gap:10px}
+.loop-vis{display:flex;flex-wrap:wrap;gap:6px;min-height:44px;padding:8px;background:#f8f8f8;border:1.5px solid #ddd;border-radius:4px}
+.loop-cell{width:32px;height:32px;border:2px solid var(--ink);border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:var(--font-code);font-size:11px;font-weight:800;background:#fff;transition:all .2s}
+.loop-cell.active{background:var(--pink);color:#fff;border-color:var(--pink);transform:scale(1.1)}
+.loop-cell.done{background:var(--green);color:#fff;border-color:var(--green)}
+.loop-controls{display:flex;gap:8px}
+.lc-btn{flex:1;padding:7px;border:2px solid var(--ink);border-radius:4px;font-family:var(--font-body);font-size:11px;font-weight:800;cursor:pointer;transition:all .15s}
+.lc-btn.play{background:var(--green);color:#fff;border-color:var(--green)}
+.lc-btn.step{background:var(--yellow);color:var(--ink)}
+.lc-btn.reset{background:#f4f4f4}
+.loop-log{background:#0d1117;border-radius:4px;padding:10px;font-family:var(--font-code);font-size:11px;border:1.5px solid #30363d;min-height:70px;line-height:1.8;max-height:120px;overflow-y:auto}
+.var-track{display:flex;gap:8px;font-family:var(--font-code);font-size:12px;flex-wrap:wrap}
+.vt{background:#1e1e1e;border:1.5px solid #333;border-radius:4px;padding:4px 10px;transition:all .3s}
+.vt.flash{background:var(--pink);border-color:var(--pink);color:#fff;animation:flashpop .3s ease}
+@keyframes flashpop{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+
+/* ── NUMBER / MATH SECTION ── */
+.num-section{padding:2rem 1.5rem;background:var(--paper);border-bottom:3px solid var(--ink)}
+.math-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:1rem}
+.math-card{background:#fff;border:2.5px solid var(--ink);border-radius:8px;overflow:hidden;box-shadow:3px 3px 0 var(--ink);cursor:pointer;transition:transform .15s}
+.math-card:hover{transform:translate(-2px,-2px)}
+.mc-hdr{padding:7px 12px;font-family:var(--font-comic);font-size:.95rem;letter-spacing:1px;display:flex;align-items:center;gap:6px}
+.mc-body{padding:8px 12px;background:#fff;font-size:11px;font-weight:700;line-height:1.5;color:#444}
+.mc-code{background:#0d1117;padding:6px 12px;font-family:var(--font-code);font-size:10px;color:#e6edf3;line-height:1.7}
+
+/* ── BITCOIN / FLOAT DANGER ── */
+.bitcoin-section{padding:2.5rem 1.5rem;background:#0d0800;border-bottom:3px solid #f7931a;color:#fff}
+.btc-title{font-family:var(--font-comic);font-size:2.2rem;letter-spacing:2px;color:#f7931a;margin-bottom:.5rem;display:flex;align-items:center;gap:12px}
+.btc-sub{font-size:13px;color:#aaa;font-weight:700;margin-bottom:1.5rem;line-height:1.6}
+.btc-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:1.5rem}
+.btc-panel{background:#161200;border:1.5px solid #3a2800;border-radius:8px;overflow:hidden}
+.btc-hdr{padding:8px 14px;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.btc-body{padding:14px}
+.danger-box{background:#1a0a00;border:2px solid #f7931a;border-radius:6px;padding:14px;margin-bottom:12px}
+.danger-title{font-size:11px;font-weight:800;color:#f7931a;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.solution-box{background:#0a1a00;border:2px solid var(--green);border-radius:6px;padding:14px}
+.solution-title{font-size:11px;font-weight:800;color:var(--green);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+/* LIVE FINANCE DEMO */
+.finance-demo{background:#fff;border:2.5px solid var(--ink);border-radius:8px;overflow:hidden;box-shadow:var(--panel-shadow);margin-top:16px}
+.fd-hdr{background:var(--ink);color:#fff;padding:8px 14px;font-size:11px;font-weight:700;letter-spacing:1px;display:flex;justify-content:space-between;align-items:center}
+.fd-body{padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fd-input{width:100%;padding:8px 12px;font-family:var(--font-code);font-size:13px;border:2px solid #ddd;border-radius:4px;outline:none;transition:border-color .2s}
+.fd-input:focus{border-color:var(--orange)}
+.fd-label{font-size:11px;font-weight:800;letter-spacing:1px;color:#888;text-transform:uppercase;margin-bottom:4px}
+.fd-result{grid-column:1/-1;background:#0d1117;border-radius:4px;padding:12px;font-family:var(--font-code);font-size:12px;border:1.5px solid #30363d;line-height:2}
+
+/* ── RANDOM NUMBER SECTION ── */
+.random-section{padding:2rem 1.5rem;background:var(--paper);border-bottom:3px solid var(--ink)}
+.rng-title{font-family:var(--font-comic);font-size:2rem;letter-spacing:2px;margin-bottom:6px}
+.rng-builder{background:#fff;border:2.5px solid var(--ink);border-radius:8px;overflow:hidden;box-shadow:var(--panel-shadow)}
+.rng-hdr{background:var(--ink);color:#fff;padding:8px 14px;font-size:11px;font-weight:700;letter-spacing:1px;display:flex;justify-content:space-between;align-items:center}
+.rng-body{padding:14px;display:flex;flex-direction:column;gap:12px}
+.rng-formula-steps{display:flex;flex-direction:column;gap:8px}
+.formula-step{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1.5px solid #ddd;border-radius:6px;background:#f8f8f8;transition:all .3s;font-family:var(--font-code);font-size:12px}
+.formula-step.active{background:#fdf2f8;border-color:var(--pink);box-shadow:2px 2px 0 var(--pink)}
+.formula-step.done{background:#e8f5e9;border-color:var(--green)}
+.fs-num{width:24px;height:24px;border-radius:50%;border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;transition:all .2s}
+.formula-step.active .fs-num{background:var(--pink);color:#fff;border-color:var(--pink)}
+.formula-step.done .fs-num{background:var(--green);color:#fff;border-color:var(--green)}
+.rng-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.rng-input{width:70px;padding:7px 10px;font-family:var(--font-code);font-size:13px;border:2px solid var(--ink);border-radius:4px;background:var(--paper);outline:none;text-align:center}
+.rng-roll{padding:8px 20px;background:var(--pink);color:#fff;border:2px solid var(--ink);border-radius:4px;font-family:var(--font-body);font-size:12px;font-weight:800;cursor:pointer;transition:all .15s}
+.rng-roll:hover{background:#be185d}
+.rng-result-big{font-family:var(--font-comic);font-size:4rem;letter-spacing:2px;text-align:center;transition:all .3s;color:var(--pink)}
+.rng-history{display:flex;gap:6px;flex-wrap:wrap;min-height:32px}
+.rng-badge{background:#fff;border:2px solid var(--ink);border-radius:4px;padding:3px 10px;font-family:var(--font-code);font-size:12px;font-weight:800;animation:fadein .2s ease}
+
+/* ── STRING SECTION ── */
+.string-section{padding:2rem 1.5rem;background:var(--paper);border-bottom:3px solid var(--ink)}
+.str-title{font-family:var(--font-comic);font-size:2rem;letter-spacing:2px;margin-bottom:6px}
+.method-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:1rem}
+.method-card{background:#fff;border:2.5px solid var(--ink);border-radius:8px;overflow:hidden;box-shadow:3px 3px 0 var(--ink);cursor:pointer;transition:transform .15s}
+.method-card:hover,.method-card.active{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--ink)}
+.method-card.active{border-color:var(--pink)}
+.mc2-hdr{padding:8px 12px;font-family:var(--font-code);font-size:.85rem;font-weight:800;display:flex;align-items:center;gap:8px}
+.mc2-body{padding:8px 12px;font-size:11px;font-weight:700;color:#555;line-height:1.5;border-top:1.5px solid #eee}
+
+/* string playground */
+.str-play{background:#fff;border:2.5px solid var(--ink);border-radius:8px;overflow:hidden;box-shadow:var(--panel-shadow);margin-top:1.5rem}
+.sp-hdr{background:var(--ink);color:#fff;padding:8px 14px;font-size:11px;font-weight:700;letter-spacing:1px;display:flex;justify-content:space-between;align-items:center}
+.sp-body{padding:14px;display:flex;flex-direction:column;gap:10px}
+.sp-input{width:100%;padding:9px 12px;font-family:var(--font-code);font-size:14px;border:2px solid var(--ink);border-radius:4px;background:var(--paper);outline:none;font-weight:700;transition:border-color .2s}
+.sp-input:focus{border-color:var(--pink)}
+.sp-methods{display:flex;flex-wrap:wrap;gap:6px}
+.sp-chip{background:#f4f4f4;border:1.5px solid var(--ink);border-radius:4px;padding:4px 10px;font-family:var(--font-code);font-size:11px;font-weight:700;cursor:pointer;transition:all .15s}
+.sp-chip:hover,.sp-chip.active{background:var(--pink);color:#fff;border-color:var(--pink);box-shadow:2px 2px 0 var(--ink)}
+.sp-result{background:#0d1117;border-radius:4px;padding:12px;font-family:var(--font-code);font-size:12px;border:1.5px solid #30363d;min-height:80px;line-height:2}
+.sp-chars{display:flex;flex-wrap:wrap;gap:3px}
+.char-box{display:inline-flex;align-items:center;justify-content:center;width:24px;height:28px;border:1.5px solid #ddd;border-radius:3px;font-family:var(--font-code);font-size:11px;font-weight:800;background:#fff;transition:all .3s;position:relative}
+.char-box .idx{position:absolute;top:-14px;font-size:8px;color:#aaa;font-weight:800}
+.char-box.highlight{background:var(--pink);color:#fff;border-color:var(--pink);transform:translateY(-3px)}
+.char-box.dim-out{opacity:.25}
+
+/* ── SUMMARY ── */
+.summary{padding:2.5rem 1.5rem;background:var(--ink);border-top:3px solid var(--pink);color:#fff}
+.sum-title{font-family:var(--font-comic);font-size:2.5rem;letter-spacing:2px;color:var(--pink);margin-bottom:1.5rem}
+.notebook{background:#fef9c3;color:var(--ink);border:2.5px solid var(--ink);border-radius:8px;box-shadow:var(--panel-shadow);overflow:hidden}
+.nb-hdr{background:var(--ink);color:#fff;padding:10px 16px;font-size:12px;font-weight:800;letter-spacing:1px;display:flex;align-items:center;gap:8px}
+.nb-body{padding:18px;display:flex;flex-direction:column;gap:10px}
+.nb-line{display:flex;align-items:flex-start;gap:10px;padding:10px;background:#fff;border:1.5px solid #e8e3d0;border-radius:6px;border-left:4px solid var(--pink)}
+.nb-line.ye{border-left-color:var(--yellow)}.nb-line.gr{border-left-color:var(--green)}.nb-line.bl{border-left-color:var(--blue)}.nb-line.or{border-left-color:var(--orange)}.nb-line.te{border-left-color:var(--teal)}
+.nb-icon{font-size:18px;flex-shrink:0}
+.nb-text{font-size:13px;font-weight:700;line-height:1.5}
+.nb-text strong{color:var(--red)}
+
+/* nav */
+.next-ch{padding:3rem 1.5rem;text-align:center;background:var(--paper);border-top:3px solid var(--ink)}
+.nc-label{font-size:10px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:#888;margin-bottom:.5rem}
+.nc-title{font-family:var(--font-comic);font-size:2.5rem;letter-spacing:2px;margin-bottom:1rem}
+.nc-btn{display:inline-block;background:var(--pink);color:#fff;font-family:var(--font-comic);font-size:1.4rem;letter-spacing:2px;padding:12px 36px;border:3px solid var(--ink);border-radius:6px;box-shadow:var(--panel-shadow);cursor:pointer;text-decoration:none;transition:transform .1s,box-shadow .1s}
+.nc-btn:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--ink)}
+
+@media(max-width:600px){
+  .r2,.r3,.r3r,.r13,.loop-grid,.btc-grid,.fd-body,.flow-grid,.typeof-grid{grid-template-columns:1fr}
+  .panel{min-height:160px}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="tb-logo">JS<span>TORY</span></div>
+  <div class="tb-ch">CHAPTER 4 — LOGIC, NUMBERS & STRINGS</div>
+  <a class="tb-back" href="thirdpage.html">← Ch.3</a>
+</div>
+
+
+<!-- ══ COVER ══ -->
+<div class="cover">
+  <div class="cover-bg"></div>
+  <div class="cover-ch">Chapter 4</div>
+  <div class="cover-title">The <pk>Little</pk><br>Teacher</div>
+  <p class="cover-sub">Arjun finally gets into the logic of JavaScript. Then his sister walks in — and suddenly he has to actually explain it.</p>
+  <div class="cover-tags">
+    <span class="cover-tag" style="background:var(--pink);color:#fff">if / else</span>
+    <span class="cover-tag" style="background:var(--orange);color:#fff">Loops</span>
+    <span class="cover-tag" style="background:var(--yellow);color:var(--ink)">Numbers & Math</span>
+    <span class="cover-tag" style="background:#f7931a;color:#fff">₿ Float Danger</span>
+    <span class="cover-tag" style="background:var(--teal);color:#fff">Strings</span>
+  </div>
+  <div class="cover-scroll">scroll down ▼</div>
+</div>
+
+<div class="webtoon">
+
+<!-- ══════════════════════════
+     SCENE 1 — ARJUN ALONE
+══════════════════════════ -->
+<div class="scene-hdr">
+  <span class="sh-num">SCENE 01</span>
+  <span class="sh-title">Deep Focus</span>
+  <span class="sh-loc">📍 Arjun's Room — Afternoon</span>
+</div>
+
+<div class="row r2">
+  <div class="panel bg-room" style="min-height:260px">
+    <div class="speed-h"></div>
+    <div class="slabel">WIDE — CURTAINS HALF OPEN</div>
+    <div class="tbox" style="align-self:center;margin-bottom:auto;margin-top:50px">
+      Chapter 3 done. ✅<br>
+      Functions ✅ &nbsp; Scope ✅<br>
+      Execution context ✅
+    </div>
+    <div class="bubbles">
+      <div class="b thought">Ok. Today is logic day.<br>if-else. Loops. Numbers. Strings.<br>The actual thinking part.</div>
+    </div>
+  </div>
+  <div class="panel bg-white" style="min-height:260px;justify-content:center;align-items:center">
+    <div class="halftone"></div>
+    <div style="text-align:center;position:relative;z-index:2;padding:14px">
+      <div style="font-family:var(--font-code);font-size:10px;color:#aaa;margin-bottom:12px;font-weight:700;letter-spacing:1px">his notes so far</div>
+      <div class="code-blk" style="text-align:left;font-size:11px">
+<span class="cm">// ✅ Ch1 — Why JS exists</span><br>
+<span class="cm">// ✅ Ch2 — Variables + types</span><br>
+<span class="cm">// ✅ Ch3 —  Operator and Data type</span><br>
+<span class="ok">// 🔄 Ch4 — Logic + numbers</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row r1">
+  <div class="panel bg-dark" style="min-height:80px;justify-content:center;align-items:center">
+    <div class="speed"></div>
+    <div class="bigtext white" style="text-align:center;font-size:clamp(1.6rem,4vw,3rem); color: #fff;">Every program is just: <span style="color:var(--yellow)">decisions</span> + <span style="color:var(--pink)">repetition</span> + <span style="color:var(--green)">data</span></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════
+     SCENE 2 — ANJALI ENTERS
+══════════════════════════ -->
+<div class="scene-hdr">
+  <span class="sh-num">SCENE 02</span>
+  <span class="sh-title">The Interruption</span>
+  <span class="sh-loc">📍 His Room — 2 minutes later</span>
+</div>
+
+<div class="row r2">
+  <div class="panel bg-room" style="min-height:240px">
+    <div class="slabel">DOOR OPENS</div>
+    <div class="speed-h"></div>
+    <div class="bubbles">
+      <div class="b thought" style="align-self:flex-end;border-style:solid">ok ok focus... if-else is just decisions—</div>
+    </div>
+  </div>
+  <div class="panel bg-room2" style="min-height:240px">
+    <div class="dots-pink"></div>
+    <div class="slabel">ANJALI — BORED</div>
+    <div style="position:absolute;top:20px;right:14px;font-size:2.5rem;z-index:2">🚪</div>
+    <div class="bubbles">
+      <div class="b anjali">Bhaiyaaaa 😩</div>
+      <div class="b anjali" style="margin-top:4px">What are you even doing? Can I see?</div>
+    </div>
+  </div>
+</div>
+
+<div class="dlg-strip pink-bg">
+  <div class="dlg">
+    <div class="dlg-who" style="color:var(--blue)">ARJUN</div>
+    <div class="dlg-b">Anjali, I'm studying JavaScript. You won't understand, it's programming.</div>
+  </div>
+  <div class="dlg r">
+    <div class="dlg-who" style="color:var(--pink);text-align:right">ANJALI</div>
+    <div class="dlg-b anjali-b">I literally top my class in Maths. I CAN. 😤</div>
+  </div>
+  <div class="dlg">
+    <div class="dlg-who" style="color:var(--blue)">ARJUN</div>
+    <div class="dlg-b">...fine. Pull up a chair. But if you ask something basic—</div>
+  </div>
+  <div class="dlg r">
+    <div class="dlg-who" style="color:var(--pink);text-align:right">ANJALI</div>
+    <div class="dlg-b anjali-b">Just start, bhaiya. 🙄</div>
+  </div>
+</div>
+
+<div class="row r1">
+  <div class="panel bg-yellow" style="min-height:80px;justify-content:center;align-items:center">
+    <div class="halftone"></div>
+    <div class="bigtext ink" style="text-align:center;font-size:clamp(1.6rem,4vw,3rem)">So Arjun became a teacher. Whether he was ready or not.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════
+     SCENE 3 — IF / ELSE
+══════════════════════════ -->
+<div class="banner pink">— TOPIC 1: IF / ELSE —</div>
+
+<div class="scene-hdr">
+  <span class="sh-num">SCENE 03</span>
+  <span class="sh-title">Decisions, Decisions</span>
+  <span class="sh-loc">📍 Arjun's Desk — Both Siblings</span>
+</div>
+
+<!-- WARDROBE ANALOGY -->
+<div class="row r1">
+  <div class="panel bg-pink" style="min-height:100px;justify-content:center;align-items:center">
+    <div class="dots-pink"></div>
+    <div class="bubbles" style="align-items:center">
+      <div class="b" style="text-align:center;font-size:13px">Anjali, you decide what to wear every morning, right?</div>
+      <div class="b anjali" style="margin-top:6px">Yeah obviously...</div>
+    </div>
+  </div>
+</div>
+
+<div class="wardrobe">
+  <div class="outfit">
+    <div class="outfit-emoji">🌧️</div>
+    <div class="outfit-cond">if (raining)</div>
+    <div class="outfit-name">Raincoat</div>
+  </div>
+  <div class="outfit">
+    <div class="outfit-emoji">☀️</div>
+    <div class="outfit-cond">else if (sunny)</div>
+    <div class="outfit-name">Sunglasses</div>
+  </div>
+  <div class="outfit">
+    <div class="outfit-emoji">🌤️</div>
+    <div class="outfit-cond">else if (cloudy)</div>
+    <div class="outfit-name">Light Jacket</div>
+  </div>
+  <div class="outfit">
+    <div class="outfit-emoji">🧥</div>
+    <div class="outfit-cond">else</div>
+    <div class="outfit-name">Regular Sweater</div>
+  </div>
+</div>
+
+<div class="dlg-strip pink-bg">
+  <div class="dlg">
+    <div class="dlg-who" style="color:var(--blue)">ARJUN</div>
+    <div class="dlg-b">That whole thought process — "is it raining? no? is it sunny? no? ok sweater" — that's if-else. The computer checks conditions in order. The first true one wins. Everything else gets skipped.</div>
+  </div>
+  <div class="dlg r">
+    <div class="dlg-who" style="color:var(--pink);text-align:right">ANJALI</div>
+    <div class="dlg-b anjali-b">Oh wait. So it doesn't check ALL of them every time?</div>
+  </div>
+  <div class="dlg">
+    <div class="dlg-who" style="color:var(--blue)">ARJUN</div>
+    <div class="dlg-b">Exactly. Once one condition is true, it runs that block and JUMPS OUT. The rest don't even execute. That's why the ORDER matters.</div>
+  </div>
+</div>
+
+<!-- CODE EXAMPLE -->
+<div style="padding:0 1.5rem 1.5rem;background:var(--paper);border-bottom:3px solid var(--ink)">
+  <div class="code-blk" style="color: rgb(253, 253, 253);">
+<span class="kw">let</span> score = <span class="num">85</span>;<br>
+<br>
+<span class="kw">if</span> (score >= <span class="num">90</span>) {<br>
+&nbsp;&nbsp;grade = <span class="str">'A'</span>; <span class="cm">// score is 85, so 85 >= 90 is FALSE → skip</span><br>
+} <span class="kw">else if</span> (score >= <span class="num">80</span>) {<br>
+&nbsp;&nbsp;grade = <span class="str">'B'</span>; <span class="cm">// 85 >= 80 is TRUE → runs this, STOPS here</span><br>
+} <span class="kw">else if</span> (score >= <span class="num">70</span>) {<br>
+&nbsp;&nbsp;grade = <span class="str">'C'</span>; <span class="cm">// never even checked</span><br>
+} <span class="kw">else</span> {<br>
+&nbsp;&nbsp;grade = <span class="str">'F'</span>; <span class="cm">// never reached</span><br>
+}<br>
+<span class="cm">// grade → "B"</span>
+  </div>
+</div>
+
+<!-- FLOW DIAGRAM + PLAYGROUND -->
+<div class="flow-section">
+  <div class="flow-title">if-else in Action</div>
+  <div class="flow-sub">See the flow. Then try your own.</div>
+  <div class="flow-grid">
+    <!-- FLOWCHART -->
+    <div class="flow-box">
+      <div class="flow-hdr">Decision Flowchart</div>
+      <div class="flow-body" style="align-items:center">
+        <div class="fc">
+          <div class="fc-rect blue">score = 85</div>
+          <div class="fc-arrow">↓</div>
+          <div class="fc-diamond"><span>≥ 90?</span></div>
+          <div class="fc-row" style="gap:20px">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+              <span class="fc-label" style="color:var(--red)">YES</span>
+              <div class="fc-rect red">Grade A</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+              <span class="fc-label" style="color:var(--green)">NO</span>
+              <div class="fc-arrow">↓</div>
+            </div>
+          </div>
+          <div class="fc-diamond"><span>≥ 80?</span></div>
+          <div class="fc-row" style="gap:20px">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+              <span class="fc-label" style="color:var(--green)">YES ✓</span>
+              <div class="fc-rect green" style="font-weight:900">Grade B 🎯</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+              <span class="fc-label" style="color:var(--red)">NO</span>
+              <div class="fc-rect" style="opacity:.4">…more checks</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- PLAYGROUND -->
+    <div class="flow-box">
+      <div class="flow-hdr">Live Playground</div>
+      <div class="flow-body">
+        <div>
+          <div style="font-size:11px;font-weight:800;color:#888;margin-bottom:4px;letter-spacing:1px;text-transform:uppercase">Your score (0–100)</div>
+          <input class="ifelse-input" id="scoreInput" type="number" value="85" min="0" max="100" oninput="gradeIt()">
+        </div>
+        <button class="run-btn" onclick="gradeIt()">Check Grade ▶</button>
+        <div class="result-box" id="gradeResult"></div>
+        <div style="font-size:11px;font-weight:800;color:#888;margin-top:4px">Try: 95 → A &nbsp;·&nbsp; 75 → C &nbsp;·&nbsp; 45 → F</div>
+        <div style="font-size:11px;font-weight:700;line-height:1.6;color:#555;background:#f8f8f8;padding:8px;border-radius:4px;border-left:3px solid var(--pink)">
+          <strong>Anjali's insight:</strong> "So if I change the ORDER of checks it could give wrong results?" — Yes. If you check <code style="font-family:var(--font-code);background:#eee;padding:1px 5px;border-radius:3px">≥ 60</code> first, a score of 95 would get a D. Order is everything.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════
+     SCENE 4 — LOOPS
+══════════════════════════ -->
+<div class="banner orange">— TOPIC 2: LOOPS —</div>
+
+<div class="scene-hdr">
+  <span class="sh-num">SCENE 04</span>
+  <span class="sh-title">Why Repeat Yourself?</span>
+  <span class="sh-loc">📍 Same Desk — 20 Minutes Later</span>
+</div>
+
+<div class="row r2">
+  <div class="panel bg-orange" style="min-height:220px">
+    <div class="halftone"></div>
+    <div class="slabel">ANJALI ASKS</div>
+    <div class="bubbles">
+      <div class="b anjali">But bhaiya, what if you need to do something 100 times? You're going to write 100 lines?</div>
+    </div>
+  </div>
+  <div class="panel bg-white" style="min-height:220px;justify-content:flex-start;padding-top:16px">
+    <div class="slabel">ARJUN'S FACE</div>
+    <div class="speed"></div>
+    <div class="bubbles">
+      <div class="b thought" style="font-style:normal">She's... actually asking the right question.</div>
+    </div>
+    <div class="bigtext red" style="text-align:center;font-size:2.5rem;margin-top:auto">LOOPS!</div>
+  </div>
+</div>
+
+<div class="dlg-strip">
+  <div class="dlg">
+    <div class="dlg-who" style="color:var(--blue)">ARJUN</div>
+    <div class="dlg-b">You know how mom says "clean your room" every single day? She doesn't write a new note every day. She just keeps saying it until the condition changes — "room is clean".</div>
+  </div>
+  <div class="dlg r">
+    <div class="dlg-who" style="color:var(--pink);text-align:right">ANJALI</div>
+    <div class="dlg-b anjali-b">...so a loop is just: keep doing something while something is true?</div>
+  </div>
+  <div class="dlg">
+    <div class="dlg-who" style="color:var(--blue)">ARJUN</div>
+    <div class="dlg-b">Exactly. Three types: <strong>for</strong> when you know how many times. <strong>while</strong> when you don't. <strong>do...while</strong> when you need it to run at least once.</div>
+  </div>
+</div>
+
+<!-- THREE LOOP TYPES CODE -->
+<div style="padding:0 1.5rem 1.5rem;background:var(--paper);border-bottom:3px solid var(--ink)">
+  <div class="code-blk" style="font-size: 11px; color: #fff;" >
+<span class="cm">// FOR — "I know I want 5 repetitions"</span><br>
+<span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">1</span>; i &lt;= <span class="num">5</span>; i++) {<br>
+&nbsp;&nbsp;<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"Day"</span>, i); <span class="cm">// Day 1, Day 2 ... Day 5</span><br>
+}<br>
+<br>
+<span class="cm">// WHILE — "keep going until condition breaks"</span><br>
+<span class="kw">let</span> health = <span class="num">10</span>;<br>
+<span class="kw">while</span> (health &gt; <span class="num">0</span>) {<br>
+&nbsp;&nbsp;<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"Health:"</span>, health);<br>
+&nbsp;&nbsp;health -= <span class="num">3</span>; <span class="cm">// ⚠️ MUST change condition or: infinite loop!</span><br>
+}<br>
+<br>
+<span class="cm">// DO...WHILE — runs at least once, THEN checks</span><br>
+<span class="kw">let</span> answer;<br>
+<span class="kw">do</span> {<br>
+&nbsp;&nbsp;answer = <span class="fn">prompt</span>(<span class="str">"Type yes:"</span>); <span class="cm">// always shows once</span><br>
+} <span class="kw">while</span> (answer !== <span class="str">"yes"</span>);<br>
+  </div>
+</div>
+
+<!-- LOOP ANIMATORS -->
+<div class="loop-section">
+  <div style="font-family:var(--font-comic);font-size:2rem;letter-spacing:2px;margin-bottom:6px">Loop Animators</div>
+  <div style="font-size:13px;color:#666;font-weight:700;margin-bottom:1rem">Watch the loop execute step by step. Anjali style: one step at a time.</div>
+  <div class="loop-grid">
+    <!-- FOR LOOP -->
+    <div class="loop-panel">
+      <div class="lp-hdr">
+        <span>for loop — i = 1 to 8</span>
+        <span style="font-size:10px;color:#888">cells light up one by one</span>
+      </div>
+      <div class="lp-body">
+        <div class="code-blk" style="font-size:10px;padding:8px;color: white;">
+<span class="kw">for</span>(<span class="kw">let</span> i=<span class="num">1</span>; i&lt;=<span class="num">8</span>; i++){<br>
+&nbsp;&nbsp;<span class="fn">console</span>.<span class="fn">log</span>(i);<br>
+}
+        </div>
+        <div style="font-size:11px;font-weight:800;color:#888;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Variables</div>
+        <div class="var-track">
+          <div class="vt"><span style="color:#888">i =</span> <span id="fi-val" style="color:var(--pink)">1</span></div>
+          <div class="vt"><span style="color:#888">condition:</span> <span id="fi-cond" style="color:var(--green)">true</span></div>
+        </div>
+        <div class="loop-vis" id="for-vis"></div>
+        <div class="loop-log" id="for-log"><span style="color:#484f58">// hit Play or Step</span></div>
+        <div class="loop-controls">
+          <button class="lc-btn play" onclick="startFor()">▶ Play</button>
+          <button class="lc-btn step" onclick="stepFor()">Step ▶|</button>
+          <button class="lc-btn reset" onclick="resetFor()">↺ Reset</button>
+        </div>
+      </div>
+    </div>
+    <!-- WHILE LOOP — health -->
+    <div class="loop-panel">
+      <div class="lp-hdr">
+        <span>while loop — health bar</span>
+        <span style="font-size:10px;color:#888">⚠️ forget update = infinite!</span>
+      </div>
+      <div class="lp-body">
+        <div class="code-blk" style="font-size:10px;padding:8px;color: #fff;">
+<span class="kw">let</span> hp = <span class="num">10</span>;<br>
+<span class="kw">while</span>(hp &gt; <span class="num">0</span>){ hp -= <span class="num">3</span>; }
+        </div>
+        <div style="font-size:11px;font-weight:800;color:#888;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Variables</div>
+        <div class="var-track">
+          <div class="vt"><span style="color:#888">hp =</span> <span id="wh-val" style="color:var(--orange)">10</span></div>
+          <div class="vt"><span style="color:#888">hp > 0:</span> <span id="wh-cond" style="color:var(--green)">true</span></div>
+        </div>
+        <!-- health bar -->
+        <div style="background:#f4f4f4;border:1.5px solid #ddd;border-radius:4px;height:20px;overflow:hidden;margin:4px 0">
+          <div id="wh-bar" style="height:100%;background:var(--green);width:100%;transition:width .4s,background .4s;border-radius:4px"></div>
+        </div>
+        <div class="loop-log" id="while-log"><span style="color:#484f58">// hit Play or Step</span></div>
+        <div class="loop-controls">
+          <button class="lc-btn play" onclick="startWhile()">▶ Play</button>
+          <button class="lc-btn step" onclick="stepWhile()">Step ▶|</button>
+          <button class="lc-btn reset" onclick="resetWhile()">↺ Reset</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════
+     SCENE 5 — NUMBERS
+══════════════════════════ -->
+<div class="banner yellow" style="color:var(--ink)">— TOPIC 3: NUMBERS & MATH —</div>
+
+<div class="scene-hdr">
+  <span class="sh-num">SCENE 05</span>
+  <span class="sh-title">One Type to Rule Them All</span>
+  <span class="sh-loc">📍 Still at the Desk</span>
+</div>
+
+<div class="row r3r">
+  <div class="panel bg-yellow" style="min-height:220px;justify-content:center;align-items:center">
+    <div class="halftone"></div>
+    <div style="text-align:center;position:relative;z-index:2">
+      <div style="font-size:3rem;margin-bottom:8px">🔢</div>
+      <div class="bigtext ink" style="font-size:2.5rem">ONE<br>TYPE</div>
+      <div style="font-size:11px;font-weight:800;color:#666;margin-top:8px">int, float, double...<br>all just: number</div>
+    </div>
+  </div>
+  <div class="panel bg-white" style="min-height:220px;justify-content:flex-start;padding-top:16px">
+    <div class="slabel">ANJALI CONFUSED</div>
+    <br>
+    <div class="bubbles">
+      <div class="b anjali">Wait — in school we have integers and decimals. JS just calls everything a "number"??</div>
+      <div class="b" style="margin-top:8px">Yep. Brendan had 10 days remember? No time for two number types. Everything is IEEE 754 double-precision floating point under the hood.</div>
+      <div class="b anjali" style="margin-top:6px">...what does that mean in human language</div>
+      <div class="b" style="margin-top:6px">It means 64 bits of storage. And it means there's a trap waiting for you.</div>
+    </div>
+  </div>
+</div>
+
+<!-- MATH CARDS -->
+<div class="num-section">
+  <div style="font-family:var(--font-comic);font-size:2rem;letter-spacing:2px;margin-bottom:6px">The Math Object</div>
+  <div style="font-size:13px;color:#666;font-weight:700;margin-bottom:4px">Your built-in calculator. Never needs <code style="font-family:var(--font-code);background:#f0f0f0;padding:2px 6px;border-radius:3px">new</code>. Just call it.</div>
+  <div class="math-grid">
+    <div class="math-card">
+      <div class="mc-hdr" style="background:#fff9e6">🔵 <span style="color:#92400e;font-family:var(--font-comic)">round / floor / ceil</span></div>
+      <div class="mc-body">Three ways to kill a decimal</div>
+      <div class="mc-code">
+        Math.round(4.7) <span style="color:#3fb950">// 5</span><br>
+        Math.floor(4.7) <span style="color:#3fb950">// 4</span><br>
+        Math.ceil(4.2)  <span style="color:#3fb950">// 5</span><br>
+        Math.trunc(4.9) <span style="color:#3fb950">// 4</span>
+      </div>
+    </div>
+    <div class="math-card">
+      <div class="mc-hdr" style="background:#e8f5e9">⚡ <span style="color:#14532d;font-family:var(--font-comic)">max / min / abs</span></div>
+      <div class="mc-body">Compare and fix values</div>
+      <div class="mc-code">
+        Math.max(3,1,9) <span style="color:#3fb950">// 9</span><br>
+        Math.min(3,1,9) <span style="color:#3fb950">// 1</span><br>
+        Math.abs(-7)    <span style="color:#3fb950">// 7</span>
+      </div>
+    </div>
+    <div class="math-card">
+      <div class="mc-hdr" style="background:#dbeafe">🔢 <span style="color:#1e3a8a;font-family:var(--font-comic)">pow / sqrt / PI</span></div>
+      <div class="mc-body">Power and roots</div>
+      <div class="mc-code">
+        Math.pow(2,10) <span style="color:#3fb950">// 1024</span><br>
+        2 ** 10        <span style="color:#3fb950">// 1024</span><br>
+        Math.sqrt(16)  <span style="color:#3fb950">// 4</span><br>
+        Math.PI        <span style="color:#3fb950">// 3.14159…</span>
+      </div>
+    </div>
+    <div class="math-card">
+      <div class="mc-hdr" style="background:#ede9fe">🎲 <span style="color:#4c1d95;font-family:var(--font-comic)">random</span></div>
+      <div class="mc-body">Returns [0, 1). Never 1.</div>
+      <div class="mc-code">
+        Math.random()        <span style="color:#8b949e">// 0.xxx</span><br>
+        Math.floor(<br>
+        &nbsp;Math.random()*10)+1 <span style="color:#3fb950">// 1-10</span>
+      </div>
+    </div>
+    <div class="math-card">
+      <div class="mc-hdr" style="background:#fff0f0">⚠️ <span style="color:#7f1d1d;font-family:var(--font-comic)">NaN / Infinity</span></div>
+      <div class="mc-body">The failure values. Both are typeof "number"!</div>
+      <div class="mc-code">
+        "hi" / 2    <span style="color:#ff7b72">// NaN</span><br>
+        1 / 0       <span style="color:#ff7b72">// Infinity</span><br>
+        NaN = = = NaN <span style="color:#ff7b72">//false 🤯</span><br>
+        isNaN(NaN)  <span style="color:#3fb950">// true</span>
+      </div>
+    </div>
+    <div class="math-card">
+      <div class="mc-hdr" style="background:#f0fdfa">📐 <span style="color:#134e4a;font-family:var(--font-comic)">toFixed / toPrecision</span></div>
+      <div class="mc-body">Format for display. Returns a string.</div>
+      <div class="mc-code">
+        (19.991).toFixed(2) <span style="color:#3fb950">// "19.99"</span><br>
+        (123.4).toPrecision(4) <span style="color:#3fb950">// "123.4"</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════
+     SCENE 6 — BITCOIN DANGER 💰
+══════════════════════════ -->
+<div class="banner bitcoin">— ₿ THE FLOAT TRAP — REAL MONEY AT RISK —</div>
+
+<div class="scene-hdr">
+  <span class="sh-num">SCENE 06</span>
+  <span class="sh-title">The ₹0.0000000001 Bug That Costs Millions</span>
+  <span class="sh-loc">📍 Arjun's Room — Anjali's eyes go wide</span>
+</div>
+
+<div class="row r2">
+  <div class="panel bg-bitcoin" style="min-height:260px">
+    <div class="speed"></div>
+    <div class="slabel w">THE SETUP</div>
+    <div class="bubbles">
+      <div class="b" style="background:#1a1200;border-color:#3a2800;color:#f7931a;font-family:var(--font-code);font-size:13px">0.1 + 0.2 === 0.3</div>
+      <div class="b anjali" style="margin-top:8px">Obviously true...?</div>
+      <div class="b" style="background:#1a1200;border-color:#3a2800;color:#ff7b72;margin-top:6px;font-family:var(--font-code)">false</div>
+      <div class="b anjali" style="margin-top:6px">WHAT.</div>
+    </div>
+  </div>
+  <div class="panel bg-bitcoin" style="min-height:260px">
+    <div class="speed"></div>
+    <div class="slabel w">THE RESULT</div>
+    <div style="position:relative;z-index:2;padding:10px">
+      <div class="code-blk" style="font-size:12px">
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="num">0.1</span> + <span class="num">0.2</span>);<br>
+<span class="cm">// 0.30000000000000004</span><br><br>
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="num">0.1</span> + <span class="num">0.2</span> === <span class="num">0.3</span>);<br>
+<span class="cm">// false ← not a bug in YOUR code</span><br>
+<span class="cm">// it's how binary stores decimals</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="dlg-strip" style="background:#0d0800;border-color:#3a2800">
+  <div class="dlg">
+    <div class="dlg-who" style="color:var(--pink)">ANJALI</div>
+    <div class="dlg-b anjali-b">But... if this happens with 0.1 + 0.2, what about real money? Like Bitcoin prices or bank transfers?</div>
+  </div>
+  <div class="dlg r">
+    <div class="dlg-who" style="color:var(--blue)">ARJUN</div>
+    <div class="dlg-b">That is EXACTLY the right question. This is the most dangerous thing in JavaScript. Real fintech companies have lost actual money because of this.</div>
+  </div>
+  <div class="dlg">
+    <div class="dlg-who" style="color:var(--pink)">ANJALI</div>
+    <div class="dlg-b anjali-b">So what do you actually DO about it?</div>
+  </div>
+</div>
+
+<!-- THE BITCOIN DEEP DIVE -->
+<div class="bitcoin-section">
+  <div class="btc-title">
+    <span>₿</span> The Float Danger — Full Breakdown
+  </div>
+  <div class="btc-sub">
+    Binary can't perfectly represent 0.1. In binary, 0.1 is 0.0001100110011... repeating forever — like 1/3 in decimal (0.333...). The computer truncates it. Those tiny errors add up. In finance, they become real money.
+  </div>
+
+  <div class="btc-grid">
+    <div class="btc-panel">
+      <div class="btc-hdr" style="background:#3a0000;border-bottom:1.5px solid #5a0000">
+        <span style="color:#ff7b72">❌</span>
+        <span style="color:#ff7b72;font-size:12px">The Dangerous Way</span>
+      </div>
+      <div class="btc-body">
+        <div class="danger-box">
+          <div class="danger-title">⚠️ Using floats for money</div>
+          <div class="code-blk" style="border:none;background:transparent;padding:0;font-size:11px">
+<span class="cm">// User buys ₿0.1 + ₿0.2 of Bitcoin</span><br>
+<span class="kw">let</span> buy1 = <span class="num">0.1</span>; <span class="cm">// ₿</span><br>
+<span class="kw">let</span> buy2 = <span class="num">0.2</span>; <span class="cm">// ₿</span><br>
+<span class="kw">let</span> total = buy1 + buy2;<br>
+<span class="fn">console</span>.<span class="fn">log</span>(total);<br>
+<span class="cm">// 0.30000000000000004 ← WRONG</span><br><br>
+<span class="cm">// At ₹35,00,000 per BTC:</span><br>
+<span class="cm">// Error = 0.00000000004 BTC</span><br>
+<span class="cm">// = ₹0.00014 per txn</span><br>
+<span class="cm">// × 1 crore txns = ₹1,40,000 LOST</span>
+          </div>
+        </div>
+        <div style="font-size:12px;color:#aaa;font-weight:700;line-height:1.6">Every transaction has a tiny error. At scale — millions of transactions — those tiny errors become massive losses or gains. Real exchanges have been sued over this.</div>
+      </div>
+    </div>
+
+    <div class="btc-panel">
+      <div class="btc-hdr" style="background:#003a00;border-bottom:1.5px solid #005a00">
+        <span style="color:#3fb950">✅</span>
+        <span style="color:#3fb950;font-size:12px">The Safe Way — Integer Arithmetic</span>
+      </div>
+      <div class="btc-body">
+        <div class="solution-box">
+          <div class="solution-title">✅ Work in smallest unit (satoshis)</div>
+          <div class="code-blk" style="border:none;background:transparent;padding:0;font-size:11px">
+<span class="cm">// 1 Bitcoin = 100,000,000 satoshis</span><br>
+<span class="cm">// NEVER store BTC as 0.1</span><br>
+<span class="cm">// Store as SATOSHIS (integers)</span><br><br>
+<span class="kw">const</span> SAT = <span class="num">100_000_000</span>; <span class="cm">// 1 BTC</span><br>
+<span class="kw">let</span> buy1 = <span class="num">10_000_000</span>; <span class="cm">// 0.1 BTC</span><br>
+<span class="kw">let</span> buy2 = <span class="num">20_000_000</span>; <span class="cm">// 0.2 BTC</span><br>
+<span class="kw">let</span> total = buy1 + buy2;<br>
+<span class="cm">// 30000000 ← EXACT. Always.</span><br><br>
+<span class="cm">// Display only: divide at the end</span><br>
+<span class="fn">console</span>.<span class="fn">log</span>(total / SAT + <span class="str">" BTC"</span>);<br>
+<span class="cm">// "0.3 BTC" ← clean</span>
+          </div>
+        </div>
+        <div style="font-size:12px;color:#aaa;font-weight:700;line-height:1.6;margin-top:10px">Bitcoin does this natively. Ethereum uses "wei" (10⁻¹⁸ ETH). Banks store in paise, not rupees. <strong style="color:#3fb950">The rule: compute in integers, display in decimals.</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- THREE SOLUTIONS TABLE -->
+  <div style="background:#161200;border:1.5px solid #3a2800;border-radius:8px;overflow:hidden">
+    <div style="background:#3a2800;padding:8px 14px;font-size:11px;font-weight:800;color:#f7931a;letter-spacing:2px;text-transform:uppercase">3 Solutions — Choose Based on Context</div>
+    <div style="padding:14px;display:flex;flex-direction:column;gap:10px">
+      <div style="background:#1a1200;border:1.5px solid #3a2800;border-radius:6px;padding:12px;border-left:3px solid #f7931a">
+        <div style="font-size:12px;font-weight:800;color:#f7931a;margin-bottom:6px">1. Integer Arithmetic (Finance & Crypto)</div>
+        <div class="code-blk" style="border:none;background:transparent;padding:0;font-size:11px;color:#e6edf3">
+<span class="cm">// Store in paise / satoshis / wei / cents</span><br>
+<span class="cm">// NEVER do math on the decimal form</span><br>
+<span class="kw">let</span> price = <span class="num">19999</span>; <span class="cm">// ₹199.99 in paise</span>
+        </div>
+      </div>
+      <div style="background:#1a1200;border:1.5px solid #3a2800;border-radius:6px;padding:12px;border-left:3px solid var(--yellow)">
+        <div style="font-size:12px;font-weight:800;color:var(--yellow);margin-bottom:6px">2. toFixed() — For Display Only</div>
+        <div class="code-blk" style="border:none;background:transparent;padding:0;font-size:11px;color:#e6edf3">
+<span class="cm">// Only for showing the user a clean number</span><br>
+<span class="cm">// toFixed() returns a STRING — don't math on it!</span><br>
+(<span class="num">0.1</span> + <span class="num">0.2</span>).<span class="fn">toFixed</span>(<span class="num">2</span>) <span class="cm">// "0.30" ← string, display only</span>
+        </div>
+      </div>
+      <div style="background:#1a1200;border:1.5px solid #3a2800;border-radius:6px;padding:12px;border-left:3px solid var(--teal)">
+        <div style="font-size:12px;font-weight:800;color:var(--teal);margin-bottom:6px">3. Number.EPSILON — For Comparisons</div>
+        <div class="code-blk" style="border:none;background:transparent;padding:0;font-size:11px;color:#e6edf3">
+<span class="cm">// When you MUST compare floats</span><br>
+<span class="kw">function</span> <span class="fn">nearlyEqual</span>(a, b) {<br>
+&nbsp;&nbsp;<span class="kw">return</span> <span class="fn">Math</span>.<span class="fn">abs</span>(a - b) &lt; <span class="cl">Number</span>.<span class="cl">EPSILON</span>;<br>
+}<br>
+<span class="fn">nearlyEqual</span>(<span class="num">0.1</span>+<span class="num">0.2</span>, <span class="num">0.3</span>); <span class="cm">// true ✓</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIVE FINANCE DEMO -->
+  <div class="finance-demo">
+    <div class="fd-hdr">
+      <span>Live Finance Demo — See the difference</span>
+      <span style="font-size:10px;color:#888">enter amounts in rupees</span>
+    </div>
+    <div class="fd-body">
+      <div>
+        <div class="fd-label">Amount 1 (₹)</div>
+        <input class="fd-input" id="fd1" value="0.1" oninput="calcFinance()">
+      </div>
+      <div>
+        <div class="fd-label">Amount 2 (₹)</div>
+        <input class="fd-input" id="fd2" value="0.2" oninput="calcFinance()">
+      </div>
+      <div class="fd-result" id="fd-res"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════
+     SCENE 7 — RANDOM NUMBERS
+══════════════════════════ -->
+<div class="banner" style="background:var(--purple);color:#fff;border-color:var(--purple)">— TOPIC 4: MATH.RANDOM() — THE FORMULA —</div>
+
+<div class="scene-hdr">
+  <span class="sh-num">SCENE 07</span>
+  <span class="sh-title">Rolling the Dice</span>
+  <span class="sh-loc">📍 Same Desk — Anjali is now genuinely hooked</span>
+</div>
+
+<div class="row r2">
+  <div class="panel bg-purple" style="min-height:220px">
+    <div class="speed"></div>
+    <div class="slabel w">ANJALI'S LIGHTBULB</div>
+    <div class="bubbles">
+      <div class="b anjali">Ohhh so if I wanted to make a game with a dice — I'd need a random number between 1 and 6?</div>
+      <div class="b" style="margin-top:6px">Exactly. But Math.random() only gives you between 0 and 1. You have to build the formula yourself.</div>
+      <div class="b anjali" style="margin-top:6px">Show me step by step.</div>
+    </div>
+  </div>
+  <div class="panel bg-white" style="min-height:220px;justify-content:center;align-items:center">
+    <div class="halftone"></div>
+    <div style="text-align:center;position:relative;z-index:2;padding:14px">
+      <div class="bigtext purple" style="font-size:2rem;margin-bottom:10px">Math.random()</div>
+      <div style="background:#f5f0ff;border:2px solid var(--purple);border-radius:8px;padding:12px;font-size:12px;font-weight:700;line-height:2;font-family:var(--font-code)">
+        0 ≤ result &lt; 1<br>
+        <span style="color:#888;font-size:10px">Never exactly 1. Can be 0.</span><br>
+        <span style="color:var(--purple)">0.0 · 0.3 · 0.7 · 0.999...</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FORMULA BUILDER -->
+<div class="random-section">
+  <div class="rng-title">Build the Formula — Step by Step</div>
+  <div style="font-size:13px;color:#666;font-weight:700;margin-bottom:1.5rem">Goal: random integer between <strong>min</strong> and <strong>max</strong> inclusive. Watch each step.</div>
+
+  <div class="rng-builder">
+    <div class="rng-hdr">
+      <span>Formula Constructor</span>
+      <span style="font-size:10px;color:#888">click steps to understand each one</span>
+    </div>
+    <div class="rng-body">
+      <div class="rng-formula-steps" id="formulaSteps">
+        <div class="formula-step active" onclick="explainStep(0)">
+          <div class="fs-num">1</div>
+          <div style="flex:1">
+            <div style="font-weight:800;color:var(--ink);margin-bottom:2px">Math.random()</div>
+            <div style="font-size:10px;color:#888">Returns a float in [0, 1)</div>
+          </div>
+          <div style="font-family:var(--font-code);font-size:11px;color:#888">e.g. 0.734</div>
+        </div>
+        <div class="formula-step" onclick="explainStep(1)">
+          <div class="fs-num">2</div>
+          <div style="flex:1">
+            <div style="font-weight:800;color:var(--ink);margin-bottom:2px">× (max − min + 1)</div>
+            <div style="font-size:10px;color:#888">Scale to the correct range size</div>
+          </div>
+          <div style="font-family:var(--font-code);font-size:11px;color:#888">0.734 × 6 = 4.404</div>
+        </div>
+        <div class="formula-step" onclick="explainStep(2)">
+          <div class="fs-num">3</div>
+          <div style="flex:1">
+            <div style="font-weight:800;color:var(--ink);margin-bottom:2px">Math.floor( … )</div>
+            <div style="font-size:10px;color:#888">Kill the decimal, get 0 to (max-min)</div>
+          </div>
+          <div style="font-family:var(--font-code);font-size:11px;color:#888">floor(4.404) = 4</div>
+        </div>
+        <div class="formula-step" onclick="explainStep(3)">
+          <div class="fs-num">4</div>
+          <div style="flex:1">
+            <div style="font-weight:800;color:var(--ink);margin-bottom:2px">+ min</div>
+            <div style="font-size:10px;color:#888">Shift range to start at min</div>
+          </div>
+          <div style="font-family:var(--font-code);font-size:11px;color:#888">4 + 1 = 5 ✓</div>
+        </div>
+      </div>
+      <div style="background:#f5f0ff;border:1.5px solid var(--purple);border-radius:6px;padding:12px;font-size:12px;font-weight:700;line-height:1.6;min-height:50px" id="stepExplain">
+        Click any step above to see exactly what it does and why it's needed.
+      </div>
+      <div class="code-blk" style="font-size:12px ; color: #fff;">
+<span class="kw">function</span> <span class="fn">getRandom</span>(min, max) {<br>
+&nbsp;&nbsp;<span class="kw">return</span> <span class="cl">Math</span>.<span class="fn">floor</span>(<span class="cl">Math</span>.<span class="fn">random</span>() * (max - min + <span class="num">1</span>)) + min;<br>
+}
+      </div>
+      <div class="rng-controls">
+        <div style="font-size:12px;font-weight:800;color:#888">Min:</div>
+        <input class="rng-input" id="rngMin" value="1">
+        <div style="font-size:12px;font-weight:800;color:#888">Max:</div>
+        <input class="rng-input" id="rngMax" value="6">
+        <button class="rng-roll" onclick="rollDice()">🎲 Roll!</button>
+        <button class="rng-roll" style="background:var(--purple)" onclick="rollMany()">Roll × 10</button>
+      </div>
+      <div class="rng-result-big" id="rngBig">?</div>
+      <div style="font-size:11px;font-weight:800;color:#888;margin-top:-8px;text-align:center">Last 10 rolls:</div>
+      <div class="rng-history" id="rngHistory"></div>
+      <div style="background:#f8f8f8;border-radius:4px;padding:10px;font-size:12px;font-weight:700;line-height:1.6;border-left:3px solid var(--purple)" id="rngFormula">
+        Formula: Math.floor(Math.random() × (6−1+1)) + 1
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════
+     SCENE 8 — STRINGS
+══════════════════════════ -->
+<div class="banner teal">— TOPIC 5: STRINGS —</div>
+
+<div class="scene-hdr">
+  <span class="sh-num">SCENE 08</span>
+  <span class="sh-title">Text is Not Just Text</span>
+  <span class="sh-loc">📍 Arjun's Desk — Anjali is taking notes now</span>
+</div>
+
+<div class="row r3r">
+  <div class="panel bg-teal" style="min-height:220px;justify-content:center;align-items:center">
+    <div style="text-align:center;position:relative;z-index:2;padding:14px">
+      <div style="font-size:3rem;margin-bottom:6px">🔤</div>
+      <div class="bigtext" style="color:var(--teal);font-size:2rem">Immutable.<br>Indexed.<br>Object-like.</div>
+    </div>
+  </div>
+  <div class="panel bg-white" style="min-height:220px">
+    <div class="halftone"></div>
+    <div class="slabel">ANJALI DISCOVERS INDEXING</div>
+    <div class="bubbles">
+        <br>
+      <div class="b anjali">Wait — so every letter has a number? Starting from 0??</div>
+      <div class="b" style="margin-top:6px">Yes. "JavaScript" — J is at index 0. a is 1. v is 2. And "immutable" means you CANNOT change a character. Ever.</div>
+      <div class="b anjali" style="margin-top:6px">Then how do you change text?</div>
+      <div class="b" style="margin-top:6px">You don't. You create a new string. Every string method returns a fresh one.</div>
+    </div>
+  </div>
+</div>
+
+<!-- STRING INDEX VISUAL -->
+<div style="padding:1.5rem;background:var(--paper);border-bottom:3px solid var(--ink)">
+  <div style="font-size:12px;font-weight:800;color:#888;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">The word "JavaScript" — zero-indexed</div>
+  <div style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:8px">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:4px" id="jsIndexVis"></div>
+  </div>
+  <div style="font-size:11px;font-weight:700;color:#666;margin-top:12px">👆 Hover over any character above</div>
+</div>
+
+<!-- METHOD REFERENCE -->
+<div class="string-section">
+  <div class="str-title">String Methods — The Essential 10</div>
+  <div style="font-size:13px;color:#666;font-weight:700;margin-bottom:4px">Click any card — then try it live below.</div>
+
+  <div class="method-grid" id="methodGrid">
+    <div class="method-card active" onclick="loadMethod('toUpperCase')">
+      <div class="mc2-hdr" style="background:#dbeafe"><span style="color:#1e3a8a">.toUpperCase()</span></div>
+      <div class="mc2-body">ALL CAPS. Returns new string.</div>
+    </div>
+    <div class="method-card" onclick="loadMethod('toLowerCase')">
+      <div class="mc2-hdr" style="background:#dcfce7"><span style="color:#14532d">.toLowerCase()</span></div>
+      <div class="mc2-body">all lowercase. Returns new string.</div>
+    </div>
+    <div class="method-card" onclick="loadMethod('trim')">
+      <div class="mc2-hdr" style="background:#fef9c3"><span style="color:#713f12">.trim()</span></div>
+      <div class="mc2-body">Remove whitespace from both ends.</div>
+    </div>
+    <div class="method-card" onclick="loadMethod('slice')">
+      <div class="mc2-hdr" style="background:#fff7ed"><span style="color:#7c2d12">.slice(start, end)</span></div>
+      <div class="mc2-body">Extract a portion. Negative indices work.</div>
+    </div>
+    <div class="method-card" onclick="loadMethod('includes')">
+      <div class="mc2-hdr" style="background:#f5f0ff"><span style="color:#4c1d95">.includes(sub)</span></div>
+      <div class="mc2-body">Returns true/false. Is substring in there?</div>
+    </div>
+    <div class="method-card" onclick="loadMethod('replace')">
+      <div class="mc2-hdr" style="background:#fdf2f8"><span style="color:#831843">.replace(old,new)</span></div>
+      <div class="mc2-body">Replace FIRST match only.</div>
+    </div>
+    <div class="method-card" onclick="loadMethod('replaceAll')">
+      <div class="mc2-hdr" style="background:#fff0f0"><span style="color:#7f1d1d">.replaceAll(old,new)</span></div>
+      <div class="mc2-body">Replace ALL matches.</div>
+    </div>
+    <div class="method-card" onclick="loadMethod('split')">
+      <div class="mc2-hdr" style="background:#f0fdfa"><span style="color:#134e4a">.split(separator)</span></div>
+      <div class="mc2-body">String → Array. Split on a character.</div>
+    </div>
+    <div class="method-card" onclick="loadMethod('indexOf')">
+      <div class="mc2-hdr" style="background:#f4f4f4"><span style="color:#1f2937">.indexOf(sub)</span></div>
+      <div class="mc2-body">Find first position. -1 if not found.</div>
+    </div>
+    <div class="method-card" onclick="loadMethod('template')">
+      <div class="mc2-hdr" style="background:#fffde7"><span style="color:#713f12">` ${template} `</span></div>
+      <div class="mc2-body">Template literals. Embed variables cleanly.</div>
+    </div>
+  </div>
+
+  <!-- STRING PLAYGROUND -->
+  <div class="str-play">
+    <div class="sp-hdr">
+      <span>String Playground — <span id="activeMethod">.toUpperCase()</span></span>
+      <span style="font-size:10px;color:#888" id="methodHint">Returns ALL CAPS version</span>
+    </div>
+    <div class="sp-body">
+      <div>
+        <div style="font-size:11px;font-weight:800;color:#888;margin-bottom:4px;letter-spacing:1px;text-transform:uppercase">Your string</div>
+        <input class="sp-input" id="strInput" value="Hello, Anjali!" oninput="runMethod()">
+      </div>
+      <div style="font-size:11px;font-weight:800;color:#888;letter-spacing:1px;text-transform:uppercase">Quick strings</div>
+      <div class="sp-methods">
+        <span class="sp-chip" onclick="setStr(this,'Hello, Anjali!')">Hello, Anjali!</span>
+        <span class="sp-chip active" onclick="setStr(this,'  arjun  ')">&nbsp;&nbsp;  arjun  &nbsp;&nbsp;</span>
+        <span class="sp-chip" onclick="setStr(this,'JavaScript')">JavaScript</span>
+        <span class="sp-chip" onclick="setStr(this,'hello hello hello')">hello x3</span>
+        <span class="sp-chip" onclick="setStr(this,'a,b,c,d')">csv</span>
+      </div>
+      <!-- CHAR VISUALISER -->
+      <div>
+        <div style="font-size:11px;font-weight:800;color:#888;margin-bottom:6px;letter-spacing:1px;text-transform:uppercase">Character view (index 0 = first)</div>
+        <div style="overflow-x:auto;padding-bottom:16px">
+          <div id="charVis" style="display:flex;gap:3px;padding-top:18px;min-width:max-content"></div>
+        </div>
+      </div>
+      <div class="sp-result" id="strResult"></div>
+    </div>
+  </div>
+
+  <!-- TEMPLATE LITERAL EXPLAINER -->
+  <div style="margin-top:1.5rem;background:#fffde7;border:2.5px solid var(--ink);border-radius:8px;overflow:hidden;box-shadow:var(--panel-shadow)">
+    <div style="background:var(--ink);color:var(--yellow);padding:8px 14px;font-size:12px;font-weight:800;letter-spacing:1px">Template Literals — The Modern Way</div>
+    <div style="padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div>
+        <div style="font-size:11px;font-weight:800;color:var(--red);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Old way ❌</div>
+        <div class="code-blk" style="font-size:11px;color: white;">
+<span class="kw">let</span> name = <span class="str">"Anjali"</span>;<br>
+<span class="kw">let</span> age = <span class="num">14</span>;<br>
+<span class="str">"Hi, I'm "</span> + name +<br>
+<span class="str">" and I am "</span> + age +<br>
+<span class="str">" years old."</span>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:800;color:var(--green);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Template literal ✅</div>
+        <div class="code-blk" style="font-size:11px;color: white;">
+<span class="kw">let</span> name = <span class="str">"Anjali"</span>;<br>
+<span class="kw">let</span> age = <span class="num">14</span>;<br>
+<span class="str">`Hi, I'm ${</span>name<span class="str">} and</span><br>
+<span class="str">I am ${</span>age<span class="str">} years old.`</span><br>
+<span class="cm">// Even expressions: ${age + 1}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════
+     SCENE 9 — WRAP UP
+══════════════════════════ -->
+<div class="scene-hdr">
+  <span class="sh-num">SCENE 09</span>
+  <span class="sh-title">The Student Teaches</span>
+  <span class="sh-loc">📍 Evening — Room getting dark</span>
+</div>
+
+<div class="row r2">
+  <div class="panel bg-morning" style="min-height:260px">
+    <div class="halftone"></div>
+    <div class="slabel">ANJALI — NOTEBOOK IN HAND</div>
+    <div class="bubbles">
+      <div class="b anjali">Ok so let me try to say it back. if-else is decisions. Loops are repetition. Numbers are tricky because of floats. Math.random needs that formula. Strings are immutable sequences.</div>
+    </div>
+  </div>
+  <div class="panel bg-room" style="min-height:260px">
+    <div class="speed-h"></div>
+    <div class="slabel">ARJUN — SURPRISED</div>
+    <div class="bubbles">
+      <div class="b thought">wait... she actually understood everything</div>
+      <div class="b" style="margin-top:8px">Yeah. That's exactly right. Honestly you explained it back better than my notes.</div>
+      <div class="b anjali" style="margin-top:6px">Teaching is the best way to learn, bhaiya. 😌</div>
+    </div>
+  </div>
+</div>
+
+<div class="row r1">
+  <div class="panel bg-dark" style="min-height:100px;justify-content:center;align-items:center">
+    <div class="speed"></div>
+    <div class="bigtext white" style="text-align:center;font-size:clamp(1.4rem,3.5vw,2.5rem);color: white;">
+      If you can't explain it simply — <span style="color:var(--yellow)">you don't understand it yet.</span>
+      <div style="font-size:.5em;color:#666;margin-top:8px">— Richard Feynman (and also Anjali, apparently)</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SUMMARY ══ -->
+<div class="summary">
+  <div class="sum-title">📓 Chapter 4 — Summary</div>
+  <div class="notebook">
+    <div class="nb-hdr">📖 Arjun's Notes + Anjali's additions ✏️</div>
+    <div class="nb-body">
+      <div class="nb-line">
+        <div class="nb-icon">🧭</div>
+        <div class="nb-text"><strong>if / else if / else</strong> — checks conditions top-to-bottom. First true one runs, everything else is skipped. Order matters completely.</div>
+      </div>
+      <div class="nb-line ye">
+        <div class="nb-icon">🔁</div>
+        <div class="nb-text"><strong>for</strong> = known count. <strong>while</strong> = unknown count, checks before. <strong>do...while</strong> = always runs once, then checks. Always update the condition variable or: infinite loop.</div>
+      </div>
+      <div class="nb-line gr">
+        <div class="nb-icon">🔢</div>
+        <div class="nb-text">One <strong>number</strong> type for everything. IEEE 754 double-precision. Math object: round, floor, ceil, max, min, abs, pow, sqrt, PI, random. NaN and Infinity are both typeof "number".</div>
+      </div>
+      <div class="nb-line or">
+        <div class="nb-icon">₿</div>
+        <div class="nb-text"><strong>0.1 + 0.2 ≠ 0.3 in binary.</strong> For money/crypto: store in integers (paise, satoshis). Display with toFixed(). Compare floats with Number.EPSILON. Real exchanges have lost real money from this.</div>
+      </div>
+      <div class="nb-line bl">
+        <div class="nb-icon">🎲</div>
+        <div class="nb-text"><strong>Random integers:</strong> Math.floor(Math.random() × (max−min+1)) + min. Step 1: scale. Step 2: floor. Step 3: shift. That formula is the only right way.</div>
+      </div>
+      <div class="nb-line te">
+        <div class="nb-icon">🔤</div>
+        <div class="nb-text"><strong>Strings are immutable</strong> — methods return NEW strings. Key methods: toUpperCase, trim, slice, includes, replace, replaceAll, split, indexOf. Template literals beat concatenation always.</div>
+      </div>
+      <div class="nb-line" style="border-left-color:var(--pink)">
+        <div class="nb-icon">🎓</div>
+        <div class="nb-text"><strong>Anjali's lesson:</strong> Explaining something to someone else is the fastest way to find out what you didn't actually understand. Teach to learn.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NEXT CHAPTER -->
+<div class="next-ch">
+  <div class="nc-label">Coming Up</div>
+  <div class="nc-title">Chapter 5: will come soon...</div>
+  <p style="font-size:13px;color:#666;font-weight:700;margin-bottom:1.5rem;line-height:1.6">
+    <!-- Arjun finally connects JavaScript to the actual page. Anjali clicks a button and nothing happens. Then they fix it — and everything lights up. -->
+  </p>
+  <a class="nc-btn" href="#">Chapter 5 →</a>
+</div>
+
+</div><!-- /webtoon -->
+
+<script>
+/* ── IF ELSE PLAYGROUND ── */
+function gradeIt(){
+  const s = parseInt(document.getElementById('scoreInput').value);
+  const out = document.getElementById('gradeResult');
+  let grade, emoji, path;
+  if(s >= 90){grade='A';emoji='🏆';path='score ≥ 90 → TRUE → Grade A'}
+  else if(s >= 80){grade='B';emoji='🥈';path='score ≥ 90 → false → score ≥ 80 → TRUE → Grade B'}
+  else if(s >= 70){grade='C';emoji='👍';path='score ≥ 90 → false → ≥ 80 → false → ≥ 70 → TRUE → Grade C'}
+  else if(s >= 60){grade='D';emoji='😬';path='score ≥ 90,80,70 → all false → ≥ 60 → TRUE → Grade D'}
+  else{grade='F';emoji='📚';path='all conditions false → else → Grade F'}
+  out.innerHTML=`<span style="color:var(--pink)">${emoji} Grade: ${grade}</span>\n<span style="color:#8b949e">// ${path}</span>`;
+}
+gradeIt();
+
+/* ── FOR LOOP ANIMATOR ── */
+const FOR_MAX = 8;
+let forI = 0, forTimer = null;
+function buildForVis(){
+  const v = document.getElementById('for-vis');
+  v.innerHTML='';
+  for(let i=1;i<=FOR_MAX;i++){
+    const c=document.createElement('div');
+    c.className='loop-cell';
+    c.id='fc'+i;
+    c.textContent=i;
+    v.appendChild(c);
+  }
+}
+buildForVis();
+function updateForStep(i){
+  document.getElementById('fi-val').textContent=i;
+  const done = i > FOR_MAX;
+  document.getElementById('fi-cond').textContent=done?'false':'true';
+  document.getElementById('fi-cond').style.color=done?'var(--red)':'var(--green)';
+  for(let j=1;j<=FOR_MAX;j++){
+    const c=document.getElementById('fc'+j);
+    c.className='loop-cell'+(j<i?' done':j===i?' active':'');
+  }
+  const log=document.getElementById('for-log');
+  if(!done) log.innerHTML+='<span class="out-line" style="color:#3fb950">> i = '+i+'</span>\n';
+  else log.innerHTML+='<span class="out-line" style="color:#888">// loop done (i='+i+', '+i+' ≤ '+FOR_MAX+' is false)</span>';
+}
+function stepFor(){
+  if(forI>FOR_MAX) return;
+  forI++;
+  updateForStep(forI);
+}
+function startFor(){
+  resetFor();
+  forTimer=setInterval(()=>{
+    forI++;
+    updateForStep(forI);
+    if(forI>FOR_MAX) clearInterval(forTimer);
+  },500);
+}
+function resetFor(){
+  clearInterval(forTimer);
+  forI=0;
+  document.getElementById('fi-val').textContent='1';
+  document.getElementById('fi-cond').textContent='true';
+  document.getElementById('fi-cond').style.color='var(--green)';
+  document.getElementById('for-log').innerHTML='<span style="color:#484f58">// hit Play or Step</span>';
+  buildForVis();
+}
+
+/* ── WHILE LOOP ANIMATOR ── */
+const WH_INIT=10, WH_DMGE=3;
+let whHp=WH_INIT, whTimer=null;
+function updateWhileStep(){
+  const hp=Math.max(0,whHp);
+  document.getElementById('wh-val').textContent=hp;
+  const alive=hp>0;
+  document.getElementById('wh-cond').textContent=alive?'true':'false';
+  document.getElementById('wh-cond').style.color=alive?'var(--green)':'var(--red)';
+  const pct=Math.max(0,(hp/WH_INIT)*100);
+  const bar=document.getElementById('wh-bar');
+  bar.style.width=pct+'%';
+  bar.style.background=pct>50?'var(--green)':pct>20?'var(--orange)':'var(--red)';
+  const log=document.getElementById('while-log');
+  if(alive) log.innerHTML+='<span class="out-line" style="color:var(--orange)">Health: '+hp+'. Taking '+WH_DMGE+' damage...</span>\n';
+  else log.innerHTML+='<span class="out-line" style="color:var(--red)">// health ≤ 0 → loop ends.</span>';
+}
+function stepWhile(){
+  if(whHp<=0) return;
+  document.getElementById('while-log').innerHTML='';
+  updateWhileStep();
+  whHp-=WH_DMGE;
+}
+function startWhile(){
+  resetWhile();
+  whTimer=setInterval(()=>{
+    updateWhileStep();
+    whHp-=WH_DMGE;
+    if(whHp<=0){clearInterval(whTimer);document.getElementById('wh-cond').textContent='false';document.getElementById('wh-cond').style.color='var(--red)';}
+  },700);
+}
+function resetWhile(){
+  clearInterval(whTimer);
+  whHp=WH_INIT;
+  document.getElementById('wh-val').textContent=WH_INIT;
+  document.getElementById('wh-cond').textContent='true';
+  document.getElementById('wh-cond').style.color='var(--green)';
+  document.getElementById('wh-bar').style.width='100%';
+  document.getElementById('wh-bar').style.background='var(--green)';
+  document.getElementById('while-log').innerHTML='<span style="color:#484f58">// hit Play or Step</span>';
+}
+
+/* ── FINANCE DEMO ── */
+function calcFinance(){
+  const a=parseFloat(document.getElementById('fd1').value)||0;
+  const b=parseFloat(document.getElementById('fd2').value)||0;
+  const raw=a+b;
+  const aPaise=Math.round(a*100), bPaise=Math.round(b*100);
+  const intSum=aPaise+bPaise;
+  const res=document.getElementById('fd-res');
+  res.innerHTML=
+    `<span style="color:#888">// Float addition (dangerous):</span>\n`+
+    `<span style="color:${raw===(a+b)&&String(raw).length>6?'#ff7b72':'#3fb950'}">${a} + ${b} = <strong>${raw}</strong></span>\n`+
+    `<span style="color:#888">// toFixed(2) display only:</span>\n`+
+    `<span style="color:#ffa657">${a} + ${b} ≈ "${raw.toFixed(2)}" (string — don't use for math)</span>\n`+
+    `<span style="color:#888">// Safe integer method (paise):</span>\n`+
+    `<span style="color:#3fb950">${aPaise}p + ${bPaise}p = ${intSum}p → ₹${(intSum/100).toFixed(2)} ✓ exact</span>`;
+}
+calcFinance();
+
+/* ── RANDOM FORMULA ── */
+const stepExplains=[
+  "Math.random() gives you a float anywhere in [0, 1). It can be 0. It can be 0.9999. It will NEVER be exactly 1. This is your raw material.",
+  "We want 6 possible outcomes (1,2,3,4,5,6). So we scale by (max−min+1) = (6−1+1) = 6. Now we have [0, 6). The highest possible is 5.999...",
+  "Math.floor() rounds DOWN to the nearest integer. [0, 6) becomes {0,1,2,3,4,5}. We have exactly 6 equally likely integers. But wrong range.",
+  "We want 1–6, not 0–5. So add min (1). Every number shifts up by 1: {0,1,2,3,4,5} → {1,2,3,4,5,6}. Done. ✓"
+];
+function explainStep(i){
+  document.querySelectorAll('.formula-step').forEach((s,j)=>s.classList.toggle('active',j===i));
+  document.getElementById('stepExplain').textContent=stepExplains[i];
+}
+let rollHistory=[];
+function rollDice(){
+  const mn=parseInt(document.getElementById('rngMin').value)||1;
+  const mx=parseInt(document.getElementById('rngMax').value)||6;
+  if(mn>mx){document.getElementById('rngBig').textContent='?';return;}
+  const r=Math.floor(Math.random()*(mx-mn+1))+mn;
+  document.getElementById('rngBig').textContent=r;
+  document.getElementById('rngBig').style.animation='none';
+  setTimeout(()=>document.getElementById('rngBig').style.animation='',10);
+  document.getElementById('rngFormula').textContent=`Math.floor(Math.random() × (${mx}−${mn}+1)) + ${mn} = ${r}`;
+  rollHistory.unshift(r);
+  if(rollHistory.length>10) rollHistory.pop();
+  const hist=document.getElementById('rngHistory');
+  hist.innerHTML=rollHistory.map(n=>`<span class="rng-badge">${n}</span>`).join('');
+}
+function rollMany(){
+  let i=0;
+  const t=setInterval(()=>{rollDice();if(++i>=10)clearInterval(t);},120);
+}
+
+/* ── STRING METHODS ── */
+let currentMethod='toUpperCase';
+const methodDefs={
+  toUpperCase:{hint:'Returns ALL CAPS version — new string',fn:s=>s.toUpperCase()},
+  toLowerCase:{hint:'Returns all lowercase version — new string',fn:s=>s.toLowerCase()},
+  trim:{hint:'Removes leading/trailing whitespace',fn:s=>s.trim()},
+  slice:{hint:'.slice(0,5) — extracts first 5 chars (change indices in code)',fn:s=>s.slice(0,Math.min(5,s.length))},
+  includes:{hint:'Returns true if string contains "a"',fn:s=>`${s.includes('a')} (checking for "a")`},
+  replace:{hint:'Replaces FIRST occurrence of "l" with "L"',fn:s=>s.replace('l','L')},
+  replaceAll:{hint:'Replaces ALL occurrences of "l" with "L"',fn:s=>s.replaceAll('l','L')},
+  split:{hint:'.split("") — splits into individual characters → Array',fn:s=>JSON.stringify(s.split(''))},
+  indexOf:{hint:'Returns index of first "a". Returns -1 if not found.',fn:s=>`${s.indexOf('a')} (position of first "a")`},
+  template:{hint:'Template literal — embed into a sentence',fn:s=>`Hello! You typed: "${s}" (${s.length} chars)`}
+};
+function loadMethod(name){
+  currentMethod=name;
+  document.querySelectorAll('.method-card').forEach(c=>c.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.getElementById('activeMethod').textContent='.'+name+'()';
+  document.getElementById('methodHint').textContent=methodDefs[name].hint;
+  runMethod();
+}
+function runMethod(){
+  const s=document.getElementById('strInput').value;
+  const out=document.getElementById('strResult');
+  try{
+    const res=methodDefs[currentMethod].fn(s);
+    out.innerHTML=`<span style="color:#888">// input: </span><span style="color:#a5d6ff">"${s}"</span>\n`+
+      `<span style="color:#888">// result: </span><span style="color:#3fb950">${typeof res==='string'?'"'+res+'"':res}</span>`;
+  }catch(e){out.innerHTML=`<span style="color:#ff7b72">Error: ${e.message}</span>`;}
+  buildCharVis(s);
+}
+function setStr(el,val){
+  document.querySelectorAll('.sp-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('strInput').value=val;
+  runMethod();
+}
+function buildCharVis(s){
+  const vis=document.getElementById('charVis');
+  vis.innerHTML='';
+  [...s].forEach((ch,i)=>{
+    const box=document.createElement('div');
+    box.className='char-box';
+    box.innerHTML=`<span class="idx">${i}</span>${ch==' '?'⎵':ch}`;
+    box.addEventListener('mouseenter',()=>box.classList.add('highlight'));
+    box.addEventListener('mouseleave',()=>box.classList.remove('highlight'));
+    vis.appendChild(box);
+  });
+}
+runMethod();
+
+/* ── JS INDEX VIS ── */
+(function(){
+  const word='JavaScript';
+  const wrap=document.getElementById('jsIndexVis');
+  wrap.style.display='flex';
+  wrap.style.gap='3px';
+  [...word].forEach((ch,i)=>{
+    const col=document.createElement('div');
+    col.style.cssText='display:flex;flex-direction:column;align-items:center;gap:4px';
+    const idx=document.createElement('div');
+    idx.style.cssText='font-size:9px;font-weight:800;color:#aaa;font-family:var(--font-code)';
+    idx.textContent=i;
+    const box=document.createElement('div');
+    box.style.cssText='width:28px;height:32px;border:2px solid var(--ink);border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:var(--font-code);font-size:13px;font-weight:800;background:#fff;cursor:pointer;transition:all .2s';
+    box.textContent=ch;
+    box.addEventListener('mouseenter',()=>{box.style.background='var(--teal)';box.style.color='#fff';box.style.borderColor='var(--teal)';idx.style.color='var(--teal)';});
+    box.addEventListener('mouseleave',()=>{box.style.background='#fff';box.style.color='var(--ink)';box.style.borderColor='var(--ink)';idx.style.color='#aaa';});
+    col.appendChild(idx);col.appendChild(box);
+    wrap.appendChild(col);
+  });
+})();
+</script>
+
+<script>
+(function(){
+
+var ALL_CHAPTERS = [
+  { num:1, title:"Why JavaScript Exists",  file:"firstpage.html",      done:true  },
+  { num:2, title:"Variables & Data Types", file:"secondpage.html", done:true  },
+  { num:3, title:"Operator and Data type",              file:"thirdpage.html",        done:true },
+  { num:4, title:"Loop, Number, math and String",       file:"fouthpage.html",        done:true },
+  { num:5, title:"Soon...",               file:"ch5.html",        done:false },
+  { num:6, title:"Soon...",    file:"ch6.html",        done:false },
+  { num:7, title:"Soon...",      file:"ch7.html",        done:false },
+  { num:8, title:"Soon...",          file:"ch8.html",        done:false },
+];
+
+/* ── styles ── */
+var s = document.createElement('style');
+s.textContent =
+  ':root{--tw:264px;--ta:#e63329;--ty:#f5c842}'
+
+  /* toggle tab */
+  +'#jtoc-btn{position:fixed;top:50%;left:0;transform:translateY(-50%);z-index:9999;'
+  +'background:var(--ta);color:#fff;border:none;border-radius:0 5px 5px 0;'
+  +'padding:13px 7px;cursor:pointer;writing-mode:vertical-lr;white-space:nowrap;'
+  +'font-family:"Bangers",cursive;font-size:10px;letter-spacing:2px;'
+  +'box-shadow:2px 0 10px rgba(0,0,0,.5);transition:left .28s ease;user-select:none}'
+  +'body.jtoc-open #jtoc-btn{left:var(--tw)}'
+  +'#jtoc-arr{writing-mode:horizontal-tb;display:block;font-size:12px;'
+  +'transition:transform .28s ease;margin-bottom:4px}'
+  +'body.jtoc-open #jtoc-arr{transform:rotate(180deg)}'
+
+  /* panel */
+  +'#jtoc-panel{position:fixed;top:0;left:calc(-1*var(--tw) - 4px);width:var(--tw);'
+  +'height:100vh;background:#0e0e0e;border-right:2px solid #1f1f1f;z-index:9998;'
+  +'display:flex;flex-direction:column;overflow:hidden;'
+  +'box-shadow:4px 0 24px rgba(0,0,0,.8);transition:left .28s ease}'
+  +'body.jtoc-open #jtoc-panel{left:0}'
+
+  /* overlay */
+  +'#jtoc-ov{display:none;position:fixed;inset:0;z-index:9997;background:rgba(0,0,0,.4)}'
+  +'body.jtoc-open #jtoc-ov{display:block}'
+
+  /* header */
+  +'.jt-hd{background:#080808;border-bottom:2px solid var(--ta);padding:13px 15px;flex-shrink:0}'
+  +'.jt-logo{font-family:"Bangers",cursive;font-size:1.3rem;color:#fff;letter-spacing:3px}'
+  +'.jt-logo b{color:var(--ta);font-weight:400}'
+  +'.jt-sub{font-size:9px;font-weight:800;color:#383838;letter-spacing:2px;text-transform:uppercase;margin-top:2px}'
+
+  /* scroll area */
+  +'.jt-body{flex:1;overflow-y:auto;padding:8px 0}'
+  +'.jt-body::-webkit-scrollbar{width:2px}'
+  +'.jt-body::-webkit-scrollbar-thumb{background:#252525}'
+
+  /* section label */
+  +'.jt-lbl{font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;'
+  +'color:#2c2c2c;padding:10px 15px 3px}'
+
+  /* chapter row — DONE */
+  +'.jt-ch{display:flex;align-items:center;gap:9px;padding:8px 15px;'
+  +'text-decoration:none;color:#a0a0a0;border-left:3px solid transparent;'
+  +'transition:background .12s}'
+  +'.jt-ch:hover{background:#161616}'
+  +'.jt-ch.jt-cur{background:#180a0a;border-left-color:var(--ta);color:#fff}'
+  +'.jt-ch-n{font-family:"Bangers",cursive;font-size:.95rem;color:var(--ta);'
+  +'min-width:24px;letter-spacing:1px}'
+  +'.jt-ch.jt-cur .jt-ch-n{color:var(--ty)}'
+  +'.jt-ch-name{font-size:12px;font-weight:700;flex:1;line-height:1.3}'
+
+  /* chapter row — LOCKED (not done) */
+  +'.jt-lock{display:flex;align-items:center;gap:9px;padding:8px 15px;'
+  +'border-left:3px solid transparent;cursor:default;opacity:1}'
+  +'.jt-lock-n{font-family:"Bangers",cursive;font-size:.95rem;color:#2a2a2a;min-width:24px;letter-spacing:1px}'
+  +'.jt-lock-name{font-size:12px;font-weight:700;flex:1;line-height:1.3;color:#2e2e2e}'
+
+  /* divider */
+  +'.jt-div{height:1px;background:#181818;margin:7px 15px}'
+
+  /* scene rows */
+  +'.jt-sc{display:flex;align-items:center;gap:8px;padding:5px 15px 5px 20px;'
+  +'cursor:pointer;border-left:3px solid transparent;color:#373737;transition:background .12s}'
+  +'.jt-sc:hover{background:#141414;color:#777}'
+  +'.jt-sc.jt-act{border-left-color:var(--ty);color:#ddd;background:#111008}'
+  +'.jt-sc-dot{width:4px;height:4px;border-radius:50%;background:currentColor;flex-shrink:0}'
+  +'.jt-sc.jt-act .jt-sc-dot{background:var(--ty)}'
+  +'.jt-sc-n{font-family:"Bangers",cursive;font-size:.8rem;min-width:32px;'
+  +'letter-spacing:1px;color:inherit}'
+  +'.jt-sc.jt-act .jt-sc-n{color:var(--ty)}'
+  +'.jt-sc-lbl{font-size:11px;font-weight:700;line-height:1.3}'
+
+  /* progress footer */
+  +'.jt-ft{padding:11px 15px;border-top:1px solid #161616;flex-shrink:0;background:#080808}'
+  +'.jt-ft-row{display:flex;justify-content:space-between;font-size:9px;font-weight:800;'
+  +'letter-spacing:1px;text-transform:uppercase;color:#2a2a2a;margin-bottom:5px}'
+  +'.jt-bar{height:2px;background:#1a1a1a;border-radius:1px;overflow:hidden}'
+  +'.jt-fill{height:100%;background:var(--ta);border-radius:1px;transition:width .2s;width:0%}'
+
+  /* push webtoon right on big screens */
+  +'@media(min-width:1100px){.webtoon{transition:margin-left .28s ease}'
+  +'body.jtoc-open .webtoon{margin-left:calc(var(--tw)+16px)}}'
+  +'@media(max-width:600px){:root{--tw:224px}}';
+document.head.appendChild(s);
+
+/* ── detect current page ── */
+var curFile = location.pathname.split('/').pop() || 'index.html';
+if(curFile === '') curFile = 'index.html';
+var curIdx = ALL_CHAPTERS.findIndex(function(c){ return c.file === curFile; });
+var curCh  = ALL_CHAPTERS[curIdx] || {num:'?'};
+
+/* ── build chapter list html ── */
+var chHTML = ALL_CHAPTERS.map(function(ch, i){
+  var isCur = (i === curIdx);
+  if(ch.done){
+    /* clickable */
+    var href = isCur ? '#' : ch.file;
+    return '<a class="jt-ch'+(isCur?' jt-cur':'')+'" href="'+href+'"'
+      +(isCur?' onclick="return false"':'')+' tabindex="0">'
+      +'<span class="jt-ch-n">'+ch.num+'</span>'
+      +'<span class="jt-ch-name">'+ch.title+'</span>'
+      +'</a>';
+  } else {
+    /* locked — looks dim, no click, no badge */
+    return '<div class="jt-lock">'
+      +'<span class="jt-lock-n">'+ch.num+'</span>'
+      +'<span class="jt-lock-name">'+ch.title+'</span>'
+      +'</div>';
+  }
+}).join('');
+
+/* ── build DOM ── */
+var panel = document.createElement('div');
+panel.id = 'jtoc-panel';
+panel.innerHTML =
+  '<div class="jt-hd">'
+  +'<div class="jt-logo">JS<b>TORY</b></div>'
+  +'<div class="jt-sub">Table of Contents</div>'
+  +'</div>'
+  +'<div class="jt-body">'
+  +'<div class="jt-lbl">Chapters</div>'
+  +chHTML
+  +'<div class="jt-div"></div>'
+  +'<div class="jt-lbl">This Chapter</div>'
+  +'<div id="jt-sc-list"></div>'
+  +'</div>'
+  +'<div class="jt-ft">'
+  +'<div class="jt-ft-row"><span>Chapter '+curCh.num+' Progress</span><span id="jt-pct">0%</span></div>'
+  +'<div class="jt-bar"><div class="jt-fill" id="jt-fill"></div></div>'
+  +'</div>';
+
+var btn = document.createElement('button');
+btn.id = 'jtoc-btn';
+btn.setAttribute('aria-label','Toggle Table of Contents');
+btn.innerHTML = '<span id="jtoc-arr">◀</span>CONTENTS';
+
+var ov = document.createElement('div');
+ov.id = 'jtoc-ov';
+
+document.body.appendChild(panel);
+document.body.appendChild(btn);
+document.body.appendChild(ov);
+
+/* ── open / close ── */
+function open(){ document.body.classList.add('jtoc-open'); }
+function close(){ document.body.classList.remove('jtoc-open'); }
+btn.onclick = function(){ document.body.classList.toggle('jtoc-open'); };
+ov.onclick  = close;
+
+/* ── scroll to scene ── */
+window.jtocGo = function(id){
+  var el = document.getElementById(id);
+  if(!el) return;
+  /* topbar height: look for .topbar or sticky element, fallback 50 */
+  var tb = document.querySelector('.topbar');
+  var offset = tb ? tb.offsetHeight + 6 : 56;
+  var y = el.getBoundingClientRect().top + window.scrollY - offset;
+  window.scrollTo({top: y, behavior:'smooth'});
+  if(window.innerWidth < 900) close();
+};
+
+/* ── build scene list from .scene-hdr ── */
+var secs = [];
+function buildSections(){
+  var hdrs = document.querySelectorAll('.scene-hdr');
+  var list = document.getElementById('jt-sc-list');
+  if(!list) return;
+  list.innerHTML = '';
+  secs = [];
+  hdrs.forEach(function(hdr, i){
+    var numEl  = hdr.querySelector('.sh-num');
+    var lblEl  = hdr.querySelector('.sh-title');
+    var num = numEl  ? numEl.textContent.trim()  : ('S'+(i+1));
+    var lbl = lblEl ? lblEl.textContent.trim() : ('Scene '+(i+1));
+    var id  = 'jtoc-s'+i;
+    hdr.id  = id;
+    secs.push({id:id, num:num, lbl:lbl});
+    var div = document.createElement('div');
+    div.className  = 'jt-sc';
+    div.dataset.id = id;
+    div.innerHTML  =
+      '<span class="jt-sc-n">'+num+'</span>'
+      +'<div class="jt-sc-dot"></div>'
+      +'<span class="jt-sc-lbl">'+lbl+'</span>';
+    div.onclick = function(){ jtocGo(id); };
+    list.appendChild(div);
+  });
+}
+
+/* ── active highlight + progress ──
+   Key fix: track which section is "above the fold".
+   Walk forward; last one whose top <= threshold wins.
+   If none qualifies (user scrolled above first section) → highlight first. */
+function tick(){
+  if(!secs.length) return;
+
+  var THRESH = 70; /* px from top — adjust if topbar is taller */
+  var active = null;
+
+  for(var i = 0; i < secs.length; i++){
+    var el = document.getElementById(secs[i].id);
+    if(!el) continue;
+    if(el.getBoundingClientRect().top <= THRESH){
+      active = secs[i]; /* keep overwriting — last one wins */
+    }
+  }
+  /* if scrolled above first section, highlight first */
+  if(!active) active = secs[0];
+
+  document.querySelectorAll('.jt-sc').forEach(function(el){
+    el.classList.toggle('jt-act', el.dataset.id === active.id);
+  });
+
+  /* scroll active item into view inside the panel */
+  var actEl = panel.querySelector('.jt-sc.jt-act');
+  if(actEl){
+    var body = panel.querySelector('.jt-body');
+    var elTop  = actEl.offsetTop;
+    var elBot  = elTop + actEl.offsetHeight;
+    var visTop = body.scrollTop;
+    var visBot = visTop + body.clientHeight;
+    if(elTop < visTop + 20)        body.scrollTop = elTop - 20;
+    else if(elBot > visBot - 20)   body.scrollTop = elBot - body.clientHeight + 20;
+  }
+
+  /* progress */
+  var total = document.documentElement.scrollHeight - window.innerHeight;
+  var pct = total > 0 ? Math.round(window.scrollY / total * 100) : 0;
+  document.getElementById('jt-fill').style.width = pct+'%';
+  document.getElementById('jt-pct').textContent  = pct+'%';
+}
+
+/* ── init ── */
+function init(){
+  buildSections();
+  tick();
+  window.addEventListener('scroll', tick, {passive:true});
+}
+
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+
+})();
+</script>
+
+
+</body>
+</html>

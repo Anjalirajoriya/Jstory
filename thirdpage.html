@@ -1,0 +1,1656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JStory — Chapter 3</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --ink:#0f0f0f;
+  --paper:#faf7f2;
+  --red:#e63329;
+  --yellow:#f5c842;
+  --blue:#1a6fdb;
+  --green:#2aaa5a;
+  --purple:#7c3aed;
+  --orange:#f97316;
+  --teal:#0d9488;
+  --pink:#db2777;
+  --panel-shadow:4px 4px 0 var(--ink);
+  --font-comic:'Bangers',cursive;
+  --font-body:'Nunito',sans-serif;
+  --font-code:'JetBrains Mono',monospace;
+}
+body{background:var(--paper);font-family:var(--font-body);color:var(--ink);overflow-x:hidden}
+
+/* ── TOPBAR ── */
+.topbar{position:sticky;top:0;z-index:100;background:var(--ink);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;height:46px;border-bottom:3px solid var(--orange)}
+.tb-logo{font-family:var(--font-comic);font-size:1.5rem;color:#fff;letter-spacing:3px}.tb-logo span{color:var(--orange)}
+.tb-ch{font-size:11px;font-weight:800;color:#888;letter-spacing:2px;text-transform:uppercase}
+.tb-back{font-size:11px;font-weight:800;color:#555;letter-spacing:1px;text-decoration:none;border:1.5px solid #333;padding:3px 10px;border-radius:3px;transition:all .15s}
+.tb-back:hover{color:#fff;border-color:#fff}
+
+/* ── COVER ── */
+.cover{min-height:100vh;background:linear-gradient(135deg,#0d1a2e 0%,#1a0d2e 50%,#0d2e1a 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:3rem;position:relative;overflow:hidden}
+.cover-dots{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(255,255,255,.05) 1px,transparent 1px);background-size:24px 24px}
+.cover-glow{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 30% 60%,rgba(245,200,66,.08) 0%,transparent 60%),radial-gradient(ellipse at 70% 30%,rgba(249,115,22,.08) 0%,transparent 60%)}
+.cover-ch{font-size:12px;font-weight:800;letter-spacing:6px;color:var(--orange);margin-bottom:.5rem;text-transform:uppercase}
+.cover-title{font-family:var(--font-comic);font-size:clamp(2.8rem,9vw,6.5rem);color:#fff;line-height:.9;margin-bottom:1.5rem;letter-spacing:2px}
+.cover-title em{color:var(--yellow);font-style:normal}
+.cover-title .or{color:var(--orange)}
+.cover-sub{font-size:1rem;color:#aaa;max-width:500px;line-height:1.7;margin-bottom:1.5rem}
+.cover-tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:3rem}
+.cover-tag{font-size:11px;font-weight:800;letter-spacing:1px;padding:4px 12px;border-radius:3px;text-transform:uppercase}
+.cover-scroll{color:#444;font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;animation:bounce 2s infinite;display:flex;flex-direction:column;align-items:center;gap:6px}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+
+/* ── WEBTOON ── */
+.webtoon{max-width:780px;margin:0 auto;border-left:3px solid var(--ink);border-right:3px solid var(--ink)}
+
+/* ── SCENE HEADER ── */
+.scene-hdr{display:flex;align-items:center;gap:12px;padding:14px 20px;background:var(--ink);color:#fff;border-bottom:2px solid var(--orange);position:sticky;top:46px;z-index:50}
+.sh-num{font-family:var(--font-comic);font-size:1.3rem;color:var(--orange);letter-spacing:2px}
+.sh-title{font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;flex:1}
+.sh-loc{font-size:10px;color:#666;font-weight:800;letter-spacing:1px;text-transform:uppercase}
+
+/* ── ROWS ── */
+.row{display:grid;border-bottom:3px solid var(--ink)}
+.r1{grid-template-columns:1fr}
+.r2{grid-template-columns:1fr 1fr}
+.r3{grid-template-columns:2fr 1fr}
+.r3r{grid-template-columns:1fr 2fr}
+.r4{grid-template-columns:1fr 1fr 1fr 1fr}
+
+/* ── PANELS ── */
+.panel{border-right:3px solid var(--ink);min-height:200px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:14px}
+.panel:last-child{border-right:none}
+.bg-room{background:#dde8ff}.bg-cafe{background:#fff3e0}.bg-outdoor{background:#e8f5e9}
+.bg-night{background:#080820}.bg-dark{background:#0d0d1a}
+.bg-white{background:#fff}.bg-yellow{background:#fffde7}.bg-flash{background:#fffbe6}
+.bg-orange{background:#fff7ed}.bg-green{background:#e8f5e9}.bg-red{background:#fff0f0}
+.bg-purple{background:#f5f0ff}.bg-blue{background:#dbeafe}.bg-teal{background:#f0fdfa}
+.bg-code{background:#0d1117}.bg-gray{background:#f4f4f4}
+.speed{position:absolute;inset:0;pointer-events:none;background:repeating-conic-gradient(from 0deg at 50% 130%,rgba(0,0,0,.04) 0deg 2deg,transparent 2deg 5deg)}
+.speed-h{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(90deg,transparent,transparent 34px,rgba(0,0,0,.04) 34px,rgba(0,0,0,.04) 36px)}
+.halftone{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(0,0,0,.07) 1px,transparent 1px);background-size:8px 8px}
+.dots{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(249,115,22,.09) 1px,transparent 1px);background-size:10px 10px}
+
+/* ── BUBBLES ── */
+.bubbles{position:relative;z-index:3;display:flex;flex-direction:column;gap:7px}
+.b{border:2.5px solid var(--ink);border-radius:16px;padding:9px 13px;font-size:13px;font-weight:700;line-height:1.5;background:#fff;position:relative;max-width:92%;box-shadow:2px 2px 0 var(--ink)}
+.b::after{content:'';position:absolute;bottom:-13px;left:16px;border:7px solid transparent;border-top-color:var(--ink)}
+.b.thought{border-style:dashed;background:#f0f4ff;font-style:italic}.b.thought::after{display:none}
+.b.right{align-self:flex-end;border-radius:16px 16px 0 16px;background:var(--blue);color:#fff;border-color:var(--blue);box-shadow:2px 2px 0 rgba(0,0,0,.3)}.b.right::after{border-top-color:var(--blue);left:auto;right:16px}
+.b.kabir{background:var(--orange);color:#fff;border-color:var(--orange);box-shadow:2px 2px 0 rgba(249,115,22,.4)}.b.kabir::after{border-top-color:var(--orange)}
+.b.priya{background:var(--teal);color:#fff;border-color:var(--teal);box-shadow:2px 2px 0 rgba(13,148,136,.4);align-self:flex-end;border-radius:16px 16px 0 16px}.b.priya::after{border-top-color:var(--teal);left:auto;right:16px}
+.b.dev{background:var(--purple);color:#fff;border-color:var(--purple);box-shadow:2px 2px 0 rgba(124,58,237,.4)}.b.dev::after{border-top-color:var(--purple)}
+.b.angry{background:var(--red);color:#fff;border-color:var(--red);clip-path:polygon(0 0,100% 0,100% 78%,90% 100%,80% 78%,0 78%);border-radius:4px}.b.angry::after{display:none}
+.b.system{background:var(--ink);color:#7ee787;border-color:#333;font-family:var(--font-code);font-size:11px;border-radius:4px}.b.system::after{display:none}
+.b.yellow{background:var(--yellow);border-color:var(--ink)}.b.yellow::after{border-top-color:var(--ink)}
+.b.small{font-size:11px;padding:7px 11px}
+
+/* ── LABELS ── */
+.slabel{position:absolute;top:10px;left:10px;font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:rgba(0,0,0,.28);z-index:2}
+.slabel.w{color:rgba(255,255,255,.35)}
+.caption{background:var(--yellow);border:2px solid var(--ink);border-radius:4px;padding:8px 12px;font-size:12px;font-weight:800;position:relative;z-index:3;align-self:flex-start;box-shadow:2px 2px 0 var(--ink)}
+.caption.or{background:var(--orange);color:#fff;border-color:var(--orange)}
+.caption.re{background:var(--red);color:#fff;border-color:var(--red)}
+.caption.gr{background:var(--green);color:#fff;border-color:var(--green)}
+.tbox{background:#fff;border:2px dashed var(--ink);border-radius:10px;padding:10px;font-size:12px;font-weight:700;line-height:1.6;position:relative;z-index:3;box-shadow:2px 2px 0 #ccc}
+.bigtext{font-family:var(--font-comic);font-size:clamp(2rem,6vw,4.5rem);line-height:.95;letter-spacing:2px;position:relative;z-index:2}
+
+/* ── BANNERS ── */
+.banner{border-top:3px solid var(--ink);border-bottom:3px solid var(--ink);padding:10px 2rem;text-align:center;font-family:var(--font-comic);font-size:1.4rem;letter-spacing:4px}
+.banner.orange{background:var(--orange);color:#fff;border-color:var(--orange)}
+.banner.yellow{background:var(--yellow);color:var(--ink)}
+.banner.green{background:var(--green);color:#fff;border-color:var(--green)}
+.banner.red{background:var(--red);color:#fff;border-color:var(--red)}
+.banner.purple{background:var(--purple);color:#fff;border-color:var(--purple)}
+.banner.teal{background:var(--teal);color:#fff;border-color:var(--teal)}
+.banner.blue{background:var(--blue);color:#fff;border-color:var(--blue)}
+.banner.dark{background:#0d0d1a;color:#fff;border-color:#333}
+
+/* ── DIALOGUE STRIP ── */
+.dlg-strip{padding:1.5rem 1.5rem;background:var(--paper);border-bottom:3px solid var(--ink);display:flex;flex-direction:column;gap:10px}
+.dlg-strip.cafe{background:#fff8f0}
+.dlg{display:flex;align-items:flex-start;gap:10px}
+.dlg.r{flex-direction:row-reverse}
+.dlg-who{font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#888;min-width:56px;padding-top:5px}
+.dlg.r .dlg-who{text-align:right}
+.dlg-b{background:#fff;border:2px solid var(--ink);border-radius:12px;padding:9px 13px;font-size:13px;font-weight:700;line-height:1.5;box-shadow:2px 2px 0 var(--ink);max-width:480px}
+.dlg.r .dlg-b{background:var(--blue);color:#fff;border-color:var(--blue);box-shadow:2px 2px 0 rgba(0,0,0,.3)}
+.dlg-b.kb{background:var(--orange);color:#fff;border-color:var(--orange);box-shadow:2px 2px 0 rgba(249,115,22,.4)}
+.dlg-b.pr{background:var(--teal);color:#fff;border-color:var(--teal);box-shadow:2px 2px 0 rgba(13,148,136,.4)}
+.dlg-b.dv{background:var(--purple);color:#fff;border-color:var(--purple);box-shadow:2px 2px 0 rgba(124,58,237,.4)}
+
+/* ── CONCEPT STRIPS ── */
+.concept-strip{padding:2rem 1.5rem;background:var(--ink);border-bottom:3px solid var(--orange);color:#fff}
+.cs-tag{font-size:9px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--orange);margin-bottom:.4rem}
+.cs-title{font-family:var(--font-comic);font-size:2rem;letter-spacing:2px;margin-bottom:1.2rem}
+.cs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.cs-item{background:#1e1e1e;border:1.5px solid #333;border-radius:6px;padding:12px}
+.cs-item.or{border-left:3px solid var(--orange)}.cs-item.ye{border-left:3px solid var(--yellow)}.cs-item.gr{border-left:3px solid var(--green)}.cs-item.bl{border-left:3px solid var(--blue)}.cs-item.pu{border-left:3px solid var(--purple)}.cs-item.te{border-left:3px solid var(--teal)}.cs-item.re{border-left:3px solid var(--red)}
+.cs-item-t{font-size:12px;font-weight:800;margin-bottom:4px}
+.cs-item-t.or{color:var(--orange)}.cs-item-t.ye{color:var(--yellow)}.cs-item-t.gr{color:var(--green)}.cs-item-t.bl{color:var(--blue)}.cs-item-t.pu{color:var(--purple)}.cs-item-t.te{color:var(--teal)}.cs-item-t.re{color:var(--red)}
+.cs-item-d{font-size:11px;color:#aaa;line-height:1.6}
+
+/* ── CODE ── */
+.code-blk{background:#0d1117;border-radius:6px;font-family:var(--font-code);font-size:12px;padding:14px;line-height:1.9;border:1.5px solid #30363d;overflow-x:auto;position:relative;z-index:2}
+.kw{color:#ff7b72}.fn{color:#d2a8ff}.str{color:#a5d6ff}.cm{color:#8b949e;font-style:italic}.num{color:#79c0ff}.cl{color:#ffa657}.ok{color:#3fb950}.op{color:#ff7b72}
+
+/* ── CHARACTER BADGES ── */
+.char-row{display:flex;gap:10px;flex-wrap:wrap;padding:1.5rem;background:var(--paper);border-bottom:3px solid var(--ink)}
+.char-badge{flex:1;min-width:140px;background:#fff;border:2.5px solid var(--ink);border-radius:8px;overflow:hidden;box-shadow:3px 3px 0 var(--ink)}
+.cb-top{padding:8px 12px;font-family:var(--font-comic);font-size:1.1rem;letter-spacing:1px;display:flex;align-items:center;gap:8px}
+.cb-body{padding:8px 12px;font-size:11px;font-weight:700;color:#555;line-height:1.5;border-top:1.5px solid #eee}
+
+/* ── OPERATOR TABLE ── */
+.op-table{width:100%;border-collapse:collapse;font-size:12px;font-weight:700}
+.op-table th{background:var(--ink);color:#fff;padding:8px 12px;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;border:1.5px solid var(--ink);text-align:left}
+.op-table td{padding:9px 12px;border:1.5px solid var(--ink);background:#fff;vertical-align:top;line-height:1.5}
+.op-table tr:nth-child(even) td{background:#f8f8f8}
+.op-table td:first-child{font-family:var(--font-code);font-weight:800;font-size:13px;background:#1e1e1e;color:var(--yellow)}
+.yes{color:var(--green)}.no{color:var(--red)}.warn{color:var(--orange)}
+
+/* ── OPERATOR PLAYGROUND ── */
+.op-play{background:#fff;border:2.5px solid var(--ink);border-radius:8px;overflow:hidden;box-shadow:var(--panel-shadow)}
+.op-hdr{background:var(--ink);color:#fff;padding:8px 14px;font-size:11px;font-weight:700;letter-spacing:1px;display:flex;justify-content:space-between;align-items:center}
+.op-dots{display:flex;gap:5px}
+.op-dot{width:9px;height:9px;border-radius:50%}
+.op-body{padding:14px;display:flex;flex-direction:column;gap:10px}
+.op-input-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.op-input{padding:8px 12px;font-family:var(--font-code);font-size:13px;border:2px solid var(--ink);border-radius:4px;background:var(--paper);outline:none;transition:border-color .2s;width:100px}
+.op-input:focus{border-color:var(--orange)}
+.op-select{padding:8px 12px;font-family:var(--font-code);font-size:13px;border:2px solid var(--ink);border-radius:4px;background:var(--paper);outline:none;cursor:pointer;font-weight:800}
+.op-run{padding:8px 20px;background:var(--orange);color:#fff;border:2px solid var(--ink);border-radius:4px;font-family:var(--font-body);font-size:12px;font-weight:800;cursor:pointer;letter-spacing:1px;transition:all .15s}
+.op-run:hover{background:#c2410c}
+.op-result{background:#0d1117;border-radius:4px;padding:12px;font-family:var(--font-code);font-size:12px;border:1.5px solid #30363d;min-height:80px;line-height:1.8}
+.chip-row{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:#f4f4f4;border:1.5px solid var(--ink);border-radius:4px;padding:4px 10px;font-family:var(--font-code);font-size:11px;font-weight:700;cursor:pointer;transition:all .15s}
+.chip:hover,.chip.active{background:var(--orange);color:#fff;border-color:var(--orange);box-shadow:2px 2px 0 var(--ink)}
+
+/* ── PREFIX/POSTFIX DEMO ── */
+.pp-section{padding:2rem 1.5rem;background:var(--paper);border-bottom:3px solid var(--ink)}
+.pp-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:1rem}
+.pp-box{background:#fff;border:2.5px solid var(--ink);border-radius:8px;overflow:hidden;box-shadow:var(--panel-shadow)}
+.pp-hdr{padding:8px 14px;font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;display:flex;align-items:center;gap:8px;border-bottom:2px solid var(--ink)}
+.pp-body{padding:14px;display:flex;flex-direction:column;gap:10px}
+.pp-var{font-family:var(--font-comic);font-size:3rem;text-align:center;transition:all .3s;padding:10px}
+.pp-var.flash{animation:flashpop .3s ease}
+@keyframes flashpop{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+.pp-log{background:#0d1117;border-radius:4px;padding:10px;font-family:var(--font-code);font-size:11px;border:1.5px solid #30363d;min-height:60px;line-height:1.8}
+.pp-btn{padding:8px 20px;border:2px solid var(--ink);border-radius:4px;font-family:var(--font-body);font-size:12px;font-weight:800;cursor:pointer;transition:all .15s;letter-spacing:1px}
+
+/* ── EQUALITY DEEP DIVE ── */
+.eq-section{padding:2rem 1.5rem;background:var(--paper);border-bottom:3px solid var(--ink)}
+.eq-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:1rem}
+.eq-panel{background:#fff;border:2.5px solid var(--ink);border-radius:8px;overflow:hidden;box-shadow:var(--panel-shadow)}
+.eq-hdr{padding:8px 14px;font-family:var(--font-comic);font-size:1.3rem;letter-spacing:1px;border-bottom:2px solid var(--ink);display:flex;align-items:center;gap:8px}
+.eq-body{padding:14px;display:flex;flex-direction:column;gap:8px}
+.eq-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;border:1.5px solid #eee;font-family:var(--font-code);font-size:12px;font-weight:800;transition:all .2s}
+.eq-row:hover{border-color:var(--orange)}
+.eq-expr{flex:1}
+.eq-result{padding:3px 10px;border-radius:3px;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase}
+.eq-result.t{background:#e8f5e9;color:var(--green)}.eq-result.f{background:#fff0f0;color:var(--red)}
+.eq-note{font-size:10px;font-weight:700;color:#888;font-family:var(--font-body)}
+
+/* ── COERCION EXPLORER ── */
+.coerce-section{padding:2rem 1.5rem;background:var(--paper);border-bottom:3px solid var(--ink)}
+.coerce-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:1rem}
+.coerce-card{background:#fff;border:2.5px solid var(--ink);border-radius:8px;overflow:hidden;box-shadow:3px 3px 0 var(--ink)}
+.cc-hdr{padding:8px 12px;font-family:var(--font-comic);font-size:1rem;letter-spacing:1px;display:flex;align-items:center;gap:8px}
+.cc-body{padding:10px 12px;font-size:11px;font-weight:700;line-height:1.6;color:#444;border-top:1.5px solid #eee}
+.cc-code{background:#0d1117;padding:8px 12px;font-family:var(--font-code);font-size:10px;line-height:1.8;color:#e6edf3}
+
+/* ── INTERACTIVE CONVERTER ── */
+.conv-section{padding:2rem 1.5rem;background:var(--paper);border-bottom:3px solid var(--ink)}
+.conv-panel{background:#fff;border:2.5px solid var(--ink);border-radius:8px;overflow:hidden;box-shadow:var(--panel-shadow)}
+.conv-hdr{background:var(--ink);color:#fff;padding:8px 14px;font-size:11px;font-weight:700;letter-spacing:1px;display:flex;justify-content:space-between;align-items:center}
+.conv-body{padding:14px;display:flex;flex-direction:column;gap:12px}
+.conv-input{width:100%;padding:9px 12px;font-family:var(--font-code);font-size:14px;border:2px solid var(--ink);border-radius:4px;background:var(--paper);outline:none;font-weight:700;transition:border-color .2s}
+.conv-input:focus{border-color:var(--teal)}
+.conv-results{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.conv-box{background:#f8f8f8;border:1.5px solid #ddd;border-radius:6px;padding:10px;text-align:center}
+.conv-box-label{font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:4px}
+.conv-box-val{font-family:var(--font-code);font-size:13px;font-weight:800;padding:6px;background:#fff;border-radius:4px;border:1.5px solid #eee;min-height:32px;display:flex;align-items:center;justify-content:center;transition:all .3s}
+.conv-box-val.true-val{background:#e8f5e9;border-color:var(--green);color:var(--green)}
+.conv-box-val.false-val{background:#fff0f0;border-color:var(--red);color:var(--red)}
+.quick-vals{display:flex;flex-wrap:wrap;gap:6px}
+.qv-chip{background:#f4f4f4;border:1.5px solid var(--ink);border-radius:4px;padding:4px 10px;font-family:var(--font-code);font-size:11px;font-weight:700;cursor:pointer;transition:all .15s}
+.qv-chip:hover{background:var(--teal);color:#fff;border-color:var(--teal);box-shadow:2px 2px 0 var(--ink)}
+
+/* ── COMPARISON SECTION ── */
+.cmp-section{padding:2rem 1.5rem;background:var(--paper);border-bottom:3px solid var(--ink)}
+.cmp-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:1rem}
+.cmp-panel{background:#fff;border:2.5px solid var(--ink);border-radius:8px;overflow:hidden;box-shadow:var(--panel-shadow)}
+.cmp-hdr{padding:8px 14px;font-size:11px;font-weight:700;letter-spacing:1px;border-bottom:2px solid var(--ink)}
+.cmp-body{padding:14px;display:flex;flex-direction:column;gap:8px}
+.cmp-case{background:#f8f8f8;border:1.5px solid #ddd;border-radius:6px;padding:10px;font-family:var(--font-code);font-size:11px;line-height:1.9;cursor:pointer;transition:all .15s;position:relative}
+.cmp-case:hover{border-color:var(--orange);background:#fff8f0}
+.cmp-case .why{display:none;font-family:var(--font-body);font-size:11px;color:#555;font-weight:700;margin-top:6px;padding-top:6px;border-top:1px dashed #ddd;line-height:1.5}
+.cmp-case.open .why{display:block}
+.cmp-case.open{border-color:var(--orange);background:#fff8f0}
+.cmp-tag{position:absolute;top:8px;right:8px;font-size:9px;font-weight:800;padding:2px 7px;border-radius:3px;letter-spacing:1px;text-transform:uppercase}
+
+/* ── DECISION TREE ── */
+.tree-section{padding:2rem 1.5rem;background:#0d1117;border-bottom:3px solid var(--orange)}
+.tree-title{font-family:var(--font-comic);font-size:2rem;letter-spacing:2px;color:#fff;margin-bottom:.5rem;display:flex;align-items:center;gap:10px}
+.tree-sub{font-size:12px;color:#888;font-weight:700;margin-bottom:1.5rem}
+.tree-node{background:#161b22;border:1.5px solid #30363d;border-radius:6px;padding:12px 14px;font-size:12px;font-weight:700;line-height:1.6;position:relative;margin-bottom:0}
+.tree-node.q{border-left:3px solid var(--yellow);color:#fff}.tree-node.a{border-left:3px solid var(--green);color:#aaa}.tree-node.w{border-left:3px solid var(--orange);color:#aaa}
+.tree-arrow{color:#555;font-size:14px;padding:4px 0 4px 20px;display:block}
+.tree-indent{margin-left:24px}
+
+/* ── BINARY EXPLAINER ── */
+.binary-section{padding:2rem 1.5rem;background:var(--paper);border-bottom:3px solid var(--ink)}
+.bin-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:1rem}
+.bin-box{background:#fff;border:2.5px solid var(--ink);border-radius:8px;overflow:hidden;box-shadow:3px 3px 0 var(--ink)}
+.bin-hdr{padding:8px 12px;font-family:var(--font-code);font-size:.85rem;font-weight:800;border-bottom:1.5px solid var(--ink)}
+.bin-steps{padding:10px 12px;display:flex;flex-direction:column;gap:4px}
+.bin-step{display:flex;gap:8px;font-family:var(--font-code);font-size:10px;line-height:1.7;padding:2px 0}
+.bin-step .step-num{color:#888;min-width:24px}.bin-step .step-calc{color:#e6edf3;flex:1}.bin-step .step-bit{color:var(--yellow);font-weight:800;min-width:14px}
+.bin-result{padding:8px 12px;background:#0d1117;font-family:var(--font-code);font-size:11px;line-height:1.8;border-top:1.5px solid var(--ink)}
+
+/* ── TRUTHY/FALSY ── */
+.tf-section{padding:2rem 1.5rem;background:var(--paper);border-bottom:3px solid var(--ink)}
+.tf-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:1rem}
+.tf-box{background:#fff;border:2.5px solid var(--ink);border-radius:8px;overflow:hidden;box-shadow:var(--panel-shadow)}
+.tf-hdr{padding:8px 14px;font-family:var(--font-comic);font-size:1.2rem;letter-spacing:1px;border-bottom:2px solid var(--ink);display:flex;align-items:center;gap:8px}
+.tf-body{padding:12px;display:flex;flex-direction:column;gap:6px}
+.tf-row{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:5px;border:1.5px solid #eee;font-family:var(--font-code);font-size:12px;font-weight:800}
+.tf-row.f{background:#fff5f5;border-color:#fcc}.tf-row.t{background:#f0fff4;border-color:#c6f6d5}
+.tf-badge{font-size:9px;font-weight:800;padding:2px 7px;border-radius:3px;letter-spacing:1px;text-transform:uppercase;margin-left:auto}
+.tf-badge.f{background:#fee2e2;color:var(--red)}.tf-badge.t{background:#dcfce7;color:var(--green)}
+
+/* ── TERNARY ── */
+.ternary-section{padding:2rem 1.5rem;background:var(--paper);border-bottom:3px solid var(--ink)}
+
+/* ── LOGICAL OP DEMO ── */
+.logical-section{padding:2rem 1.5rem;background:var(--paper);border-bottom:3px solid var(--ink)}
+.logical-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:1rem}
+.logical-card{background:#fff;border:2.5px solid var(--ink);border-radius:8px;overflow:hidden;box-shadow:3px 3px 0 var(--ink)}
+.lc-hdr{padding:8px 12px;font-family:var(--font-comic);font-size:1.1rem;letter-spacing:1px;display:flex;align-items:center;gap:8px}
+.lc-body{padding:10px 12px;font-size:11px;font-weight:700;line-height:1.6;color:#444;border-top:1.5px solid #eee}
+.lc-code{background:#0d1117;padding:8px 12px;font-family:var(--font-code);font-size:10px;line-height:1.8;color:#e6edf3}
+
+/* ── BITWISE ── */
+.bit-section{padding:2rem 1.5rem;background:#0d1117;border-bottom:3px solid var(--ink)}
+.bit-title{font-family:var(--font-comic);font-size:2rem;letter-spacing:2px;color:#fff;margin-bottom:.5rem}
+.bit-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:1rem}
+.bit-table th{background:#21262d;color:#aaa;padding:8px 12px;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;border:1.5px solid #30363d;text-align:left}
+.bit-table td{padding:9px 12px;border:1.5px solid #30363d;background:#161b22;vertical-align:top;line-height:1.5;font-family:var(--font-code);font-size:11px;color:#e6edf3}
+.bit-table td:first-child{color:var(--yellow);font-weight:800;font-size:13px}
+.bit-table td:nth-child(2){color:#d2a8ff}
+
+/* ── SUMMARY ── */
+.summary{padding:2.5rem 1.5rem;background:var(--ink);border-top:3px solid var(--orange);color:#fff}
+.sum-title{font-family:var(--font-comic);font-size:2.5rem;letter-spacing:2px;color:var(--orange);margin-bottom:1.5rem}
+.notebook{background:#fef9c3;color:var(--ink);border:2.5px solid var(--ink);border-radius:8px;box-shadow:var(--panel-shadow);overflow:hidden}
+.nb-hdr{background:var(--ink);color:#fff;padding:10px 16px;font-size:12px;font-weight:800;letter-spacing:1px;display:flex;align-items:center;gap:8px}
+.nb-body{padding:18px;display:flex;flex-direction:column;gap:10px}
+.nb-line{display:flex;align-items:flex-start;gap:10px;padding:10px;background:#fff;border:1.5px solid #e8e3d0;border-radius:6px;border-left:4px solid var(--orange)}
+.nb-line.ye{border-left-color:var(--yellow)}.nb-line.gr{border-left-color:var(--green)}.nb-line.bl{border-left-color:var(--blue)}.nb-line.pu{border-left-color:var(--purple)}.nb-line.te{border-left-color:var(--teal)}.nb-line.re{border-left-color:var(--red)}
+.nb-icon{font-size:18px;flex-shrink:0}
+.nb-text{font-size:13px;font-weight:700;line-height:1.5}
+.nb-text strong{color:var(--red)}
+
+.next-ch{padding:3rem 1.5rem;text-align:center;background:var(--paper);border-top:3px solid var(--ink)}
+.nc-label{font-size:10px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:#888;margin-bottom:.5rem}
+.nc-title{font-family:var(--font-comic);font-size:2.5rem;letter-spacing:2px;margin-bottom:1rem}
+.nc-btn{display:inline-block;background:var(--orange);color:#fff;font-family:var(--font-comic);font-size:1.4rem;letter-spacing:2px;padding:12px 36px;border:3px solid var(--ink);border-radius:6px;box-shadow:var(--panel-shadow);cursor:pointer;text-decoration:none;transition:transform .1s,box-shadow .1s}
+.nc-btn:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--ink)}
+
+.out-line{display:block;animation:fadein .25s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+
+@media(max-width:600px){
+  .r2,.r3,.r3r,.r4,.pp-grid,.eq-grid,.cmp-grid,.coerce-grid,.conv-results,.bin-grid,.logical-grid,.tf-grid{grid-template-columns:1fr}
+  .panel{min-height:160px}
+  .cover-title{font-size:3rem}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="tb-logo">JS<span>TORY</span></div>
+  <div class="tb-ch">CHAPTER 3 — OPERATORS, TYPES & COMPARISONS</div>
+  <a class="tb-back" href="secondpage.html">← Ch.2</a>
+</div>
+
+<!-- ══ COVER ══ -->
+<div class="cover">
+  <div class="cover-dots"></div>
+  <div class="cover-glow"></div>
+  <div class="cover-ch">Chapter 3</div>
+  <div class="cover-title">The <em>Group</em><br>Study <or>Problem</or></div>
+  <p class="cover-sub">Arjun's friends show up. What started as solo studying becomes a group debate — and JavaScript gets a lot more interesting.</p>
+  <div class="cover-tags">
+    <span class="cover-tag" style="background:var(--orange);color:#fff">Operators</span>
+    <span class="cover-tag" style="background:var(--yellow);color:var(--ink)">Type Conversion</span>
+    <span class="cover-tag" style="background:var(--red);color:#fff">== vs ===</span>
+    <span class="cover-tag" style="background:var(--teal);color:#fff">Truthy / Falsy</span>
+    <span class="cover-tag" style="background:var(--purple);color:#fff">Comparisons</span>
+    <span class="cover-tag" style="background:var(--blue);color:#fff">Bitwise</span>
+  </div>
+  <div class="cover-scroll">scroll down ▼</div>
+</div>
+
+<div class="webtoon">
+
+<!-- ══ SCENE 1 — SOLO THEN THE KNOCK ══ -->
+<div class="scene-hdr">
+  <span class="sh-num">SCENE 01</span>
+  <span class="sh-title">Solo No More</span>
+  <span class="sh-loc">📍 Arjun's Room — Late Morning</span>
+</div>
+
+<div class="row r2">
+  <div class="panel bg-room" style="min-height:240px">
+    <div class="speed-h"></div>
+    <div class="slabel">ARJUN DEEP IN NOTES</div>
+    <div class="tbox" style="align-self:center;margin-bottom:auto;margin-top:40px;font-size:12px">
+      Ch2 done ✅<br>Variables, types, typeof...<br>Today: Operators.<br>How does JS actually calculate things?
+    </div>
+    <div class="bubbles">
+      <div class="b thought">ok... arithmetic operators. seems easy enough—</div>
+    </div>
+  </div>
+  <div class="panel bg-white" style="min-height:240px">
+    <div class="halftone"></div>
+    <div class="slabel">THE DOOR</div>
+    <div style="position:absolute;top:16px;right:14px;font-size:3rem;z-index:2">🚪</div>
+    <div class="bubbles">
+      <div class="b" style="font-size:2rem;letter-spacing:2px;background:#fffde7;border-color:var(--yellow);font-family:var(--font-comic)">KNOCK<br>KNOCK</div>
+    </div>
+  </div>
+</div>
+
+<!-- FRIENDS ARRIVE -->
+<div class="row r1">
+  <div class="panel bg-cafe" style="min-height:80px;justify-content:center;align-items:center">
+    <div class="dots"></div>
+    <div class="bigtext" style="text-align:center;color:var(--orange)">3 friends. 1 laptop. Instant chaos.</div>
+  </div>
+</div>
+
+<!-- CHARACTER INTROS -->
+<div class="char-row">
+  <div class="char-badge">
+    <div class="cb-top" style="background:#fff7ed">🧢 <span style="color:#c2410c;font-family:var(--font-comic);font-size:1.2rem">Kabir</span></div>
+    <div class="cb-body">"The Questioner." Asks WHY before anything else. Type-safety evangelist.</div>
+  </div>
+  <div class="char-badge">
+    <div class="cb-top" style="background:#f0fdfa">👩‍💻 <span style="color:#0f766e;font-family:var(--font-comic);font-size:1.2rem">Priya</span></div>
+    <div class="cb-body">"The Practitioner." Learns by doing. Always opens devtools first.</div>
+  </div>
+  <div class="char-badge">
+    <div class="cb-top" style="background:#f5f0ff">🤓 <span style="color:#6d28d9;font-family:var(--font-comic);font-size:1.2rem">Dev</span></div>
+    <div class="cb-body">"The Deep Diver." Reads MDN for fun. Loves bitwise operators unironically.</div>
+  </div>
+</div>
+
+<div class="dlg-strip cafe">
+  <div class="dlg">
+    <div class="dlg-who" style="color:var(--orange)">KABIR</div>
+    <div class="dlg-b kb">Arjun bhai, we're all studying the same chapter. Let's do it together. Four brains better than one.</div>
+  </div>
+  <div class="dlg r">
+    <div class="dlg-who" style="color:var(--blue)">ARJUN</div>
+    <div class="dlg-b">...ok fine. Pull up chairs. I was just starting operators.</div>
+  </div>
+  <div class="dlg">
+    <div class="dlg-who" style="color:var(--teal)">PRIYA</div>
+    <div class="dlg-b pr">Operators — isn't that just + - * / ? What's there to study?</div>
+  </div>
+  <div class="dlg">
+    <div class="dlg-who" style="color:var(--purple)">DEV</div>
+    <div class="dlg-b dv">Oh Priya. Oh no. It's not just that. Not even close.</div>
+  </div>
+</div>
+
+<!-- ══ SCENE 2 — ARITHMETIC ══ -->
+<div class="banner orange">— TOPIC 1: ARITHMETIC OPERATORS —</div>
+
+<div class="scene-hdr">
+  <span class="sh-num">SCENE 02</span>
+  <span class="sh-title">More Than Just Math</span>
+  <span class="sh-loc">📍 Group — Laptop Open</span>
+</div>
+
+<div style="padding:1.5rem;background:var(--paper);border-bottom:3px solid var(--ink)">
+  <div class="code-blk" style="color: white;">
+<span class="cm">// The standard ones you know</span><br>
+<span class="num">10</span> + <span class="num">3</span>  <span class="cm">// 13 — addition</span><br>
+<span class="num">10</span> - <span class="num">3</span>  <span class="cm">// 7  — subtraction</span><br>
+<span class="num">10</span> * <span class="num">3</span>  <span class="cm">// 30 — multiplication</span><br>
+<span class="num">10</span> / <span class="num">3</span>  <span class="cm">// 3.333... — division</span><br>
+<span class="num">2</span> ** <span class="num">10</span> <span class="cm">// 1024 — exponentiation (ES2016)</span><br>
+<br>
+<span class="cm">// The sneaky one</span><br>
+<span class="num">10</span> % <span class="num">3</span>  <span class="cm">// 1 — MODULO (remainder after division)</span><br>
+<span class="num">10</span> % <span class="num">2</span>  <span class="cm">// 0 — even numbers always give 0</span><br>
+<span class="cm">//                ^ use this to check even/odd!</span>
+  </div>
+</div>
+
+<div class="dlg-strip cafe">
+  <div class="dlg">
+    <div class="dlg-who" style="color:var(--orange)">KABIR</div>
+    <div class="dlg-b kb">The % sign confuses me every time. Why do we need "remainder"?</div>
+  </div>
+  <div class="dlg r">
+    <div class="dlg-who" style="color:var(--blue)">ARJUN</div>
+    <div class="dlg-b">Real use: check if a number is even or odd. If <code style="font-family:var(--font-code);background:#464746;padding:1px 5px;border-radius:3px">n % 2 = = = 0</code> it's even. Also: every Nth item in a loop — like coloring table rows. Timestamps. Circular arrays.</div>
+  </div>
+  <div class="dlg">
+    <div class="dlg-who" style="color:var(--teal)">PRIYA</div>
+    <div class="dlg-b pr">Can we actually type stuff and see it? I learn better by doing.</div>
+  </div>
+</div>
+
+<!-- ARITHMETIC PLAYGROUND -->
+<div style="padding:1.5rem;background:var(--paper);border-bottom:3px solid var(--ink)">
+  <div class="op-play">
+    <div class="op-hdr">
+      <span>Arithmetic Playground</span>
+      <div class="op-dots">
+        <div class="op-dot" style="background:#ff5f57"></div>
+        <div class="op-dot" style="background:#febc2e"></div>
+        <div class="op-dot" style="background:#28c840"></div>
+      </div>
+    </div>
+    <div class="op-body">
+      <div class="op-input-row">
+        <input class="op-input" id="arith-a" value="10">
+        <select class="op-select" id="arith-op">
+          <option>+</option><option>-</option><option>*</option><option>/</option><option>%</option><option>**</option>
+        </select>
+        <input class="op-input" id="arith-b" value="3">
+        <button class="op-run" onclick="runArith()">= ?</button>
+      </div>
+      <div class="op-result" id="arith-result"><span style="color:#484f58">// result appears here</span></div>
+      <div style="font-size:11px;font-weight:800;color:#888">Quick try: &nbsp;&nbsp;<span style="font-family:var(--font-code)">17 % 5</span> &nbsp;·&nbsp; <span style="font-family:var(--font-code)">2 ** 8</span> &nbsp;·&nbsp; <span style="font-family:var(--font-code)">100 % 7</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- PREFIX / POSTFIX — THE TRAP -->
+<div class="banner yellow" style="color:var(--ink)">— THE ++ TRAP: PREFIX VS POSTFIX —</div>
+
+<div class="dlg-strip cafe">
+  <div class="dlg">
+    <div class="dlg-who" style="color:var(--purple)">DEV</div>
+    <div class="dlg-b dv">Ok the real trap is i++ vs ++i. Most beginners think they're the same.</div>
+  </div>
+  <div class="dlg r">
+    <div class="dlg-who" style="color:var(--orange)">KABIR</div>
+    <div class="dlg-b kb">...aren't they? Both increment by 1?</div>
+  </div>
+  <div class="dlg">
+    <div class="dlg-who" style="color:var(--purple)">DEV</div>
+    <div class="dlg-b dv">They DO both increment. But they return DIFFERENT values when used in an expression. That's the trap.</div>
+  </div>
+</div>
+
+<div class="pp-section">
+  <div style="font-family:var(--font-comic);font-size:2rem;letter-spacing:2px;margin-bottom:6px">Prefix (++i) vs Postfix (i++)</div>
+  <div style="font-size:13px;color:#666;font-weight:700;margin-bottom:1.5rem">Click Step on both. Watch what the console.log prints BEFORE the increment happens.</div>
+  <div class="pp-grid">
+    <div class="pp-box">
+      <div class="pp-hdr" style="background:#fff7ed"><span style="color:var(--orange)">i++</span> — POSTFIX</div>
+      <div class="pp-body">
+        <div class="code-blk" style="font-size:11px; color: white;">
+<span class="kw">let</span> i = <span class="num">5</span>;<br>
+<span class="fn">console</span>.<span class="fn">log</span>(i++); <span class="cm">// prints THEN adds</span><br>
+<span class="fn">console</span>.<span class="fn">log</span>(i);    <span class="cm">// now it's 6</span>
+        </div>
+        <div style="font-size:11px;font-weight:800;color:#888;letter-spacing:1px;text-transform:uppercase">Variable i</div>
+        <div class="pp-var" id="post-var" style="color:var(--orange)">5</div>
+        <div class="pp-log" id="post-log"><span style="color:#484f58">// click Step</span></div>
+        <div style="display:flex;gap:8px">
+          <button class="pp-btn" style="background:var(--orange);color:#fff;border-color:var(--orange);flex:1" onclick="stepPost()">Step ▶</button>
+          <button class="pp-btn" style="flex:1" onclick="resetPost()">↺ Reset</button>
+        </div>
+        <div style="background:#fff8f0;border:1.5px solid var(--orange);border-radius:4px;padding:8px 10px;font-size:11px;font-weight:700;line-height:1.5">
+          <strong>Rule:</strong> console.log sees the value BEFORE the increment. It's like: "give me the current value, then add 1."
+        </div>
+      </div>
+    </div>
+    <div class="pp-box">
+      <div class="pp-hdr" style="background:#f5f0ff"><span style="color:var(--purple)">++i</span> — PREFIX</div>
+      <div class="pp-body">
+        <div class="code-blk" style="font-size:11px ; color: white;">
+<span class="kw">let</span> i = <span class="num">5</span>;<br>
+<span class="fn">console</span>.<span class="fn">log</span>(++i); <span class="cm">// adds THEN prints</span><br>
+<span class="fn">console</span>.<span class="fn">log</span>(i);    <span class="cm">// still 6</span>
+        </div>
+        <div style="font-size:11px;font-weight:800;color:#888;letter-spacing:1px;text-transform:uppercase">Variable i</div>
+        <div class="pp-var" id="pre-var" style="color:var(--purple)">5</div>
+        <div class="pp-log" id="pre-log"><span style="color:#484f58">// click Step</span></div>
+        <div style="display:flex;gap:8px">
+          <button class="pp-btn" style="background:var(--purple);color:#fff;border-color:var(--purple);flex:1" onclick="stepPre()">Step ▶</button>
+          <button class="pp-btn" style="flex:1" onclick="resetPre()">↺ Reset</button>
+        </div>
+        <div style="background:#f5f0ff;border:1.5px solid var(--purple);border-radius:4px;padding:8px 10px;font-size:11px;font-weight:700;line-height:1.5">
+          <strong>Rule:</strong> The increment happens FIRST. console.log sees the new value. It's like: "add 1 first, then give me the value."
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCENE 3 — ASSIGNMENT OPERATORS ══ -->
+<div class="banner" style="background:var(--green);color:#fff;border-color:var(--green)">— ASSIGNMENT OPERATORS & SHORTHANDS —</div>
+
+<div style="padding:1.5rem;background:var(--paper);border-bottom:3px solid var(--ink)">
+  <div style="font-family:var(--font-comic);font-size:1.8rem;letter-spacing:2px;margin-bottom:10px">The Shorthand Rules</div>
+  <div style="font-size:13px;color:#666;font-weight:700;margin-bottom:1rem">Kabir asks: "why write <code style="font-family:var(--font-code);background:#f0f0f0;padding:2px 6px;border-radius:3px">x = x + 5</code> when you can write <code style="font-family:var(--font-code);background:#f0f0f0;padding:2px 6px;border-radius:3px">x += 5</code>?"</div>
+  <table class="op-table">
+    <thead><tr><th>Shorthand</th><th>Full Form</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td style="color: #28940d;">x += 5</td><td>x = x + 5</td><td>Add 5 to x, store back</td></tr>
+      <tr><td style="color: #28940d;">x -= 3 </td><td>x = x - 3</td><td>Subtract 3, store back</td></tr>
+      <tr><td style="color: #28940d;">x *= 2</td><td>x = x * 2</td><td>Double x, store back</td></tr>
+      <tr><td style="color: #28940d;">x /= 4</td><td>x = x / 4</td><td>Divide by 4, store back</td></tr>
+      <tr><td style="color: #28940d;">x %= 7</td><td>x = x % 7</td><td>Remainder of x÷7, store back</td></tr>
+      <tr><td style="color: #28940d;">x **= 3</td><td>x = x ** 3</td><td>Cube x, store back</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══ SCENE 4 — COMPARISON: THE BIG DEBATE ══ -->
+<div class="banner red">— TOPIC 2: == vs === — THE GROUP DEBATE —</div>
+
+<div class="scene-hdr">
+  <span class="sh-num">SCENE 03</span>
+  <span class="sh-title">The Question That Broke the Group</span>
+  <span class="sh-loc">📍 Someone Types 7 == "7" and Hits Enter</span>
+</div>
+
+<div class="row r2">
+  <div class="panel bg-white" style="min-height:240px;justify-content:flex-start;padding-top:16px">
+    <div class="halftone"></div>
+    <div class="slabel">PRIYA — DEVTOOLS OPEN</div>
+    <div class="bubbles">
+      <div class="b priya">Wait wait wait. I just typed this in the console—</div>
+      <div class="code-blk" style="margin-top:8px;font-size:12px ; color: white;">
+<span class="num">7</span> = = <span class="str">"7"</span>  <span class="cm">// true???</span><br>
+<span class="num">0</span> = = <span class="kw">false</span>  <span class="cm">// true???</span>
+      </div>
+      <div class="b priya" style="margin-top:8px">The NUMBER 7 equals the STRING "7"?? That makes no sense!</div>
+    </div>
+  </div>
+  <div class="panel bg-red" style="min-height:240px">
+    <div class="speed"></div>
+    <div class="slabel">KABIR'S REACTION</div>
+    <div class="bubbles">
+      <div class="b angry" style="font-size:1.1rem">WHAT IS THIS LANGUAGE</div>
+      <div class="b kabir" style="margin-top:10px">This is why people say JavaScript is broken.</div>
+      <div class="b" style="margin-top:8px;font-size:12px">It's not broken. It's "type coercion." == converts types before comparing. That's the problem.</div>
+    </div>
+  </div>
+</div>
+
+<div class="dlg-strip">
+  <div class="dlg">
+    <div class="dlg-who" style="color:var(--purple)">DEV</div>
+    <div class="dlg-b dv">There are TWO equality operators. == is loose. === is strict. One of them you should basically never use.</div>
+  </div>
+  <div class="dlg r">
+    <div class="dlg-who" style="color:var(--orange)">KABIR</div>
+    <div class="dlg-b kb">Which one do we actually use?</div>
+  </div>
+  <div class="dlg">
+    <div class="dlg-who" style="color:var(--blue)">ARJUN</div>
+    <div class="dlg-b">Always ===. Always. Never ==. Pretend == doesn't exist unless you have a very specific reason.</div>
+  </div>
+</div>
+
+<!-- EQUALITY DEEP DIVE -->
+<div class="eq-section">
+  <div style="font-family:var(--font-comic);font-size:2rem;letter-spacing:2px;margin-bottom:6px">Strict === vs Loose ==</div>
+  <div style="font-size:13px;color:#666;font-weight:700;margin-bottom:1rem">Click any row to see WHY it evaluates that way.</div>
+  <div class="eq-grid">
+    <div class="eq-panel">
+      <div class="eq-hdr" style="background:#fff0f0"><span style="color:var(--red)">==</span> LOOSE — coerces first</div>
+      <div class="eq-body">
+        <div class="eq-row" onclick="toggleCmp(this)">
+          <span class="eq-expr">7 == "7"</span>
+          <span class="eq-result t">TRUE</span>
+          <div class="why">JS converts "7" (string) → 7 (number), then compares 7 === 7. Different types but == doesn't care — it forces them equal.</div>
+        </div>
+        <div class="eq-row" onclick="toggleCmp(this)">
+          <span class="eq-expr">0 == false</span>
+          <span class="eq-result t">TRUE</span>
+          <div class="why">false → 0 (boolean to number). Then 0 === 0 is true. This is why form validation breaks when checking for empty fields with ==.</div>
+        </div>
+        <div class="eq-row" onclick="toggleCmp(this)">
+          <span class="eq-expr">null == undefined</span>
+          <span class="eq-result t">TRUE</span>
+          <div class="why">Special case rule in the == algorithm: null and undefined are ONLY equal to each other (and themselves) under ==. This one is actually useful sometimes.</div>
+        </div>
+        <div class="eq-row" onclick="toggleCmp(this)">
+          <span class="eq-expr">"" == false</span>
+          <span class="eq-result t">TRUE</span>
+          <div class="why">false → 0, then "" → 0, then 0 === 0. Empty string and false both coerce to 0. This kind of chain is why == causes bugs.</div>
+        </div>
+        <div class="eq-row" onclick="toggleCmp(this)">
+          <span class="eq-expr">[] == false</span>
+          <span class="eq-result t">TRUE</span>
+          <div class="why">An empty array is truthy... but == converts it: [] → "" → 0, and false → 0. So 0 === 0. Mind-bending? Yes. Use === instead.</div>
+        </div>
+        <div class="eq-row" onclick="toggleCmp(this)">
+          <span class="eq-expr">NaN == NaN</span>
+          <span class="eq-result f">FALSE</span>
+          <div class="why">NaN is the only value NOT equal to itself — in both == and ===. Use Number.isNaN() to check for NaN.</div>
+        </div>
+      </div>
+    </div>
+    <div class="eq-panel">
+      <div class="eq-hdr" style="background:#e8f5e9"><span style="color:var(--green)">===</span> STRICT — no coercion</div>
+      <div class="eq-body">
+        <div class="eq-row" onclick="toggleCmp(this)">
+          <span class="eq-expr">7 === "7"</span>
+          <span class="eq-result f">FALSE</span>
+          <div class="why">Different types (number vs string). No conversion happens. Stops immediately: types don't match → false.</div>
+        </div>
+        <div class="eq-row" onclick="toggleCmp(this)">
+          <span class="eq-expr">0 === false</span>
+          <span class="eq-result f">FALSE</span>
+          <div class="why">Number vs boolean. Different types. === never converts. This is the safe, predictable result you actually want.</div>
+        </div>
+        <div class="eq-row" onclick="toggleCmp(this)">
+          <span class="eq-expr">null === undefined</span>
+          <span class="eq-result f">FALSE</span>
+          <div class="why">Both are "empty" but they ARE different types. null is object-typed, undefined is undefined-typed. Strict: different types → false.</div>
+        </div>
+        <div class="eq-row" onclick="toggleCmp(this)">
+          <span class="eq-expr">7 === 7</span>
+          <span class="eq-result t">TRUE</span>
+          <div class="why">Same type (number), same value (7). === simply checks: type match? ✓. Value match? ✓. Result: true. Clean, predictable.</div>
+        </div>
+        <div class="eq-row" onclick="toggleCmp(this)">
+          <span class="eq-expr">"hi" === "hi"</span>
+          <span class="eq-result t">TRUE</span>
+          <div class="why">Same type (string), same content. Strings are compared character by character. Identical → true.</div>
+        </div>
+        <div class="eq-row" onclick="toggleCmp(this)">
+          <span class="eq-expr">{} === {}</span>
+          <span class="eq-result f">FALSE</span>
+          <div class="why">Two separate objects in memory. === for objects compares REFERENCES (memory addresses), not content. They look the same but they're different objects. Same rule for arrays.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCENE 5 — TYPE CONVERSION ══ -->
+<div class="banner teal">— TOPIC 3: TYPE CONVERSION — EXPLICIT VS IMPLICIT —</div>
+
+<div class="scene-hdr">
+  <span class="sh-num">SCENE 04</span>
+  <span class="sh-title">Making the Conversion Safe</span>
+  <span class="sh-loc">📍 Kabir vs Dev — Argument Begins</span>
+</div>
+
+<div class="row r2">
+  <div class="panel bg-cafe" style="min-height:220px">
+    <div class="dots"></div>
+    <div class="slabel">KABIR</div>
+    <div class="bubbles">
+      <div class="b kabir">So JS was just randomly converting my types this whole time and I didn't even know?</div>
+    </div>
+  </div>
+  <div class="panel bg-white" style="min-height:220px">
+    <div class="halftone"></div>
+    <div class="slabel">DEV</div>
+    <div class="bubbles">
+      <div class="b dev">Implicit coercion — yes. It happens behind the scenes with ==, +, if statements. The fix? You do it EXPLICITLY. You're in control.</div>
+      <div class="b dev" style="margin-top:6px">The rule: use the TYPE NAME as a function. Number(). String(). Boolean().</div>
+    </div>
+  </div>
+</div>
+
+<!-- CONVERSION CARDS -->
+<div class="coerce-section">
+  <div style="font-family:var(--font-comic);font-size:2rem;letter-spacing:2px;margin-bottom:1rem">Explicit Conversion — 3 Directions</div>
+  <div class="coerce-grid">
+    <div class="coerce-card">
+      <div class="cc-hdr" style="background:#f0fdfa">🔢 <span style="color:#0f766e;font-family:var(--font-comic)">→ Number</span></div>
+      <div class="cc-body">
+        String "123" → 123 ✓<br>
+        " 45 " (spaces) → 45 ✓<br>
+        true → 1 · false → 0<br>
+        null → 0<br>
+        undefined → NaN<br>
+        "hello" → NaN
+      </div>
+      <div class="cc-code">
+<span class="cl">Number</span>(<span class="str">"99.5"</span>) <span style="color:#3fb950">// 99.5</span><br>
+<span class="cl">Number</span>(<span class="kw">true</span>)   <span style="color:#3fb950">// 1</span><br>
+<span class="cl">Number</span>(<span class="str">"hi"</span>)    <span style="color:#ff7b72">// NaN</span><br>
+<span class="fn">parseInt</span>(<span class="str">"100px"</span>) <span style="color:#3fb950">// 100</span>
+      </div>
+    </div>
+    <div class="coerce-card">
+      <div class="cc-hdr" style="background:#dbeafe">🔤 <span style="color:#1e3a8a;font-family:var(--font-comic)">→ String</span></div>
+      <div class="cc-body">
+        Everything becomes a string.<br>
+        Works on null, undefined too.<br>
+        Arrays → comma-joined.<br>
+        null → "null"<br>
+        undefined → "undefined"<br>
+        [1,2] → "1,2"
+      </div>
+      <div class="cc-code">
+<span class="cl">String</span>(<span class="num">123</span>)    <span style="color:#3fb950">// "123"</span><br>
+<span class="cl">String</span>(<span class="kw">true</span>)   <span style="color:#3fb950">// "true"</span><br>
+<span class="cl">String</span>(<span class="kw">null</span>)   <span style="color:#3fb950">// "null"</span><br>
+<span class="num">99</span>.<span class="fn">toString</span>()  <span style="color:#3fb950">// "99"</span>
+      </div>
+    </div>
+    <div class="coerce-card">
+      <div class="cc-hdr" style="background:#fef9c3">✅ <span style="color:#713f12;font-family:var(--font-comic)">→ Boolean</span></div>
+      <div class="cc-body">
+        6 FALSY values only:<br>
+        false · 0 · "" · null<br>
+        undefined · NaN<br><br>
+        EVERYTHING else is truthy.<br>
+        "false" (string) → true!<br>
+        [] → true · {} → true
+      </div>
+      <div class="cc-code">
+<span class="cl">Boolean</span>(<span class="num">0</span>)     <span style="color:#ff7b72">// false</span><br>
+<span class="cl">Boolean</span>(<span class="str">""</span>)    <span style="color:#ff7b72">// false</span><br>
+<span class="cl">Boolean</span>([])    <span style="color:#3fb950">// true!</span><br>
+<span class="cl">Boolean</span>(<span class="str">"false"</span>) <span style="color:#3fb950">// true!</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INTERACTIVE CONVERTER -->
+<div class="conv-section">
+  <div style="font-family:var(--font-comic);font-size:2rem;letter-spacing:2px;margin-bottom:6px">Live Type Converter</div>
+  <div style="font-size:13px;color:#666;font-weight:700;margin-bottom:1.5rem">Priya's idea: type any value and see all three conversions at once.</div>
+  <div class="conv-panel">
+    <div class="conv-hdr">
+      <span>Try any JS value</span>
+      <span style="font-size:10px;color:#888">converts to Number, String, and Boolean simultaneously</span>
+    </div>
+    <div class="conv-body">
+      <input class="conv-input" id="convInput" value="null" oninput="runConv()" spellcheck="false">
+      <div class="quick-vals">
+        <span class="qv-chip" onclick="setConv(this, 'null')">null</span>
+<span class="qv-chip" onclick="setConv(this, 'undefined')">undefined</span>
+<span class="qv-chip" onclick="setConv(this, '0')">0</span>
+<span class="qv-chip" onclick='setConv(this, "\"\"")'>""</span>
+<span class="qv-chip" onclick='setConv(this, "\"hello\"")'>"hello"</span>
+<span class="qv-chip" onclick="setConv(this, 'true')">true</span>
+<span class="qv-chip" onclick="setConv(this, 'false')">false</span>
+<span class="qv-chip" onclick="setConv(this, '[]')">[]</span>
+<span class="qv-chip" onclick="setConv(this, '{}')">{}</span>
+<span class="qv-chip" onclick="setConv(this, 'NaN')">NaN</span>
+<span class="qv-chip" onclick='setConv(this, "\"100px\"")'>"100px"</span>
+<span class="qv-chip" onclick='setConv(this, "\"3.14\"")'>"3.14"</span>
+      </div>
+      <div class="conv-results">
+        <div class="conv-box">
+          <div class="conv-box-label">Number()</div>
+          <div class="conv-box-val" id="cv-num">—</div>
+        </div>
+        <div class="conv-box">
+          <div class="conv-box-label">String()</div>
+          <div class="conv-box-val" id="cv-str">—</div>
+        </div>
+        <div class="conv-box">
+          <div class="conv-box-label">Boolean()</div>
+          <div class="conv-box-val" id="cv-bool">—</div>
+        </div>
+      </div>
+      <div style="background:#0d1117;border-radius:4px;padding:12px;font-family:var(--font-code);font-size:11px;border:1.5px solid #30363d;line-height:1.9" id="conv-explain"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCENE 6 — TRUTHY/FALSY ══ -->
+<div class="banner" style="background:var(--yellow);color:var(--ink)">— THE 6 FALSY VALUES — MEMORIZE THESE —</div>
+
+<div class="dlg-strip cafe">
+  <div class="dlg">
+    <div class="dlg-who" style="color:var(--orange)">KABIR</div>
+    <div class="dlg-b kb">Wait so empty array [] is TRUTHY? An empty thing is truthy?</div>
+  </div>
+  <div class="dlg r">
+    <div class="dlg-who" style="color:var(--purple)">DEV</div>
+    <div class="dlg-b dv">Yes. Because it EXISTS. It's an object in memory. Only 6 specific values are falsy. Everything else — including [], {}, "false", -1 — is truthy.</div>
+  </div>
+  <div class="dlg">
+    <div class="dlg-who" style="color:var(--teal)">PRIYA</div>
+    <div class="dlg-b pr">So if I do if([]) it runs? That seems wrong.</div>
+  </div>
+  <div class="dlg">
+    <div class="dlg-who" style="color:var(--blue)">ARJUN</div>
+    <div class="dlg-b">It runs. Use array.length === 0 to actually check if it's empty.</div>
+  </div>
+</div>
+
+<div class="tf-section">
+  <div style="font-family:var(--font-comic);font-size:2rem;letter-spacing:2px;margin-bottom:1rem">Truthy & Falsy — The Full List</div>
+  <div class="tf-grid">
+    <div class="tf-box">
+      <div class="tf-hdr" style="background:#fff0f0">❌ <span style="color:var(--red)">The 6 Falsy Values</span></div>
+      <div class="tf-body">
+        <div class="tf-row f"><span style="font-family:var(--font-code)">false</span><span class="tf-badge f">falsy</span></div>
+        <div class="tf-row f"><span style="font-family:var(--font-code)">0</span><span class="tf-badge f">falsy</span><span class="eq-note" style="margin-left:8px">also -0 and 0n</span></div>
+        <div class="tf-row f"><span style="font-family:var(--font-code)">""</span><span class="tf-badge f">falsy</span><span class="eq-note" style="margin-left:8px">empty string only</span></div>
+        <div class="tf-row f"><span style="font-family:var(--font-code)">null</span><span class="tf-badge f">falsy</span></div>
+        <div class="tf-row f"><span style="font-family:var(--font-code)">undefined</span><span class="tf-badge f">falsy</span></div>
+        <div class="tf-row f"><span style="font-family:var(--font-code)">NaN</span><span class="tf-badge f">falsy</span></div>
+        <div style="font-size:11px;font-weight:700;color:#888;margin-top:6px;padding:8px;background:#fff8f8;border-radius:4px">That's the complete list. Six values. Everything else is truthy.</div>
+      </div>
+    </div>
+    <div class="tf-box">
+      <div class="tf-hdr" style="background:#e8f5e9">✅ <span style="color:var(--green)">Surprising Truthy Values</span></div>
+      <div class="tf-body">
+        <div class="tf-row t"><span style="font-family:var(--font-code)">[]</span><span class="tf-badge t">truthy</span><span class="eq-note" style="margin-left:8px">empty array is an object</span></div>
+        <div class="tf-row t"><span style="font-family:var(--font-code)">{}</span><span class="tf-badge t">truthy</span><span class="eq-note" style="margin-left:8px">empty object exists</span></div>
+        <div class="tf-row t"><span style="font-family:var(--font-code)">"false"</span><span class="tf-badge t">truthy</span><span class="eq-note" style="margin-left:8px">non-empty string!</span></div>
+        <div class="tf-row t"><span style="font-family:var(--font-code)">"0"</span><span class="tf-badge t">truthy</span><span class="eq-note" style="margin-left:8px">the string "0", not number</span></div>
+        <div class="tf-row t"><span style="font-family:var(--font-code)">-1</span><span class="tf-badge t">truthy</span><span class="eq-note" style="margin-left:8px">any non-zero number</span></div>
+        <div class="tf-row t"><span style="font-family:var(--font-code)">Infinity</span><span class="tf-badge t">truthy</span></div>
+        <div style="font-size:11px;font-weight:700;color:#888;margin-top:6px;padding:8px;background:#f0fff4;border-radius:4px">Rule: check <code style="font-family:var(--font-code);background:#e8f5e9;padding:1px 5px;border-radius:3px">arr.length</code> not just <code style="font-family:var(--font-code);background:#e8f5e9;padding:1px 5px;border-radius:3px">arr</code>.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCENE 7 — LOGICAL OPERATORS ══ -->
+<div class="banner blue">— TOPIC 4: LOGICAL OPERATORS & SHORT-CIRCUIT —</div>
+
+<div class="dlg-strip cafe">
+  <div class="dlg">
+    <div class="dlg-who" style="color:var(--purple)">DEV</div>
+    <div class="dlg-b dv">The most USEFUL hidden feature of && and || is short-circuit evaluation. Most people miss this completely.</div>
+  </div>
+  <div class="dlg r">
+    <div class="dlg-who" style="color:var(--orange)">KABIR</div>
+    <div class="dlg-b kb">Short-circuit? What does that mean?</div>
+  </div>
+  <div class="dlg">
+    <div class="dlg-who" style="color:var(--purple)">DEV</div>
+    <div class="dlg-b dv">If && finds a falsy value on the LEFT, it stops. Never looks right. If || finds a truthy value on the LEFT, it stops. That's how you safely check for null without crashing.</div>
+  </div>
+</div>
+
+<div class="logical-section">
+  <div style="font-family:var(--font-comic);font-size:2rem;letter-spacing:2px;margin-bottom:1rem">Logical Operators — Real Usage</div>
+  <div class="logical-grid">
+    <div class="logical-card">
+      <div class="lc-hdr" style="background:#dbeafe">⚡ <span style="color:#1e3a8a;font-family:var(--font-comic)">&& AND</span></div>
+      <div class="lc-body">True only if BOTH sides truthy. Stops at first falsy — never evaluates right side.</div>
+      <div class="lc-code">
+<span class="kw">let</span> user = <span class="kw">null</span>;<br>
+<span class="cm">// Safe — stops at user (null)</span><br>
+user && user.<span class="fn">name</span> === <span class="str">"Admin"</span><br>
+<span class="cm">// no crash ✓</span>
+      </div>
+    </div>
+    <div class="logical-card">
+      <div class="lc-hdr" style="background:#dcfce7">✅ <span style="color:#14532d;font-family:var(--font-comic)">|| OR</span></div>
+      <div class="lc-body">True if EITHER is truthy. Stops at first truthy — perfect for default values.</div>
+      <div class="lc-code">
+<span class="kw">let</span> name = <span class="str">""</span>; <span class="cm">// falsy</span><br>
+<span class="kw">let</span> display = name || <span class="str">"Guest"</span>;<br>
+<span class="cm">// display = "Guest" ✓</span><br>
+<span class="cm">// great default value pattern</span>
+      </div>
+    </div>
+    <div class="logical-card">
+      <div class="lc-hdr" style="background:#fef9c3">🔄 <span style="color:#713f12;font-family:var(--font-comic)">! NOT</span></div>
+      <div class="lc-body">Inverts truthy/falsy. Coerces to boolean first, then flips. !! (double not) converts anything to boolean.</div>
+      <div class="lc-code">
+!<span class="kw">true</span>   <span style="color:#ff7b72">// false</span><br>
+!<span class="num">0</span>      <span style="color:#3fb950">// true</span><br>
+!<span class="str">""</span>     <span style="color:#3fb950">// true</span><br>
+!!<span class="str">"hi"</span>  <span style="color:#3fb950">// true (toBool)</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCENE 8 — TERNARY ══ -->
+<div class="banner" style="background:var(--purple);color:#fff;border-color:var(--purple)">— TOPIC 5: TERNARY OPERATOR — THE ONE-LINER —</div>
+
+<div class="ternary-section">
+  <div style="font-family:var(--font-comic);font-size:2rem;letter-spacing:2px;margin-bottom:1rem">condition ? ifTrue : ifFalse</div>
+  <div style="font-size:13px;color:#666;font-weight:700;margin-bottom:1.5rem">Dev calls it "the most elegant operator in JS." Kabir calls it "unreadable." Both are right depending on how you use it.</div>
+  <div class="code-blk" style="color: white;">
+<span class="cm">// Old way: if-else</span><br>
+<span class="kw">let</span> message;<br>
+<span class="kw">if</span> (age &gt;= <span class="num">18</span>) {<br>
+&nbsp;&nbsp;message = <span class="str">"You can vote."</span>;<br>
+} <span class="kw">else</span> {<br>
+&nbsp;&nbsp;message = <span class="str">"Too young."</span>;<br>
+}<br>
+<br>
+<span class="cm">// Ternary: same result, one line</span><br>
+<span class="kw">const</span> message = age &gt;= <span class="num">18</span> ? <span class="str">"You can vote."</span> : <span class="str">"Too young."</span>;<br>
+<br>
+<span class="cm">// ⚠️ Don't NEST ternaries — it becomes unreadable fast</span><br>
+<span class="cm">// condition ? a : condition2 ? b : c  ← bad</span>
+  </div>
+
+  <!-- LIVE TERNARY DEMO -->
+  <div style="margin-top:1.5rem">
+    <div class="op-play">
+      <div class="op-hdr"><span>Ternary Playground</span></div>
+      <div class="op-body">
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <div style="font-size:12px;font-weight:800;color:#888">age =</div>
+          <input class="op-input" id="tern-age" value="20" type="number" style="width:80px">
+          <button class="op-run" onclick="runTernary()" style="background:var(--purple)">Evaluate ▶</button>
+        </div>
+        <div class="op-result" id="tern-result"><span style="color:#484f58">// hit evaluate</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCENE 9 — RELATIONAL COMPARISON ══ -->
+<div class="banner orange">— TOPIC 6: RELATIONAL COMPARISONS < > — THE WEIRD RULES —</div>
+
+<div class="scene-hdr">
+  <span class="sh-num">SCENE 05</span>
+  <span class="sh-title">The Rules That Break Your Brain</span>
+  <span class="sh-loc">📍 Priya Finds Something in the Console</span>
+</div>
+
+<div class="row r2">
+  <div class="panel bg-white" style="min-height:220px">
+    <div class="halftone"></div>
+    <div class="slabel">PRIYA — CONSOLE AGAIN</div>
+    <div class="bubbles">
+      <div class="b priya">I found something. Watch this.</div>
+      <div class="code-blk" style="margin-top:8px;font-size:12px ;color: white;">
+<span class="str">"10"</span> &gt; <span class="str">"9"</span>  <span class="cm">// false ??</span>
+      </div>
+      <div class="b priya" style="margin-top:8px">10 is bigger than 9. But this says false?</div>
+    </div>
+  </div>
+  <div class="panel bg-yellow" style="min-height:220px;justify-content:center">
+    <div class="halftone"></div>
+    <div class="slabel">KABIR SIGHS</div>
+    <div class="bigtext ink" style="text-align:center;font-size:2rem">here we<br>go again</div>
+    <div class="b" style="margin-top:8px;font-size:12px">Both sides are STRINGS. So JS does dictionary comparison. "9" comes after "10" alphabetically — same as "banana" > "apple".</div>
+  </div>
+</div>
+
+<div class="cmp-section">
+  <div style="font-family:var(--font-comic);font-size:2rem;letter-spacing:2px;margin-bottom:6px">Relational Comparison Rules</div>
+  <div style="font-size:13px;color:#666;font-weight:700;margin-bottom:1rem">Click any case to see exactly which rule triggered. Two sets of rules: string vs string = dictionary. Everything else = numeric conversion.</div>
+  <div class="cmp-grid">
+    <div class="cmp-panel">
+      <div class="cmp-hdr" style="background:#dbeafe">📖 String vs String → Dictionary</div>
+      <div class="cmp-body">
+        <div class="cmp-case" onclick="this.classList.toggle('open')">
+          <span style="font-family:var(--font-code)">"10" &gt; "9"</span> → <strong style="color:var(--red)">false</strong>
+          <span class="cmp-tag" style="background:#fee2e2;color:var(--red)">string</span>
+          <div class="why">Both strings → dictionary order. Compare first character: "1" vs "9". Character codes: "1" = 49, "9" = 57. 49 &lt; 57, so "10" &lt; "9".</div>
+        </div>
+        <div class="cmp-case" onclick="this.classList.toggle('open')">
+          <span style="font-family:var(--font-code)">"b" &gt; "a"</span> → <strong style="color:var(--green)">true</strong>
+          <span class="cmp-tag" style="background:#fee2e2;color:var(--red)">string</span>
+          <div class="why">Both strings → dictionary. "b" (98) > "a" (97) in char codes. This is lexicographic comparison — same as how a dictionary orders words.</div>
+        </div>
+        <div class="cmp-case" onclick="this.classList.toggle('open')">
+          <span style="font-family:var(--font-code)">"apple" &lt; "banana"</span> → <strong style="color:var(--green)">true</strong>
+          <span class="cmp-tag" style="background:#fee2e2;color:var(--red)">string</span>
+          <div class="why">Compare "a" vs "b" at position 0. "a"(97) &lt; "b"(98). Since the first characters differ, result decided immediately.</div>
+        </div>
+        <div class="cmp-case" onclick="this.classList.toggle('open')">
+          <span style="font-family:var(--font-code)">"Z" &lt; "a"</span> → <strong style="color:var(--green)">true</strong>
+          <span class="cmp-tag" style="background:#fee2e2;color:var(--red)">string</span>
+          <div class="why">Uppercase letters have LOWER char codes than lowercase. "Z" = 90, "a" = 97. So all uppercase letters are "less than" all lowercase letters.</div>
+        </div>
+      </div>
+    </div>
+    <div class="cmp-panel">
+      <div class="cmp-hdr" style="background:#dcfce7">🔢 Mixed Types → Both Become Numbers</div>
+      <div class="cmp-body">
+        <div class="cmp-case" onclick="this.classList.toggle('open')">
+          <span style="font-family:var(--font-code)">"5" &gt; 3</span> → <strong style="color:var(--green)">true</strong>
+          <span class="cmp-tag" style="background:#dcfce7;color:var(--green)">numeric</span>
+          <div class="why">One is a number → numeric conversion. "5" → 5 (number). Then 5 > 3 → true. When types are mixed in &lt;&gt;, both get converted to numbers.</div>
+        </div>
+        <div class="cmp-case" onclick="this.classList.toggle('open')">
+          <span style="font-family:var(--font-code)">null &gt; 0</span> → <strong style="color:var(--red)">false</strong>
+          <span class="cmp-tag" style="background:#dcfce7;color:var(--green)">numeric</span>
+          <div class="why">null → 0 (numeric conversion). Then 0 > 0 → false. Surprising: null == 0 is also false (special case). null only equals undefined with ==.</div>
+        </div>
+        <div class="cmp-case" onclick="this.classList.toggle('open')">
+          <span style="font-family:var(--font-code)">undefined &gt; 0</span> → <strong style="color:var(--red)">false</strong>
+          <span class="cmp-tag" style="background:#dcfce7;color:var(--green)">numeric</span>
+          <div class="why">undefined → NaN (numeric conversion). Any comparison with NaN is ALWAYS false. NaN > 0, NaN &lt; 0, NaN == 0 — all false.</div>
+        </div>
+        <div class="cmp-case" onclick="this.classList.toggle('open')">
+          <span style="font-family:var(--font-code)">true &gt; false</span> → <strong style="color:var(--green)">true</strong>
+          <span class="cmp-tag" style="background:#dcfce7;color:var(--green)">numeric</span>
+          <div class="why">Both booleans → numbers. true = 1, false = 0. Then 1 > 0 → true. Booleans in comparisons always convert to numbers first.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DECISION TREE ══ -->
+<div class="tree-section">
+  <div class="tree-title">🌳 The Comparison Decision Tree</div>
+  <div class="tree-sub">Dev draws it on paper. Arjun copies it to notes. Kabir actually learns it.</div>
+  <div style="display:flex;flex-direction:column;gap:0">
+    <div class="tree-node q">❓ Which operator?</div>
+    <div class="tree-arrow">├──</div>
+    <div class="tree-indent">
+      <div class="tree-node q">→ === or !==</div>
+      <div class="tree-arrow">↓</div>
+      <div class="tree-node a">Check types first. Different types? Immediately false. Same types? Compare values. For objects: compare references (memory addresses). NaN === NaN is ALWAYS false.</div>
+    </div>
+    <div class="tree-arrow">├──</div>
+    <div class="tree-indent">
+      <div class="tree-node q">→ == or !=</div>
+      <div class="tree-arrow">↓</div>
+      <div class="tree-node w">Same types? → use === rules. null == undefined? → true (special). Boolean involved? → convert bool to number, restart. String + number? → convert string to number. Object + primitive? → convert object (.valueOf then .toString). Otherwise → false.</div>
+    </div>
+    <div class="tree-arrow">└──</div>
+    <div class="tree-indent">
+      <div class="tree-node q">→ &lt; &gt; &lt;= &gt;=</div>
+      <div class="tree-arrow">↓</div>
+      <div class="tree-node a">BOTH sides are strings? → Dictionary (character code) comparison. ANY other combination? → Convert BOTH to numbers (null→0, undefined→NaN, booleans→0/1). If either is NaN → always false.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ BINARY FLOAT EXPLAINER ══ -->
+<div class="banner dark">— WHY 0.1 + 0.2 ≠ 0.3 — BINARY PROOF —</div>
+
+<div class="scene-hdr">
+  <span class="sh-num">SCENE 06</span>
+  <span class="sh-title">Dev Explains the Math</span>
+  <span class="sh-loc">📍 Dev Gets the Whiteboard Out</span>
+</div>
+
+<div class="row r1">
+  <div class="panel bg-dark" style="min-height:80px;justify-content:center;align-items:center">
+    <div class="speed"></div>
+    <div class="bigtext" style="color:var(--yellow);text-align:center;font-size:clamp(1.4rem,4vw,2.5rem)">The computer thinks in Base 2.<br><span style="color:#fff;font-size:.6em">You're giving it Base 10. The translation is imperfect.</span></div>
+  </div>
+</div>
+
+<div class="binary-section">
+  <div style="font-family:var(--font-comic);font-size:2rem;letter-spacing:2px;margin-bottom:6px">The Step-by-Step Proof</div>
+  <div style="font-size:13px;color:#666;font-weight:700;margin-bottom:1rem">Multiply by 2, take the integer part as the next binary digit — repeat until it repeats or terminates.</div>
+  <div class="bin-grid">
+    <div class="bin-box">
+      <div class="bin-hdr" style="background:#fff9e6;color:#92400e">Converting 0.1 to Binary</div>
+      <div class="bin-steps">
+        <div class="bin-step"><span class="step-num">1.</span><span class="step-calc" style="color:#5aa5e7">0.1×2 = 0.2</span><span class="step-bit">→ 0</span></div>
+        <div class="bin-step"><span class="step-num">2.</span><span class="step-calc" style="color:#5aa5e7">0.2×2 = 0.4</span><span class="step-bit">→ 0</span></div>
+        <div class="bin-step"><span class="step-num">3.</span><span class="step-calc" style="color:#5aa5e7">0.4×2 = 0.8</span><span class="step-bit">→ 0</span></div>
+        <div class="bin-step"><span class="step-num">4.</span><span class="step-calc" style="color:#5aa5e7">0.8×2 = 1.6</span><span class="step-bit">→ 1</span></div>
+        <div class="bin-step"><span class="step-num">5.</span><span class="step-calc" style="color:#5aa5e7">0.6×2 = 1.2</span><span class="step-bit">→ 1</span></div>
+        <div class="bin-step"><span class="step-num">6.</span><span class="step-calc" style="color:var(--orange)">0.2×2 = 0.4 ↺</span><span class="step-bit" style="color:var(--orange)">→ 0</span></div>
+        <div class="bin-step"><span class="step-num">…</span><span class="step-calc" style="color:#555">repeats forever</span><span class="step-bit" style="color:#555">…</span></div>
+      </div>
+      <div class="bin-result" style="color: white;">
+        0.1 = 0.0001100110011... (binary)<br>
+        <span style="color:var(--orange)">Stored ≈ 0.100097... (slightly over)</span>
+      </div>
+    </div>
+    <div class="bin-box">
+      <div class="bin-hdr" style="background:#e8f5e9;color:#14532d">Converting 0.2 to Binary</div>
+      <div class="bin-steps">
+        <div class="bin-step"><span class="step-num">1.</span><span class="step-calc" style="color:#5aa5e7">0.2×2 = 0.4</span><span class="step-bit">→ 0</span></div>
+        <div class="bin-step"><span class="step-num">2.</span><span class="step-calc" style="color:#5aa5e7">0.4×2 = 0.8</span><span class="step-bit">→ 0</span></div>
+        <div class="bin-step"><span class="step-num">3.</span><span class="step-calc" style="color:#5aa5e7">0.8×2 = 1.6</span><span class="step-bit">→ 1</span></div>
+        <div class="bin-step"><span class="step-num">4.</span><span class="step-calc" style="color:#5aa5e7">0.6×2 = 1.2</span><span class="step-bit">→ 1</span></div>
+        <div class="bin-step"><span class="step-num">5.</span><span class="step-calc" style="color:var(--green)">0.2×2 = 0.4 ↺</span><span class="step-bit" style="color:var(--green)">→ 0</span></div>
+        <div class="bin-step"><span class="step-num">…</span><span class="step-calc" style="color:#555">repeats forever</span><span class="step-bit" style="color:#555">…</span></div>
+      </div>
+      <div class="bin-result" style="color: white;">
+        0.2 = 0.001100110011... (binary)<br>
+        <span style="color:var(--green)">Stored ≈ 0.199218... (slightly under)</span>
+      </div>
+    </div>
+    <div class="bin-box">
+      <div class="bin-hdr" style="background:#fff0f0;color:#7f1d1d">The Sum — Where the Error Hides</div>
+      <div class="bin-steps">
+        <div class="bin-step"><span class="step-num"></span><span class="step-calc" style="color:#b516ca">stored 0.1 =</span><span class="step-bit" style="color:#b516ca;min-width:auto">≈0.1000977</span></div>
+        <div class="bin-step"><span class="step-num">+</span><span class="step-calc" style="color:#ef1d1d">stored 0.2 =</span><span class="step-bit" style="color:#ef1d1d;min-width:auto">≈0.1992187</span></div>
+        <div style="height:1px;background:#333;margin:4px 0"></div>
+        <div class="bin-step"><span class="step-num">=</span><span class="step-calc" style="color:var(--red)">sum result</span><span class="step-bit" style="color:var(--red);min-width:auto">≈0.2993164</span></div>
+        <div style="height:1px;background:#333;margin:4px 0"></div>
+        <div class="bin-step"><span class="step-num"></span><span class="step-calc" style="color:#4c09d3">stored 0.3 =</span><span class="step-bit" style="color:#4c09d3;min-width:auto">≈0.2998046</span></div>
+        <div class="bin-step"><span class="step-num"></span><span class="step-calc" style="color:var(--red);font-size:10px">≠ they are different!</span></div>
+      </div>
+      <div class="bin-result" style="color: white;">
+        0.1 + 0.2 = 0.30000000000000004<br>
+        <span style="color:var(--red)">The tiny errors accumulated</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ BITWISE — DEV'S MOMENT ══ -->
+<div class="banner dark">— TOPIC 7: BITWISE OPERATORS — DEV'S FAVOURITE —</div>
+
+<div class="scene-hdr">
+  <span class="sh-num">SCENE 07</span>
+  <span class="sh-title">Dev's Eyes Light Up</span>
+  <span class="sh-loc">📍 The Rest of the Group Sighs</span>
+</div>
+
+<div class="row r2">
+  <div class="panel bg-dark" style="min-height:220px">
+    <div class="speed"></div>
+    <div class="slabel w">DEV — SUDDENLY EXCITED</div>
+    <div class="bubbles">
+      <div class="b dev">OK this is the best part. Bitwise operators. They work directly on the binary representation.</div>
+      <div class="b kabir" style="margin-top:6px">Dev no one uses these—</div>
+      <div class="b dev" style="margin-top:6px">They're used in graphics, encryption, feature flags, hashing, and low-level performance tricks. You'll care eventually.</div>
+    </div>
+  </div>
+  <div class="panel bg-code" style="min-height:220px;justify-content:center">
+    <div class="slabel w">5 AND 3 IN BINARY</div>
+    <div class="code-blk" style="border:none;background:transparent;font-size:12px ; color: white;">
+<span style="color:#888">// 5 = 101 in binary</span><br>
+<span style="color:#888">// 3 = 011 in binary</span><br>
+<span style="color:#fff">&nbsp;&nbsp;1 0 1  (5)</span><br>
+<span style="color:#888">& 0 1 1  (3)</span><br>
+<span style="color:#888">───────</span><br>
+<span style="color:var(--yellow)">&nbsp;&nbsp;0 0 1  = 1</span><br>
+<span style="color:#888">// AND: 1 only where BOTH are 1</span>
+    </div>
+  </div>
+</div>
+
+<div class="bit-section">
+  <div class="bit-title">Bitwise Operators — Reference</div>
+  <div style="font-size:12px;color:#888;font-weight:700;margin-bottom:1rem">5 = 101₂ &nbsp;·&nbsp; 3 = 011₂ &nbsp;·&nbsp; "Don't confuse & with && or | with ||"</div>
+  <table class="bit-table">
+    <thead><tr><th>Op</th><th>Name</th><th>Rule</th><th>5 op 3</th><th>Real Use</th></tr></thead>
+    <tbody>
+      <tr><td>&amp;</td><td style="color:#d2a8ff">AND</td><td>1 only where BOTH bits are 1</td><td style="color:var(--yellow)">5 &amp; 3 = 1 (001)</td><td style="color:#aaa;font-family:var(--font-body)">Check/extract specific bits. Even/odd: n &amp; 1</td></tr>
+      <tr><td>|</td><td style="color:#d2a8ff">OR</td><td>1 where EITHER bit is 1</td><td style="color:var(--yellow)">5 | 3 = 7 (111)</td><td style="color:#aaa;font-family:var(--font-body)">Set specific bits. Combine flags.</td></tr>
+      <tr><td>^</td><td style="color:#d2a8ff">XOR</td><td>1 where EXACTLY ONE bit is 1</td><td style="color:var(--yellow)">5 ^ 3 = 6 (110)</td><td style="color:#aaa;font-family:var(--font-body)">Toggle bits. Simple encryption. Swap vars.</td></tr>
+      <tr><td>~</td><td style="color:#d2a8ff">NOT</td><td>Invert all bits (unary)</td><td style="color:var(--yellow)">~5 = -6</td><td style="color:#aaa;font-family:var(--font-body)">~n = -(n+1). ~-1 = 0 (indexOf trick)</td></tr>
+      <tr><td>&lt;&lt;</td><td style="color:#d2a8ff">Left Shift</td><td>Shift bits left, pad with 0s</td><td style="color:var(--yellow)">5 &lt;&lt; 1 = 10</td><td style="color:#aaa;font-family:var(--font-body)">Multiply by 2ⁿ (fast). n &lt;&lt; 1 = n×2</td></tr>
+      <tr><td>&gt;&gt;</td><td style="color:#d2a8ff">Right Shift</td><td>Shift bits right, preserve sign</td><td style="color:var(--yellow)">5 &gt;&gt; 1 = 2</td><td style="color:#aaa;font-family:var(--font-body)">Divide by 2ⁿ (fast, rounds down)</td></tr>
+    </tbody>
+  </table>
+  <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div style="background:#161b22;border:1.5px solid #30363d;border-radius:6px;padding:12px">
+      <div style="font-size:11px;font-weight:800;color:var(--yellow);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Practical: Even/Odd with &amp;</div>
+      <div class="code-blk" style="border:none;background:transparent;padding:0;font-size:11px ; color: white;">
+<span class="kw">if</span> (n &amp; <span class="num">1</span>) { <span class="cm">// last bit is 1 = odd</span><br>
+&nbsp;&nbsp;<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"odd"</span>)<br>
+} <span class="kw">else</span> { <span class="cm">// last bit is 0 = even</span><br>
+&nbsp;&nbsp;<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"even"</span>)<br>
+}
+      </div>
+    </div>
+    <div style="background:#161b22;border:1.5px solid #30363d;border-radius:6px;padding:12px">
+      <div style="font-size:11px;font-weight:800;color:var(--yellow);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Practical: Fast Math with &lt;&lt; &gt;&gt;</div>
+      <div class="code-blk" style="border:none;background:transparent;padding:0;font-size:11px ; color: white;">
+<span class="num">4</span> &lt;&lt; <span class="num">1</span>  <span class="cm">// 4 × 2 = 8</span><br>
+<span class="num">4</span> &lt;&lt; <span class="num">2</span>  <span class="cm">// 4 × 4 = 16</span><br>
+<span class="num">16</span> &gt;&gt; <span class="num">1</span> <span class="cm">// 16 ÷ 2 = 8</span><br>
+<span class="num">16</span> &gt;&gt; <span class="num">2</span> <span class="cm">// 16 ÷ 4 = 4</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CLOSING SCENE -->
+<div class="scene-hdr">
+  <span class="sh-num">SCENE 08</span>
+  <span class="sh-title">The Group Wraps Up</span>
+  <span class="sh-loc">📍 Late Evening — Empty Snack Packets</span>
+</div>
+
+<div class="row r2">
+  <div class="panel bg-cafe" style="min-height:220px">
+    <div class="dots"></div>
+    <div class="slabel">ALL FOUR</div>
+    <div class="bubbles">
+      <div class="b kabir">Ok. That was actually more than I expected. === always. Never ==. Got it.</div>
+      <div class="b priya" style="margin-top:6px">The type conversion stuff is going to save me so many bugs.</div>
+      <div class="b dev" style="margin-top:6px">And bitwise operators are actually beautiful when you understand them.</div>
+    </div>
+  </div>
+  <div class="panel bg-room" style="min-height:220px">
+    <div class="speed-h"></div>
+    <div class="slabel">ARJUN</div>
+    <div class="bubbles">
+      <div class="b thought">Teaching three people at once forced me to actually understand it properly.</div>
+      <div class="b" style="margin-top:8px">Same time next chapter? Loops and functions?</div>
+      <div class="b kabir" style="margin-top:6px">Same time. Priya brings snacks this time.</div>
+      <div class="b priya" style="margin-top:6px">...fine. 🙄</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SUMMARY ══ -->
+<div class="summary">
+  <div class="sum-title">📓 Chapter 3 — Summary</div>
+  <div class="notebook">
+    <div class="nb-hdr">📖 Group Notes — Four Contributors</div>
+    <div class="nb-body">
+      <div class="nb-line">
+        <div class="nb-icon">➕</div>
+        <div class="nb-text"><strong>Arithmetic:</strong> +, -, *, /, %, ** — modulo (%) checks even/odd, finds cycles. i++ (postfix) returns THEN increments. ++i (prefix) increments THEN returns.</div>
+      </div>
+      <div class="nb-line ye">
+        <div class="nb-icon">📝</div>
+        <div class="nb-text"><strong>Assignment shorthands:</strong> +=, -=, *=, /=, %=, **= — all mean "do the operation and store back." Cleaner than writing x = x + 5.</div>
+      </div>
+      <div class="nb-line re">
+        <div class="nb-icon">⚠️</div>
+        <div class="nb-text"><strong>ALWAYS === , NEVER ==.</strong> Loose == performs type coercion: 7 == "7" is true, 0 == false is true. Strict === never converts: different types → immediately false.</div>
+      </div>
+      <div class="nb-line te">
+        <div class="nb-icon">🔄</div>
+        <div class="nb-text"><strong>Explicit conversion:</strong> Number(), String(), Boolean() — use the type name as a function. parseInt("100px") → 100. Number("100px") → NaN. Know the difference.</div>
+      </div>
+      <div class="nb-line gr">
+        <div class="nb-icon">✅</div>
+        <div class="nb-text"><strong>6 falsy values ONLY:</strong> false, 0, "", null, undefined, NaN. Everything else is truthy — including [], {}, and "false". Check arr.length not arr.</div>
+      </div>
+      <div class="nb-line bl">
+        <div class="nb-icon">⚡</div>
+        <div class="nb-text"><strong>Short-circuit:</strong> && stops at first falsy (safe null checks). || stops at first truthy (default values). !! converts anything to boolean.</div>
+      </div>
+      <div class="nb-line pu">
+        <div class="nb-icon">❓</div>
+        <div class="nb-text"><strong>Ternary:</strong> condition ? trueValue : falseValue — one-line if-else. Don't nest them. <strong>Relational &lt;&gt;:</strong> both strings → dictionary. Mixed types → both become numbers.</div>
+      </div>
+      <div class="nb-line">
+        <div class="nb-icon">💡</div>
+        <div class="nb-text"><strong>Float mismatch:</strong> 0.1 + 0.2 ≠ 0.3 because binary can't represent most decimals exactly. The tiny storage errors accumulate. Fix: integers for money, toFixed for display.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="next-ch">
+  <div class="nc-label">Up Next</div>
+  <div class="nc-title">Chapter 4: if/else, Loops, Numbers & Strings</div>
+  <p style="font-size:13px;color:#666;font-weight:700;margin-bottom:1.5rem;line-height:1.6">
+    Arjun's back solo — until his little sister Anjali walks in. One question turns into a full teaching session.
+  </p>
+  <a class="nc-btn" href="fouthpage.html">Chapter 4 →</a>
+</div>
+
+</div><!-- /webtoon -->
+
+<script>
+/* ── ARITHMETIC ── */
+function runArith(){
+  const a = document.getElementById('arith-a').value;
+  const b = document.getElementById('arith-b').value;
+  const op = document.getElementById('arith-op').value;
+  const out = document.getElementById('arith-result');
+  try{
+    const result = eval(`(${a}) ${op} (${b})`);
+    const note = op==='%' ? `\n<span style="color:#888">// ${a} ÷ ${b} = ${Math.floor(a/b)} remainder ${result}</span>${result===0?'\n<span style="color:#3fb950">// → '+a+' is EVEN</span>':'\n<span style="color:#ffa657">// → '+a+' is ODD</span>'}` :
+                 op==='**' ? `\n<span style="color:#888">// ${a} to the power of ${b}</span>` : '';
+    out.innerHTML = `<span style="color:#fff">${a} ${op} ${b}</span> <span style="color:#888">=</span> <span style="color:#3fb950;font-size:1.2em;font-weight:800">${result}</span>${note}`;
+  }catch(e){out.innerHTML=`<span style="color:#ff7b72">Error: ${e.message}</span>`;}
+}
+
+/* ── PREFIX / POSTFIX ── */
+let postStep=0, preStep=0;
+function stepPost(){
+  postStep++;
+  const v=document.getElementById('post-var');
+  const log=document.getElementById('post-log');
+  if(postStep===1){
+    log.innerHTML='<span class="out-line" style="color:#ffa657">console.log(i++) prints: <strong>5</strong></span>\n<span style="color:#888">// returns CURRENT value first</span>';
+    setTimeout(()=>{v.textContent='6';v.classList.add('flash');setTimeout(()=>v.classList.remove('flash'),400);},300);
+    log.innerHTML+='<span class="out-line" style="color:#888">\n// then increments to 6</span>';
+  } else if(postStep===2){
+    log.innerHTML+='<span class="out-line" style="color:#3fb950">\nconsole.log(i) → <strong>6</strong></span>';
+  }
+}
+function resetPost(){postStep=0;document.getElementById('post-var').textContent='5';document.getElementById('post-log').innerHTML='<span style="color:#484f58">// click Step</span>';}
+function stepPre(){
+  preStep++;
+  const v=document.getElementById('pre-var');
+  const log=document.getElementById('pre-log');
+  if(preStep===1){
+    v.textContent='6';v.classList.add('flash');setTimeout(()=>v.classList.remove('flash'),400);
+    log.innerHTML='<span class="out-line" style="color:#888">// increments FIRST to 6</span>\n<span class="out-line" style="color:#d2a8ff">console.log(++i) prints: <strong>6</strong></span>';
+  } else if(preStep===2){
+    log.innerHTML+='<span class="out-line" style="color:#3fb950">\nconsole.log(i) → <strong>6</strong></span>';
+  }
+}
+function resetPre(){preStep=0;document.getElementById('pre-var').textContent='5';document.getElementById('pre-log').innerHTML='<span style="color:#484f58">// click Step</span>';}
+
+/* ── EQUALITY TOGGLE ── */
+function toggleCmp(el){el.classList.toggle('open');}
+
+/* ── TYPE CONVERTER ── */
+function setConv(el,val){document.getElementById('convInput').value=val;runConv();}
+function runConv(){
+  const raw=document.getElementById('convInput').value.trim();
+  let val, numV, strV, boolV;
+  try{
+    val=eval(raw);
+    numV=Number(val); strV=String(val); boolV=Boolean(val);
+    const nEl=document.getElementById('cv-num');
+    const sEl=document.getElementById('cv-str');
+    const bEl=document.getElementById('cv-bool');
+    nEl.textContent=isNaN(numV)?'NaN':numV;
+    nEl.className='conv-box-val'+(isNaN(numV)||numV===0?' false-val':' true-val');
+    sEl.textContent='"'+strV+'"';
+    sEl.className='conv-box-val';
+    bEl.textContent=boolV?'true':'false';
+    bEl.className='conv-box-val '+(boolV?'true-val':'false-val');
+    // explanation
+    const isFalsy=[false,0,'',null,undefined].includes(val)||Number.isNaN(val);
+    let expl='<span style="color:#888">typeof: </span><span style="color:#d2a8ff">'+typeof val+'</span>\n';
+    expl+='<span style="color:#888">Boolean: </span><span style="color:'+(boolV?'#3fb950':'#ff7b72')+'">'+boolV+' — '+(isFalsy?'one of the 6 falsy values':'not a falsy value → truthy')+'</span>\n';
+    if(val===null) expl+='<span style="color:#ffa657">⚠️ typeof null = "object" — the famous 30-year bug</span>';
+    if(val===undefined) expl+='<span style="color:#ffa657">Number(undefined) = NaN — not 0 (unlike null)</span>';
+    if(typeof val==='string'&&!isNaN(Number(val))) expl+='<span style="color:#3fb950">String is numeric → Number() converts cleanly</span>';
+    document.getElementById('conv-explain').innerHTML=expl;
+  }catch(e){
+    document.getElementById('cv-num').textContent='err';
+    document.getElementById('cv-str').textContent='err';
+    document.getElementById('cv-bool').textContent='err';
+    document.getElementById('conv-explain').innerHTML='<span style="color:#ff7b72">Invalid expression</span>';
+  }
+}
+runConv();
+
+/* ── TERNARY ── */
+function runTernary(){
+  const age=parseInt(document.getElementById('tern-age').value)||0;
+  const out=document.getElementById('tern-result');
+  const r1=age>=18?'You can vote.':'Too young to vote.';
+  const r2=age>=21?'🍺 Legal drinking age (US)':age>=18?'🗳️ Voting age only':age>=13?'👶 Teenager':'🍼 Young child';
+  out.innerHTML=
+    `<span style="color:#888">age = </span><span style="color:#79c0ff">${age}</span>\n`+
+    `<span style="color:#888">// age >= 18 ? ... : ...</span>\n`+
+    `<span style="color:#3fb950">→ "${r1}"</span>\n`+
+    `<span style="color:#ffa657">// nested example: ${r2}</span>`;
+}
+</script>
+<script>
+(function(){
+
+var ALL_CHAPTERS = [
+  { num:1, title:"Why JavaScript Exists",  file:"firstpage.html",      done:true  },
+  { num:2, title:"Variables & Data Types", file:"secondpage.html", done:true  },
+  { num:3, title:"Operator and Data type",              file:"thirdpage.html",        done:true },
+  { num:4, title:"Loop, Number, math and String",       file:"fouthpage.html",        done:true },
+  { num:5, title:"Soon...",               file:"ch5.html",        done:false },
+  { num:6, title:"Soon...",    file:"ch6.html",        done:false },
+  { num:7, title:"Soon...",      file:"ch7.html",        done:false },
+  { num:8, title:"Soon...",          file:"ch8.html",        done:false },
+];
+
+/* ── styles ── */
+var s = document.createElement('style');
+s.textContent =
+  ':root{--tw:264px;--ta:#e63329;--ty:#f5c842}'
+
+  /* toggle tab */
+  +'#jtoc-btn{position:fixed;top:50%;left:0;transform:translateY(-50%);z-index:9999;'
+  +'background:var(--ta);color:#fff;border:none;border-radius:0 5px 5px 0;'
+  +'padding:13px 7px;cursor:pointer;writing-mode:vertical-lr;white-space:nowrap;'
+  +'font-family:"Bangers",cursive;font-size:10px;letter-spacing:2px;'
+  +'box-shadow:2px 0 10px rgba(0,0,0,.5);transition:left .28s ease;user-select:none}'
+  +'body.jtoc-open #jtoc-btn{left:var(--tw)}'
+  +'#jtoc-arr{writing-mode:horizontal-tb;display:block;font-size:12px;'
+  +'transition:transform .28s ease;margin-bottom:4px}'
+  +'body.jtoc-open #jtoc-arr{transform:rotate(180deg)}'
+
+  /* panel */
+  +'#jtoc-panel{position:fixed;top:0;left:calc(-1*var(--tw) - 4px);width:var(--tw);'
+  +'height:100vh;background:#0e0e0e;border-right:2px solid #1f1f1f;z-index:9998;'
+  +'display:flex;flex-direction:column;overflow:hidden;'
+  +'box-shadow:4px 0 24px rgba(0,0,0,.8);transition:left .28s ease}'
+  +'body.jtoc-open #jtoc-panel{left:0}'
+
+  /* overlay */
+  +'#jtoc-ov{display:none;position:fixed;inset:0;z-index:9997;background:rgba(0,0,0,.4)}'
+  +'body.jtoc-open #jtoc-ov{display:block}'
+
+  /* header */
+  +'.jt-hd{background:#080808;border-bottom:2px solid var(--ta);padding:13px 15px;flex-shrink:0}'
+  +'.jt-logo{font-family:"Bangers",cursive;font-size:1.3rem;color:#fff;letter-spacing:3px}'
+  +'.jt-logo b{color:var(--ta);font-weight:400}'
+  +'.jt-sub{font-size:9px;font-weight:800;color:#383838;letter-spacing:2px;text-transform:uppercase;margin-top:2px}'
+
+  /* scroll area */
+  +'.jt-body{flex:1;overflow-y:auto;padding:8px 0}'
+  +'.jt-body::-webkit-scrollbar{width:2px}'
+  +'.jt-body::-webkit-scrollbar-thumb{background:#252525}'
+
+  /* section label */
+  +'.jt-lbl{font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;'
+  +'color:#2c2c2c;padding:10px 15px 3px}'
+
+  /* chapter row — DONE */
+  +'.jt-ch{display:flex;align-items:center;gap:9px;padding:8px 15px;'
+  +'text-decoration:none;color:#a0a0a0;border-left:3px solid transparent;'
+  +'transition:background .12s}'
+  +'.jt-ch:hover{background:#161616}'
+  +'.jt-ch.jt-cur{background:#180a0a;border-left-color:var(--ta);color:#fff}'
+  +'.jt-ch-n{font-family:"Bangers",cursive;font-size:.95rem;color:var(--ta);'
+  +'min-width:24px;letter-spacing:1px}'
+  +'.jt-ch.jt-cur .jt-ch-n{color:var(--ty)}'
+  +'.jt-ch-name{font-size:12px;font-weight:700;flex:1;line-height:1.3}'
+
+  /* chapter row — LOCKED (not done) */
+  +'.jt-lock{display:flex;align-items:center;gap:9px;padding:8px 15px;'
+  +'border-left:3px solid transparent;cursor:default;opacity:1}'
+  +'.jt-lock-n{font-family:"Bangers",cursive;font-size:.95rem;color:#2a2a2a;min-width:24px;letter-spacing:1px}'
+  +'.jt-lock-name{font-size:12px;font-weight:700;flex:1;line-height:1.3;color:#2e2e2e}'
+
+  /* divider */
+  +'.jt-div{height:1px;background:#181818;margin:7px 15px}'
+
+  /* scene rows */
+  +'.jt-sc{display:flex;align-items:center;gap:8px;padding:5px 15px 5px 20px;'
+  +'cursor:pointer;border-left:3px solid transparent;color:#373737;transition:background .12s}'
+  +'.jt-sc:hover{background:#141414;color:#777}'
+  +'.jt-sc.jt-act{border-left-color:var(--ty);color:#ddd;background:#111008}'
+  +'.jt-sc-dot{width:4px;height:4px;border-radius:50%;background:currentColor;flex-shrink:0}'
+  +'.jt-sc.jt-act .jt-sc-dot{background:var(--ty)}'
+  +'.jt-sc-n{font-family:"Bangers",cursive;font-size:.8rem;min-width:32px;'
+  +'letter-spacing:1px;color:inherit}'
+  +'.jt-sc.jt-act .jt-sc-n{color:var(--ty)}'
+  +'.jt-sc-lbl{font-size:11px;font-weight:700;line-height:1.3}'
+
+  /* progress footer */
+  +'.jt-ft{padding:11px 15px;border-top:1px solid #161616;flex-shrink:0;background:#080808}'
+  +'.jt-ft-row{display:flex;justify-content:space-between;font-size:9px;font-weight:800;'
+  +'letter-spacing:1px;text-transform:uppercase;color:#2a2a2a;margin-bottom:5px}'
+  +'.jt-bar{height:2px;background:#1a1a1a;border-radius:1px;overflow:hidden}'
+  +'.jt-fill{height:100%;background:var(--ta);border-radius:1px;transition:width .2s;width:0%}'
+
+  /* push webtoon right on big screens */
+  +'@media(min-width:1100px){.webtoon{transition:margin-left .28s ease}'
+  +'body.jtoc-open .webtoon{margin-left:calc(var(--tw)+16px)}}'
+  +'@media(max-width:600px){:root{--tw:224px}}';
+document.head.appendChild(s);
+
+/* ── detect current page ── */
+var curFile = location.pathname.split('/').pop() || 'index.html';
+if(curFile === '') curFile = 'index.html';
+var curIdx = ALL_CHAPTERS.findIndex(function(c){ return c.file === curFile; });
+var curCh  = ALL_CHAPTERS[curIdx] || {num:'?'};
+
+/* ── build chapter list html ── */
+var chHTML = ALL_CHAPTERS.map(function(ch, i){
+  var isCur = (i === curIdx);
+  if(ch.done){
+    /* clickable */
+    var href = isCur ? '#' : ch.file;
+    return '<a class="jt-ch'+(isCur?' jt-cur':'')+'" href="'+href+'"'
+      +(isCur?' onclick="return false"':'')+' tabindex="0">'
+      +'<span class="jt-ch-n">'+ch.num+'</span>'
+      +'<span class="jt-ch-name">'+ch.title+'</span>'
+      +'</a>';
+  } else {
+    /* locked — looks dim, no click, no badge */
+    return '<div class="jt-lock">'
+      +'<span class="jt-lock-n">'+ch.num+'</span>'
+      +'<span class="jt-lock-name">'+ch.title+'</span>'
+      +'</div>';
+  }
+}).join('');
+
+/* ── build DOM ── */
+var panel = document.createElement('div');
+panel.id = 'jtoc-panel';
+panel.innerHTML =
+  '<div class="jt-hd">'
+  +'<div class="jt-logo">JS<b>TORY</b></div>'
+  +'<div class="jt-sub">Table of Contents</div>'
+  +'</div>'
+  +'<div class="jt-body">'
+  +'<div class="jt-lbl">Chapters</div>'
+  +chHTML
+  +'<div class="jt-div"></div>'
+  +'<div class="jt-lbl">This Chapter</div>'
+  +'<div id="jt-sc-list"></div>'
+  +'</div>'
+  +'<div class="jt-ft">'
+  +'<div class="jt-ft-row"><span>Chapter '+curCh.num+' Progress</span><span id="jt-pct">0%</span></div>'
+  +'<div class="jt-bar"><div class="jt-fill" id="jt-fill"></div></div>'
+  +'</div>';
+
+var btn = document.createElement('button');
+btn.id = 'jtoc-btn';
+btn.setAttribute('aria-label','Toggle Table of Contents');
+btn.innerHTML = '<span id="jtoc-arr">◀</span>CONTENTS';
+
+var ov = document.createElement('div');
+ov.id = 'jtoc-ov';
+
+document.body.appendChild(panel);
+document.body.appendChild(btn);
+document.body.appendChild(ov);
+
+/* ── open / close ── */
+function open(){ document.body.classList.add('jtoc-open'); }
+function close(){ document.body.classList.remove('jtoc-open'); }
+btn.onclick = function(){ document.body.classList.toggle('jtoc-open'); };
+ov.onclick  = close;
+
+/* ── scroll to scene ── */
+window.jtocGo = function(id){
+  var el = document.getElementById(id);
+  if(!el) return;
+  /* topbar height: look for .topbar or sticky element, fallback 50 */
+  var tb = document.querySelector('.topbar');
+  var offset = tb ? tb.offsetHeight + 6 : 56;
+  var y = el.getBoundingClientRect().top + window.scrollY - offset;
+  window.scrollTo({top: y, behavior:'smooth'});
+  if(window.innerWidth < 900) close();
+};
+
+/* ── build scene list from .scene-hdr ── */
+var secs = [];
+function buildSections(){
+  var hdrs = document.querySelectorAll('.scene-hdr');
+  var list = document.getElementById('jt-sc-list');
+  if(!list) return;
+  list.innerHTML = '';
+  secs = [];
+  hdrs.forEach(function(hdr, i){
+    var numEl  = hdr.querySelector('.sh-num');
+    var lblEl  = hdr.querySelector('.sh-title');
+    var num = numEl  ? numEl.textContent.trim()  : ('S'+(i+1));
+    var lbl = lblEl ? lblEl.textContent.trim() : ('Scene '+(i+1));
+    var id  = 'jtoc-s'+i;
+    hdr.id  = id;
+    secs.push({id:id, num:num, lbl:lbl});
+    var div = document.createElement('div');
+    div.className  = 'jt-sc';
+    div.dataset.id = id;
+    div.innerHTML  =
+      '<span class="jt-sc-n">'+num+'</span>'
+      +'<div class="jt-sc-dot"></div>'
+      +'<span class="jt-sc-lbl">'+lbl+'</span>';
+    div.onclick = function(){ jtocGo(id); };
+    list.appendChild(div);
+  });
+}
+
+/* ── active highlight + progress ──
+   Key fix: track which section is "above the fold".
+   Walk forward; last one whose top <= threshold wins.
+   If none qualifies (user scrolled above first section) → highlight first. */
+function tick(){
+  if(!secs.length) return;
+
+  var THRESH = 70; /* px from top — adjust if topbar is taller */
+  var active = null;
+
+  for(var i = 0; i < secs.length; i++){
+    var el = document.getElementById(secs[i].id);
+    if(!el) continue;
+    if(el.getBoundingClientRect().top <= THRESH){
+      active = secs[i]; /* keep overwriting — last one wins */
+    }
+  }
+  /* if scrolled above first section, highlight first */
+  if(!active) active = secs[0];
+
+  document.querySelectorAll('.jt-sc').forEach(function(el){
+    el.classList.toggle('jt-act', el.dataset.id === active.id);
+  });
+
+  /* scroll active item into view inside the panel */
+  var actEl = panel.querySelector('.jt-sc.jt-act');
+  if(actEl){
+    var body = panel.querySelector('.jt-body');
+    var elTop  = actEl.offsetTop;
+    var elBot  = elTop + actEl.offsetHeight;
+    var visTop = body.scrollTop;
+    var visBot = visTop + body.clientHeight;
+    if(elTop < visTop + 20)        body.scrollTop = elTop - 20;
+    else if(elBot > visBot - 20)   body.scrollTop = elBot - body.clientHeight + 20;
+  }
+
+  /* progress */
+  var total = document.documentElement.scrollHeight - window.innerHeight;
+  var pct = total > 0 ? Math.round(window.scrollY / total * 100) : 0;
+  document.getElementById('jt-fill').style.width = pct+'%';
+  document.getElementById('jt-pct').textContent  = pct+'%';
+}
+
+/* ── init ── */
+function init(){
+  buildSections();
+  tick();
+  window.addEventListener('scroll', tick, {passive:true});
+}
+
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+
+})();
+</script>
+
+</body>
+</html>
